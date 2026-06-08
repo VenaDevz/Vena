@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const emptyModule = "./src/lib/wagmi/empty-module.js";
 
 const nextConfig: NextConfig = {
+  images: {
+    qualities: [75, 95],
+  },
   turbopack: {
     resolveAlias: {
       accounts: emptyModule,
