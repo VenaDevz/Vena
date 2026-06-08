@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { ArrowRight, Layers } from "lucide-react";
 import { PROJECT } from "@/lib/project";
 import { SUPPLY_BREAKDOWN } from "@/lib/tokenomics";
-import BrandLogo from "./BrandLogo";
 import HeroParticles from "./HeroParticles";
 import XIcon from "./XIcon";
 import ProtocolMetrics from "./ProtocolMetrics";
@@ -16,7 +15,7 @@ export default function HeroSection() {
       className="relative min-h-screen flex flex-col overflow-hidden cyber-grid scanlines"
       id="protocol"
     >
-      <div className="absolute inset-x-0 top-24 sm:top-28 flex justify-center pointer-events-none opacity-40 sm:opacity-55">
+      <div className="absolute inset-x-0 top-24 sm:top-28 flex justify-center pointer-events-none opacity-25 sm:opacity-35">
         <div className="relative w-full max-w-4xl px-6">
           <Image
             src={PROJECT.bannerPath}
@@ -30,7 +29,7 @@ export default function HeroSection() {
           <div
             className="absolute inset-0"
             style={{
-              background: "radial-gradient(ellipse at center, transparent 20%, #030609 75%)",
+              background: "radial-gradient(ellipse at center, transparent 10%, #030609 65%)",
             }}
           />
         </div>
@@ -58,9 +57,8 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex flex-col items-center gap-4 mb-8"
+          className="flex flex-col items-center mb-6"
         >
-          <BrandLogo size="xl" showWordmark={false} className="justify-center" />
           <p className="text-[10px] sm:text-xs font-mono tracking-[0.35em] text-[#00d4ff]/80 uppercase text-center">
             {PROJECT.subtitle}
           </p>
