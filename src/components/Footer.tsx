@@ -42,19 +42,26 @@ export default function Footer() {
           </a>
         </div>
 
-        <div className="relative rounded-2xl overflow-hidden border border-[rgba(0,212,255,0.1)] opacity-90">
+        <div
+          className="relative rounded-2xl overflow-hidden"
+          style={{ border: "1px solid rgba(0,212,255,0.1)" }}
+        >
           <Image
             src={PROJECT.bannerPath}
             alt={`${PROJECT.name} — ${PROJECT.tokenDisplay}`}
-            width={1500}
-            height={500}
-            className="w-full h-auto max-h-32 sm:max-h-40 object-cover object-center"
+            width={1024}
+            height={341}
+            className="w-full h-auto block opacity-80"
+            style={{ display: "block" }}
           />
+          {/* top + bottom fade to blend with page background */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background:
-                "linear-gradient(90deg, rgba(3,6,9,0.5) 0%, transparent 40%, transparent 60%, rgba(3,6,9,0.5) 100%)",
+              background: [
+                "linear-gradient(to bottom, #030609 0%, transparent 20%, transparent 80%, #030609 100%)",
+                "linear-gradient(to right,  #030609 0%, transparent 12%, transparent 88%, #030609 100%)",
+              ].join(", "),
             }}
           />
         </div>
