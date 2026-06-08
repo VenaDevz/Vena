@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Unlock, Zap, Clock } from "lucide-react";
 import { RARITY_CONFIG, type PickaxeNFT } from "@/lib/types";
 import {
-  estimatePaybackDays,
+  effectiveMiningPower,
   formatVenaAmount,
   getForgeTokenCost,
   getMiningPyramidMultiplier,
@@ -15,6 +15,7 @@ import {
   venaPerHourForPickaxe,
   venaPerSecondForPickaxe,
 } from "@/lib/mining";
+import { formatNumber } from "@/lib/format";
 import { PROJECT } from "@/lib/project";
 
 interface NFTCardProps {
@@ -33,7 +34,7 @@ export default function NFTCard({ nft, onStake, onUnstake }: NFTCardProps) {
   const tokenCost = getForgeTokenCost(nft.rarity);
   const dailyEst = venaPerDayForPickaxe(nft.rarity, nft.hashrate);
   const hourlyEst = venaPerHourForPickaxe(nft.rarity, nft.hashrate);
-  const paybackDays = estimatePaybackDays(nft.rarity, nft.hashrate);
+  const miningPower = effectiveMiningPower(nft.hashrate, nft.rarity);
 
   useEffect(() => {
     if (!localStaked) return;
@@ -139,11 +140,11 @@ export default function NFTCard({ nft, onStake, onUnstake }: NFTCardProps) {
             small
           />
           <StatBox
-            label="~Payback"
-            value={paybackDays < 100 ? `~${paybackDays.toFixed(1)} days` : "—"}
+            label="Mining power"
+            value={formatNumber(miningPower)}
             accent="#00d4ff"
             small
-            hint={`${tokenCost} ${PROJECT.tokenSymbol} cost`}
+            hint={`${tokenCost} ${PROJECT.tokenSymbol} locked`}
           />
         </div>
 

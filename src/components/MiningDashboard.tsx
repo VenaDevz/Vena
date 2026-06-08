@@ -1,25 +1,36 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutGrid, List, Filter, Cpu } from "lucide-react";
+import { LayoutGrid, List, Filter, Cpu, Wallet } from "lucide-react";
+import { useAppKit } from "@reown/appkit/react";
+import { useAccount } from "wagmi";
 import NFTCard from "./NFTCard";
 import RewardCounter from "./RewardCounter";
 import { PROJECT } from "@/lib/project";
-import { TOKENOMICS } from "@/lib/tokenomics";
 import { MOCK_NFTS, RARITY_CONFIG, RARITY_ORDER, type PickaxeNFT, type Rarity } from "@/lib/types";
 import { formatNumber } from "@/lib/format";
 import {
   effectiveMiningPower,
   formatVenaAmount,
-  MINING_EMISSION,
   venaPerDayFromPower,
 } from "@/lib/mining";
 
 export default function MiningDashboard() {
-  const [nfts, setNfts] = useState<PickaxeNFT[]>(MOCK_NFTS);
+  const { isConnected } = useAccount();
+  const { open } = useAppKit();
+  const [nfts, setNfts] = useState<PickaxeNFT[]>([]);
   const [filter, setFilter] = useState<Rarity | "All">("All");
   const [gridView, setGridView] = useState(true);
+
+  useEffect(() => {
+    if (isConnected) {
+      setNfts(MOCK_NFTS.map((n) => ({ ...n, staked: false })));
+    } else {
+      setNfts([]);
+      setFilter("All");
+    }
+  }, [isConnected]);
 
   const handleStake = (id: number) => {
     setNfts((prev) =>
@@ -49,7 +60,7 @@ export default function MiningDashboard() {
     [stakedNfts]
   );
 
-  const stakedCount = nfts.filter((n) => n.staked).length;
+  const stakedCount = stakedNfts.length;
 
   const filtered = useMemo(
     () => (filter === "All" ? nfts : nfts.filter((n) => n.rarity === filter)),
@@ -61,7 +72,6 @@ export default function MiningDashboard() {
       id="mining"
       className="relative min-h-screen py-24 px-4 sm:px-6 lg:px-8 cyber-grid"
     >
-      {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] pointer-events-none"
         style={{
@@ -71,7 +81,6 @@ export default function MiningDashboard() {
       />
 
       <div className="relative z-10 max-w-7xl mx-auto">
-        {/* Section heading */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -102,80 +111,115 @@ export default function MiningDashboard() {
             </span>
           </h2>
           <p className="mt-3 text-slate-500 text-sm sm:text-base max-w-2xl mx-auto">
-            {MINING_EMISSION.poolVena.toLocaleString("en-US")} {PROJECT.tokenDisplay} (
-            {TOKENOMICS.miningPoolPct}% supply) over{" "}
-            {MINING_EMISSION.emissionDays} days. Pyramid tiers — higher rarity, faster payback.
+            Higher rarity, higher {PROJECT.tokenSymbol}. Stake Pickaxes to earn from the
+            mining pool.
           </p>
-          <p className="mt-2 text-slate-600 text-xs font-mono">
-            {stakedCount}/{nfts.length} staked · {formatNumber(totalHashrate)} H/s ·{" "}
-            {formatNumber(totalMiningPower)} mining power
-          </p>
+          {isConnected && (
+            <p className="mt-2 text-slate-600 text-xs font-mono">
+              {stakedCount}/{nfts.length} staked · {formatNumber(totalHashrate)} H/s ·{" "}
+              {formatNumber(totalMiningPower)} mining power
+            </p>
+          )}
         </motion.div>
 
-        {/* Main layout */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
-          {/* LEFT: NFT Grid */}
           <div>
-            {/* Toolbar */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
-              className="flex flex-wrap items-center gap-3 mb-6"
-            >
-              {/* Rarity filter */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <Filter size={13} className="text-slate-500" />
-                {(["All", ...RARITY_ORDER] as const).map((r) => {
-                  const color = r === "All" ? "#64748b" : RARITY_CONFIG[r].color;
-                  const active = filter === r;
-                  return (
-                    <button
-                      key={r}
-                      onClick={() => setFilter(r as Rarity | "All")}
-                      className="px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase font-mono transition-all duration-200"
-                      style={{
-                        background: active ? `${color}25` : "rgba(255,255,255,0.03)",
-                        border: active ? `1px solid ${color}60` : "1px solid rgba(255,255,255,0.06)",
-                        color: active ? color : "rgb(100,116,139)",
-                        boxShadow: active ? `0 0 10px ${color}20` : "none",
-                      }}
-                    >
-                      {r}
-                    </button>
-                  );
-                })}
-              </div>
+            {isConnected && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4 }}
+                className="flex flex-wrap items-center gap-3 mb-6"
+              >
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Filter size={13} className="text-slate-500" />
+                  {(["All", ...RARITY_ORDER] as const).map((r) => {
+                    const color = r === "All" ? "#64748b" : RARITY_CONFIG[r].color;
+                    const active = filter === r;
+                    return (
+                      <button
+                        key={r}
+                        onClick={() => setFilter(r as Rarity | "All")}
+                        className="px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase font-mono transition-all duration-200"
+                        style={{
+                          background: active ? `${color}25` : "rgba(255,255,255,0.03)",
+                          border: active ? `1px solid ${color}60` : "1px solid rgba(255,255,255,0.06)",
+                          color: active ? color : "rgb(100,116,139)",
+                          boxShadow: active ? `0 0 10px ${color}20` : "none",
+                        }}
+                      >
+                        {r}
+                      </button>
+                    );
+                  })}
+                </div>
 
-              {/* View toggle */}
-              <div className="ml-auto flex items-center gap-1 p-1 rounded-lg border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]">
-                <button
-                  onClick={() => setGridView(true)}
-                  className={`p-1.5 rounded-md transition-all ${
-                    gridView
-                      ? "bg-[rgba(0,212,255,0.15)] text-[#00d4ff]"
-                      : "text-slate-600 hover:text-slate-400"
-                  }`}
-                >
-                  <LayoutGrid size={14} />
-                </button>
-                <button
-                  onClick={() => setGridView(false)}
-                  className={`p-1.5 rounded-md transition-all ${
-                    !gridView
-                      ? "bg-[rgba(0,212,255,0.15)] text-[#00d4ff]"
-                      : "text-slate-600 hover:text-slate-400"
-                  }`}
-                >
-                  <List size={14} />
-                </button>
-              </div>
-            </motion.div>
+                <div className="ml-auto flex items-center gap-1 p-1 rounded-lg border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]">
+                  <button
+                    onClick={() => setGridView(true)}
+                    className={`p-1.5 rounded-md transition-all ${
+                      gridView
+                        ? "bg-[rgba(0,212,255,0.15)] text-[#00d4ff]"
+                        : "text-slate-600 hover:text-slate-400"
+                    }`}
+                  >
+                    <LayoutGrid size={14} />
+                  </button>
+                  <button
+                    onClick={() => setGridView(false)}
+                    className={`p-1.5 rounded-md transition-all ${
+                      !gridView
+                        ? "bg-[rgba(0,212,255,0.15)] text-[#00d4ff]"
+                        : "text-slate-600 hover:text-slate-400"
+                    }`}
+                  >
+                    <List size={14} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
 
-            {/* NFT Cards */}
             <AnimatePresence mode="popLayout">
-              {filtered.length === 0 ? (
+              {!isConnected ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col items-center justify-center py-24 px-6 text-center rounded-2xl border border-[rgba(0,212,255,0.12)] bg-[rgba(10,15,22,0.6)]"
+                >
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+                    style={{
+                      background: "rgba(0,212,255,0.08)",
+                      border: "1px solid rgba(0,212,255,0.2)",
+                    }}
+                  >
+                    <Wallet size={24} className="text-[#00d4ff]" />
+                  </div>
+                  <h3
+                    className="text-lg font-bold text-white mb-2"
+                    style={{ fontFamily: "var(--font-orbitron)" }}
+                  >
+                    Connect wallet
+                  </h3>
+                  <p className="text-sm text-slate-500 max-w-sm mb-6 leading-relaxed">
+                    Link your wallet to view Pickaxes, stake for mining, and track rewards.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => open()}
+                    className="px-6 py-3 rounded-xl font-semibold text-sm tracking-wider text-[#030609]"
+                    style={{
+                      fontFamily: "var(--font-orbitron)",
+                      backgroundImage:
+                        "linear-gradient(135deg, #32cd32 0%, #00ff88 50%, #00d4ff 100%)",
+                    }}
+                  >
+                    Connect Wallet
+                  </button>
+                </motion.div>
+              ) : filtered.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -216,7 +260,6 @@ export default function MiningDashboard() {
             </AnimatePresence>
           </div>
 
-          {/* RIGHT: Reward Counter (sticky) */}
           <div className="lg:sticky lg:top-28 lg:self-start">
             <motion.div
               initial={{ opacity: 0, x: 30 }}
@@ -227,10 +270,10 @@ export default function MiningDashboard() {
               <RewardCounter
                 totalHashrate={totalHashrate}
                 totalMiningPower={totalMiningPower}
+                walletConnected={isConnected}
               />
             </motion.div>
 
-            {/* Stats below counter */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -239,18 +282,24 @@ export default function MiningDashboard() {
               className="mt-4 grid grid-cols-2 gap-3"
             >
               {[
-                { label: "Staked", value: `${stakedCount}/${nfts.length}`, sub: "Pickaxes" },
+                {
+                  label: "Staked",
+                  value: isConnected ? `${stakedCount}/${nfts.length}` : "—",
+                  sub: "Pickaxes",
+                },
                 {
                   label: "Hashrate",
-                  value: formatNumber(totalHashrate),
+                  value: isConnected ? formatNumber(totalHashrate) : "—",
                   sub: "H/s Active",
                 },
                 {
                   label: "Est. Daily",
-                  value: formatVenaAmount(venaPerDayFromPower(totalMiningPower)),
+                  value: isConnected
+                    ? formatVenaAmount(venaPerDayFromPower(totalMiningPower))
+                    : "—",
                   sub: `${PROJECT.tokenSymbol}/day est.`,
                 },
-                { label: "Tier Bonus", value: "1.0×", sub: "Multiplier" },
+                { label: "Tier Bonus", value: isConnected ? "1.0×" : "—", sub: "Multiplier" },
               ].map((stat) => (
                 <div
                   key={stat.label}

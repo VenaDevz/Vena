@@ -17,12 +17,14 @@ interface RewardCounterProps {
   totalHashrate: number;
   totalMiningPower: number;
   baseRewards?: number;
+  walletConnected?: boolean;
 }
 
 export default function RewardCounter({
   totalHashrate,
   totalMiningPower,
   baseRewards = 0,
+  walletConnected = true,
 }: RewardCounterProps) {
   const [rewards, setRewards] = useState(baseRewards);
   const [claiming, setClaiming] = useState(false);
@@ -31,7 +33,7 @@ export default function RewardCounter({
 
   const dailyEst = venaPerDayFromPower(totalMiningPower);
   const perSecond = venaPerSecondFromPower(totalMiningPower);
-  const isActive = totalMiningPower > 0;
+  const isActive = walletConnected && totalMiningPower > 0;
 
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -93,7 +95,7 @@ export default function RewardCounter({
                 Mining Rewards
               </p>
               <p className="text-[11px] text-slate-500 font-mono tracking-wider">
-                Pyramid · {MINING_EMISSION.emissionDays}d pool
+                Staked Pickaxe rewards
               </p>
             </div>
           </div>
@@ -136,18 +138,17 @@ export default function RewardCounter({
                 ≈ {formatVenaAmount(dailyEst)} {PROJECT.tokenSymbol}/day · cap{" "}
                 {DAILY_GLOBAL_CAP.toFixed(2)}/day global
               </>
+            ) : !walletConnected ? (
+              "Connect wallet to start mining"
             ) : (
               "Stake Pickaxes to start earning"
             )}
           </p>
         </div>
 
-        {isActive && (
+        {walletConnected && isActive && (
           <div className="mb-5 px-3 py-2.5 rounded-lg bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.05)] text-[10px] text-slate-500 font-mono leading-relaxed">
-            Early-network est. @ {MINING_EMISSION.launchReferencePower.toLocaleString("en-US")}{" "}
-            mining power. Higher tiers use pyramid multipliers — more VENA per token
-            invested. Pool hard-capped at {MINING_EMISSION.poolVena.toLocaleString("en-US")}{" "}
-            {PROJECT.tokenSymbol} total.
+            Higher rarity tiers earn more {PROJECT.tokenSymbol} per staked Pickaxe.
           </div>
         )}
 
