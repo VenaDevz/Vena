@@ -9,7 +9,7 @@ export default function HowItWorks() {
       id="how-it-works"
       eyebrow="Flow"
       title="Three rules."
-      subtitle="Same fairness as Eldor — one whole token, one Pickaxe — plus forgeable rarity and Stratum depth."
+      subtitle="One whole token, one Pickaxe — fair and proportional — plus forgeable rarity and Stratum depth."
     >
       <div className="grid md:grid-cols-3 gap-6">
         {HOW_IT_WORKS.map((item) => (

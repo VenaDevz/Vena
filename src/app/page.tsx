@@ -8,6 +8,7 @@ import StratumTimeline from "@/components/StratumTimeline";
 import ForgeSection from "@/components/ForgeSection";
 import TokenomicsSection from "@/components/TokenomicsSection";
 import MiningDashboard from "@/components/MiningDashboard";
+import SwapSection from "@/components/SwapSection";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -49,6 +50,7 @@ export default function Home() {
         </div>
 
         <MiningDashboard />
+        <SwapSection />
         <Footer />
       </main>
     </>

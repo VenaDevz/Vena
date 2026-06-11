@@ -20,8 +20,8 @@ import { PROJECT } from "@/lib/project";
 
 interface NFTCardProps {
   nft: PickaxeNFT;
-  onStake: (id: number) => void;
-  onUnstake: (id: number) => void;
+  onStake: (id: number) => Promise<void>;
+  onUnstake: (id: number) => Promise<void>;
 }
 
 export default function NFTCard({ nft, onStake, onUnstake }: NFTCardProps) {
@@ -49,16 +49,20 @@ export default function NFTCard({ nft, onStake, onUnstake }: NFTCardProps) {
 
   const handleAction = useCallback(async () => {
     setPending(true);
-    await new Promise((r) => setTimeout(r, 800));
-    if (localStaked) {
-      setLocalStaked(false);
-      setSessionRewards(0);
-      onUnstake(nft.id);
-    } else {
-      setLocalStaked(true);
-      onStake(nft.id);
+    try {
+      if (localStaked) {
+        await onUnstake(nft.id);
+        setLocalStaked(false);
+        setSessionRewards(0);
+      } else {
+        await onStake(nft.id);
+        setLocalStaked(true);
+      }
+    } catch {
+      // error handled upstream
+    } finally {
+      setPending(false);
     }
-    setPending(false);
   }, [localStaked, nft.id, onStake, onUnstake]);
 
   return (
