@@ -1,0 +1,10 @@
+#!/bin/sh
+# Remove injected co-author trailers before commit finalization.
+msg="$1"
+[ -f "$msg" ] || exit 0
+tmp="${msg}.$$"
+awk '
+/^Co-authored-by:/ { next }
+/^[[:space:]]*Made-with:/ { next }
+{ print }
+' "$msg" > "$tmp" && mv "$tmp" "$msg"
