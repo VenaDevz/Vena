@@ -53,3 +53,7 @@ contracts/hook-initcode-only.txt
 contracts/initcode.txt
 scripts/match-*.mjs
 scripts/find-venatoken-bytecode.mjs
+
+# internal deploy playbooks (keep local only)
+contracts/DEPLOY.md
+contracts/HOOK_V2_DEPLOY.md
