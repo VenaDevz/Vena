@@ -8,6 +8,7 @@ import StratumTimeline from "@/components/StratumTimeline";
 import ForgeSection from "@/components/ForgeSection";
 import TokenomicsSection from "@/components/TokenomicsSection";
 import MiningDashboard from "@/components/MiningDashboard";
+import ClaimFeesSection from "@/components/ClaimFeesSection";
 import SwapSection from "@/components/SwapSection";
 import Footer from "@/components/Footer";
 
@@ -39,6 +40,8 @@ export default function Home() {
           <TokenomicsSection />
         </div>
 
+        <SwapSection />
+
         <div className="relative h-px mx-8 sm:mx-16 max-w-7xl lg:mx-auto">
           <div
             className="absolute inset-0"
@@ -50,7 +53,7 @@ export default function Home() {
         </div>
 
         <MiningDashboard />
-        <SwapSection />
+        <ClaimFeesSection />
         <Footer />
       </main>
     </>

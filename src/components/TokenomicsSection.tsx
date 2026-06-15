@@ -12,6 +12,7 @@ import {
 import { PROJECT } from "@/lib/project";
 import { SUPPLY_ALLOCATIONS, SUPPLY_BREAKDOWN } from "@/lib/tokenomics";
 import SectionShell from "./SectionShell";
+import TokenomicsPieChart from "./TokenomicsPieChart";
 
 export default function TokenomicsSection() {
   return (
@@ -21,7 +22,9 @@ export default function TokenomicsSection() {
       title="10,000 $VENA. 10,000 Pickaxes."
       subtitle={`One whole token always equals one NFT. ${SUPPLY_BREAKDOWN.mining.toLocaleString("en-US")} VENA funds mining — separate from LP fees.`}
     >
-      <div className="grid lg:grid-cols-2 gap-10 items-center">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-10 lg:gap-14 items-start">
+        <TokenomicsPieChart />
+
         <div className="space-y-5">
           {SUPPLY_ALLOCATIONS.map((row) => (
             <div key={row.key}>

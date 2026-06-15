@@ -27,8 +27,8 @@ export default function Footer() {
           </div>
 
           <p className="text-xs text-slate-600 font-mono text-center max-w-md">
-            Uniswap v4 · {PROJECT.timeBonusName} depth · Independent launch on{" "}
-            <span className="text-[#00ff88]">{PROJECT.network} Network</span>
+            Live on {PROJECT.network} · Uniswap v4 · {PROJECT.timeBonusName} depth ·{" "}
+            <span className="text-[#00ff88]">{PROJECT.network} mainnet</span>
           </p>
 
           <a

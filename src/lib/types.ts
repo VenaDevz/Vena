@@ -1,3 +1,5 @@
+import { resolvePickaxeImage } from "./nftImages";
+
 export type Rarity = "Silver" | "Gold" | "Platinum" | "Diamond" | "Emerald";
 
 export interface PickaxeNFT {
@@ -64,10 +66,10 @@ export const RARITY_CONFIG: Record<
 };
 
 export function getPickaxeImage(rarity: Rarity): string {
-  return RARITY_CONFIG[rarity].image;
+  return resolvePickaxeImage(rarity, RARITY_CONFIG[rarity].image);
 }
 
-/** Preview data — shown only when wallet is connected (pre-launch demo) */
+/** Preview data — shown when wallet is connected */
 export const MOCK_NFTS: PickaxeNFT[] = [
   { id: 1, tokenId: "#0042", name: "Emerald Drill", rarity: "Emerald", hashrate: 320, staked: false, image: "/emerald.jpeg" },
   { id: 2, tokenId: "#0117", name: "Diamond Cutter", rarity: "Diamond", hashrate: 160, staked: false, image: "/diamond.jpeg" },

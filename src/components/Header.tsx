@@ -7,6 +7,7 @@ import ConnectWalletButton from "@/components/ConnectWalletButton";
 import BrandLogo from "@/components/BrandLogo";
 import XIcon from "@/components/XIcon";
 import { PROJECT } from "@/lib/project";
+import { handleSectionLink } from "@/lib/scroll";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -20,9 +21,10 @@ export default function Header() {
 
   const navLinks = [
     { label: "Protocol", href: "#protocol" },
+    { label: "Swap", href: "#swap" },
     { label: "Stratum", href: "#stratum" },
-    { label: "Forge", href: "#forge" },
-    { label: "Tokenomics", href: "#tokenomics" },
+    { label: "Forge", href: "#forge-upgrade" },
+    { label: "Fees", href: "#claim-fees" },
     { label: "Mining", href: "#mining" },
   ];
 
@@ -52,6 +54,7 @@ export default function Header() {
               <a
                 key={link.label}
                 href={link.href}
+                onClick={(e) => handleSectionLink(e, link.href.slice(1))}
                 className="relative text-sm font-medium tracking-wider text-slate-400 hover:text-[#00d4ff] transition-colors duration-200 group"
                 style={{ fontFamily: "var(--font-orbitron)" }}
               >
@@ -74,7 +77,7 @@ export default function Header() {
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-[rgba(0,255,136,0.2)] bg-[rgba(0,255,136,0.05)]">
               <div className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse" />
               <span className="text-[10px] tracking-widest text-[#00ff88] font-mono uppercase">
-                {PROJECT.network}
+                Live · {PROJECT.network}
               </span>
             </div>
 
@@ -107,9 +110,12 @@ export default function Header() {
                 <a
                   key={link.label}
                   href={link.href}
+                  onClick={(e) => {
+                    handleSectionLink(e, link.href.slice(1));
+                    setMenuOpen(false);
+                  }}
                   className="block text-sm font-medium tracking-wider text-slate-400 hover:text-[#00d4ff] transition-colors py-2"
                   style={{ fontFamily: "var(--font-orbitron)" }}
-                  onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
                 </a>

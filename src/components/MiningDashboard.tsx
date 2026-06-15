@@ -6,6 +6,7 @@ import { LayoutGrid, List, Filter, Cpu, Wallet, Loader2 } from "lucide-react";
 import { useAppKit } from "@reown/appkit/react";
 import { useAccount, useReadContract, useReadContracts, useWriteContract } from "wagmi";
 import NFTCard from "./NFTCard";
+import ForgeUpgradePanel from "./ForgeUpgradePanel";
 import RewardCounter from "./RewardCounter";
 import { PROJECT } from "@/lib/project";
 import { RARITY_CONFIG, RARITY_ORDER, type PickaxeNFT, type Rarity } from "@/lib/types";
@@ -15,6 +16,7 @@ import {
   formatVenaAmount,
   venaPerDayFromPower,
 } from "@/lib/mining";
+import { handleSectionLink } from "@/lib/scroll";
 
 // ─── Contract addresses ───────────────────────────────────────────────────────
 
@@ -324,6 +326,15 @@ export default function MiningDashboard() {
               </motion.div>
             )}
 
+            {isConnected && (
+              <ForgeUpgradePanel
+                nfts={nfts}
+                onForged={() => {
+                  void Promise.all([refetchOwners(), refetchUserInfo()]);
+                }}
+              />
+            )}
+
             <AnimatePresence mode="popLayout">
               {!isConnected ? (
                 /* ── Not connected ── */
@@ -380,8 +391,15 @@ export default function MiningDashboard() {
                     No Pickaxes found
                   </h3>
                   <p className="text-sm text-slate-500 max-w-sm">
-                    You don&apos;t own any Pickaxe NFTs yet. Mint Silver Pickaxes by burning 1 VENA each.
+                    You don&apos;t own any Pickaxe NFTs yet. Buy whole $VENA in the swap panel to mint Silver pickaxes.
                   </p>
+                  <a
+                    href="#swap"
+                    onClick={(e) => handleSectionLink(e, "swap")}
+                    className="mt-4 text-sm text-[#00d4ff] hover:underline font-mono"
+                  >
+                    Go to Swap →
+                  </a>
                 </motion.div>
 
               ) : filtered.length === 0 ? (

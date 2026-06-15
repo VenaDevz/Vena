@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: "VENA — Stake Depth. Compound Yield.",
   description:
-    "10,000 $VENA on Base. One token, one Pickaxe. Stratum depth, forgeable rarity, Uniswap v4 LP fees, and separate mining emissions.",
+    "10,000 $VENA on Base. Buy on the live v4 pool — one token, one Silver Pickaxe. Stratum depth, forge upgrades, LP fee rewards, and mining emissions.",
   icons: {
     icon: "/logo.jpg",
     apple: "/logo.jpg",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "VENA — Mining Protocol on Base",
     description:
-      "10,000 $VENA on Base. One token, one Pickaxe. Stratum depth, forgeable rarity, Uniswap v4.",
+      "10,000 $VENA on Base. Live Uniswap v4 hook pool. Stratum depth, forgeable rarity, on-site swap.",
     images: [{ url: "/banner.jpg", width: 1500, height: 500, alt: "VENA" }],
     siteName: "VENA",
   },

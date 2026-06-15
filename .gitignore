@@ -57,3 +57,12 @@ scripts/find-venatoken-bytecode.mjs
 # internal deploy playbooks (keep local only)
 contracts/DEPLOY.md
 contracts/HOOK_V2_DEPLOY.md
+contracts/HOOK_V4_DEPLOY.md
+contracts/LAUNCH_CHECKLIST.md
+contracts/v3-hook-deploy.env
+contracts/v4-hook-deploy.env
+contracts/v3-hook-initcode.txt
+contracts/v4-hook-initcode.txt
+contracts/v3-hook-calldata.txt
+contracts/v3-hook-abi-calldata.txt
+contracts/metadata/

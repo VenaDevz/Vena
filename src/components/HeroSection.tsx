@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Layers } from "lucide-react";
+import { ArrowRight, ExternalLink, Layers } from "lucide-react";
 import { PROJECT } from "@/lib/project";
+import { getBuyVenaHref, getUniswapBuyVenaUrl, isBuyVenaExternal } from "@/lib/links";
+import { handleSectionLink } from "@/lib/scroll";
 import { SUPPLY_BREAKDOWN } from "@/lib/tokenomics";
 import HeroParticles from "./HeroParticles";
 import XIcon from "./XIcon";
@@ -93,7 +95,15 @@ export default function HeroSection() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14"
         >
           <motion.a
-            href="#tokenomics"
+            href={isBuyVenaExternal() ? getBuyVenaHref() : "#swap"}
+            onClick={
+              isBuyVenaExternal()
+                ? undefined
+                : (e) => handleSectionLink(e, "swap")
+            }
+            {...(isBuyVenaExternal()
+              ? { target: "_blank", rel: "noopener noreferrer" }
+              : {})}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
             className="flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm tracking-wider text-[#030609]"
@@ -104,8 +114,22 @@ export default function HeroSection() {
             }}
           >
             Buy {PROJECT.tokenDisplay}
-            <ArrowRight size={16} />
+            {isBuyVenaExternal() ? <ExternalLink size={15} /> : <ArrowRight size={15} />}
           </motion.a>
+          {!isBuyVenaExternal() && (
+          <motion.a
+            href={getUniswapBuyVenaUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            className="flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm tracking-wider border border-[rgba(0,212,255,0.35)] text-[#00d4ff] hover:bg-[rgba(0,212,255,0.08)] transition-colors"
+            style={{ fontFamily: "var(--font-orbitron)" }}
+          >
+            Uniswap
+            <ExternalLink size={15} />
+          </motion.a>
+          )}
           <motion.a
             href="#stratum"
             whileHover={{ scale: 1.03 }}

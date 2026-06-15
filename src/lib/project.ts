@@ -12,7 +12,7 @@ export const PROJECT = {
   /** Hero headline — two lines */
   heroLine1: "STAKE DEPTH",
   heroLine2: "COMPOUND YIELD",
-  subtitle: "Base / Uniswap V4 / Weighted Fee Primitive",
+  subtitle: "Base / Uniswap V4 / Live Hook Pool",
   maxSupply: TOKENOMICS.maxTokenSupply,
   maxNfts: TOKENOMICS.maxNftSupply,
   timeBonusName: "Stratum",

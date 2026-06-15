@@ -33,10 +33,18 @@ type BalanceDelta is int256;
 
 library BalanceDeltaLib {
     function amount0(BalanceDelta delta) internal pure returns (int128) {
-        return int128(BalanceDelta.unwrap(delta) >> 128);
+        int256 d = BalanceDelta.unwrap(delta);
+        assembly {
+            d := sar(128, d)
+        }
+        return int128(d);
     }
     function amount1(BalanceDelta delta) internal pure returns (int128) {
-        return int128(BalanceDelta.unwrap(delta));
+        int256 d = BalanceDelta.unwrap(delta);
+        assembly {
+            d := signextend(15, d)
+        }
+        return int128(d);
     }
 }
 
@@ -49,21 +57,24 @@ bytes4 constant AFTER_SWAP_SELECTOR = bytes4(
 );
 
 /**
- * @title VenaHook v2
+ * @title VenaHook v4
  * @notice Uniswap v4 hook for ETH/VENA pool with buy/sell NFT game logic.
  *
  * On ETH -> VENA buy:
- *   - Track lifetime cumulative VENA bought per address (never resets on sell).
- *   - Mint 1 NFT per whole VENA at current tier (Silver/Gold/...).
- *   - Upgrade all existing NFTs in-place when tier threshold is crossed.
+ *   - Track lifetime cumulative VENA bought per address (analytics only).
+ *   - Mint 1 Silver NFT per whole VENA received (net of hook fee).
+ *   - Tier upgrades happen only via Forge on-site, never on buy.
  *
- * On VENA -> ETH sell (any amount):
- *   - Burn ALL NFTs for the swapper (staked NFTs auto-unstake + burn via VenaMining).
+ * On VENA -> ETH sell:
+ *   - Auto-claim accumulated swap fees for the seller's own registered NFTs.
+ *   - Burn NFTs by sold whole-token count (1 NFT per full 1 VENA sold).
+ *   - Fractional sells accumulate per user; burn strongest-first.
  *
  * Fees:
  *   - 1% of swap output via afterSwap return delta.
- *   - 80% to NFT holder reward pool (rarity x Stratum weight).
- *   - 20% to treasury (immediate transfer).
+ *   - 80% to NFT holder reward pool (rarity x Stratum weight), claimable manually
+ *     or auto-claimed on sell for the seller's NFTs only.
+ *   - 20% to treasury: sent immediately to the treasury address (must accept ETH + VENA).
  *
  * Swapper detection:
  *   - hookData = abi.encode(address swapper) from VenaSwapRouter.
@@ -72,6 +83,9 @@ bytes4 constant AFTER_SWAP_SELECTOR = bytes4(
  * NFT ops are wrapped in try/catch so swaps never revert if mint/burn fails.
  *
  * CREATE2 address flags: last 14 bits == 0x0044
+ *
+ * Pool safety:
+ *   - This hook is intended for exactly one pool: ETH/VENA, fee=0, tickSpacing=1.
  */
 contract VenaHook is Ownable, ReentrancyGuard {
     using BalanceDeltaLib for BalanceDelta;
@@ -82,11 +96,6 @@ contract VenaHook is Ownable, ReentrancyGuard {
     uint256 private constant FEE_DIVISOR      = 100;   // 1%
     uint256 private constant HOLDER_SHARE_BPS = 8000;  // 80%
     uint256 private constant TREASURY_BPS     = 2000;  // 20%
-
-    uint256 private constant TIER_GOLD     = 4  * 1e18;
-    uint256 private constant TIER_PLATINUM = 8  * 1e18;
-    uint256 private constant TIER_DIAMOND  = 16 * 1e18;
-    uint256 private constant TIER_EMERALD  = 32 * 1e18;
 
     uint256[5] private RARITY_WEIGHTS = [1, 4, 8, 16, 32];
 
@@ -104,6 +113,7 @@ contract VenaHook is Ownable, ReentrancyGuard {
     // ─── Cumulative buy tracking (lifetime, not reset on sell) ────────────────
 
     mapping(address => uint256) public cumulativeVenaBought;
+    mapping(address => uint256) public sellRemainderWei;
 
     // ─── Per-user NFT registry (logical owner, includes staked) ───────────────
 
@@ -138,8 +148,9 @@ contract VenaHook is Ownable, ReentrancyGuard {
     event FeesClaimed(address indexed holder, uint256[] tokenIds, uint256 ethAmount, uint256 venaAmount);
     event PickaxesMinted(address indexed user, uint256 count, PickaxeNFT.Tier tier);
     event PickaxesBurned(address indexed user, uint256 count);
-    event TierUpgradedBatch(address indexed user, PickaxeNFT.Tier newTier, uint256 count);
     event SwapEffectsFailed(address indexed swapper, bool isBuy);
+
+    error InvalidPoolKey();
 
     // ─── Constructor ──────────────────────────────────────────────────────────
 
@@ -182,6 +193,7 @@ contract VenaHook is Ownable, ReentrancyGuard {
     ) external returns (bytes4, int128) {
         require(msg.sender == address(poolManager), "Only PoolManager");
         if (params.amountSpecified >= 0) return (AFTER_SWAP_SELECTOR, 0);
+        _validatePoolKey(key);
 
         int128 rawOutput;
         address outputCurrency;
@@ -194,9 +206,9 @@ contract VenaHook is Ownable, ReentrancyGuard {
             outputCurrency = key.currency0;
         }
 
-        if (rawOutput >= 0) return (AFTER_SWAP_SELECTOR, 0);
+        if (rawOutput <= 0) return (AFTER_SWAP_SELECTOR, 0);
 
-        uint256 outputAmount = uint256(int256(-rawOutput));
+        uint256 outputAmount = uint256(uint128(rawOutput));
         uint256 feeAmount    = outputAmount / FEE_DIVISOR;
         if (feeAmount == 0) return (AFTER_SWAP_SELECTOR, 0);
 
@@ -208,9 +220,11 @@ contract VenaHook is Ownable, ReentrancyGuard {
         address swapper = _resolveSwapper(hookData);
         if (swapper != address(0)) {
             if (params.zeroForOne) {
-                _tryBuyEffects(swapper, outputAmount);
+                _tryBuyEffects(swapper, outputAmount - feeAmount);
             } else {
-                _trySellEffects(swapper);
+                int128 rawVenaIn = delta.amount1();
+                uint256 venaIn = rawVenaIn < 0 ? uint256(int256(-rawVenaIn)) : 0;
+                _trySellEffects(swapper, venaIn);
             }
         }
 
@@ -225,8 +239,8 @@ contract VenaHook is Ownable, ReentrancyGuard {
         }
     }
 
-    function _trySellEffects(address swapper) internal {
-        try this._handleSell(swapper) {} catch {
+    function _trySellEffects(address swapper, uint256 venaIn) internal {
+        try this._handleSell(swapper, venaIn) {} catch {
             emit SwapEffectsFailed(swapper, false);
         }
     }
@@ -235,28 +249,27 @@ contract VenaHook is Ownable, ReentrancyGuard {
     function _handleBuy(address swapper, uint256 venaOut) external {
         require(msg.sender == address(this), "Internal");
 
-        uint256 prevCum = cumulativeVenaBought[swapper];
-        uint256 newCum  = prevCum + venaOut;
-        cumulativeVenaBought[swapper] = newCum;
-
-        PickaxeNFT.Tier oldTier = _tierForCumulative(prevCum);
-        PickaxeNFT.Tier newTier = _tierForCumulative(newCum);
-
-        if (newTier > oldTier) {
-            _upgradeAllForUser(swapper, newTier);
-        }
+        cumulativeVenaBought[swapper] += venaOut;
 
         uint256 wholeCount = venaOut / 1e18;
         if (wholeCount > 0) {
-            pickaxe.mintByHook(swapper, newTier, wholeCount);
-            emit PickaxesMinted(swapper, wholeCount, newTier);
+            pickaxe.mintByHook(swapper, PickaxeNFT.Tier.Silver, wholeCount);
+            emit PickaxesMinted(swapper, wholeCount, PickaxeNFT.Tier.Silver);
         }
     }
 
     /// @dev External only for try/catch; do not call directly.
-    function _handleSell(address swapper) external {
+    function _handleSell(address swapper, uint256 venaIn) external {
         require(msg.sender == address(this), "Internal");
-        _burnAllForUser(swapper);
+
+        _claimFeesForUser(swapper);
+
+        uint256 totalSold = sellRemainderWei[swapper] + venaIn;
+        uint256 burnCount = totalSold / 1e18;
+        sellRemainderWei[swapper] = totalSold % 1e18;
+        if (burnCount > 0) {
+            _burnForUser(swapper, burnCount);
+        }
     }
 
     // ─── NFT registry ─────────────────────────────────────────────────────────
@@ -264,7 +277,6 @@ contract VenaHook is Ownable, ReentrancyGuard {
     function onNFTAcquired(address newOwner, uint256 tokenId) external {
         require(msg.sender == address(pickaxe), "Only PickaxeNFT");
 
-        // Staking moves NFT to VenaMining - keep registry under staker, preserve Stratum.
         if (newOwner == address(venaMining)) {
             address staker = venaMining.stakedBy(tokenId);
             if (staker != address(0) && _logicalOwner[tokenId] == staker) return;
@@ -276,7 +288,6 @@ contract VenaHook is Ownable, ReentrancyGuard {
             if (staker != address(0)) logicalOwner = staker;
         }
 
-        // Unstake returns NFT to same owner - preserve Stratum.
         if (_logicalOwner[tokenId] == logicalOwner && tokenAcquiredAt[tokenId] != 0) return;
 
         address prev = _logicalOwner[tokenId];
@@ -306,57 +317,14 @@ contract VenaHook is Ownable, ReentrancyGuard {
     // ─── Claim fees ───────────────────────────────────────────────────────────
 
     function claimFees(uint256[] calldata tokenIds) external nonReentrant {
-        require(tokenIds.length > 0 && tokenIds.length <= 100, "1-100 tokens");
-
-        uint256 totalEthClaim;
-        uint256 totalVenaClaim;
-
-        for (uint256 i; i < tokenIds.length; ++i) {
-            uint256 id = tokenIds[i];
-            require(_ownsNFT(msg.sender, id), "Not owner");
-            require(tokenAcquiredAt[id] != 0, "Not registered");
-
-            (uint256 e, uint256 v) = _pendingForToken(id);
-
-            tokenEthSnapshot[id]         = pendingEth;
-            tokenVenaSnapshot[id]        = pendingVena;
-            tokenTotalWeightSnapshot[id] = totalEffectiveWeightScaled;
-
-            _refreshEffectiveWeight(id);
-
-            totalEthClaim  += e;
-            totalVenaClaim += v;
-        }
-
-        uint256 ethBal  = address(this).balance;
-        uint256 venaBal = venaToken.balanceOf(address(this));
-        if (totalEthClaim  > ethBal)  totalEthClaim  = ethBal;
-        if (totalVenaClaim > venaBal) totalVenaClaim = venaBal;
-
-        require(totalEthClaim > 0 || totalVenaClaim > 0, "Nothing to claim");
-
-        totalEthDistributed  += totalEthClaim;
-        totalVenaDistributed += totalVenaClaim;
-
-        if (totalEthClaim > 0) {
-            (bool ok, ) = payable(msg.sender).call{value: totalEthClaim}("");
-            require(ok, "ETH transfer failed");
-        }
-        if (totalVenaClaim > 0) {
-            require(venaToken.transfer(msg.sender, totalVenaClaim), "VENA transfer failed");
-        }
-
-        emit FeesClaimed(msg.sender, tokenIds, totalEthClaim, totalVenaClaim);
+        (uint256 ethOut, uint256 venaOut) = _claimFees(msg.sender, tokenIds);
+        require(ethOut > 0 || venaOut > 0, "Nothing to claim");
     }
 
     // ─── Views ────────────────────────────────────────────────────────────────
 
     function getUserTokenIds(address user) external view returns (uint256[] memory) {
         return _userTokenIds[user];
-    }
-
-    function tierForAddress(address user) external view returns (PickaxeNFT.Tier) {
-        return _tierForCumulative(cumulativeVenaBought[user]);
     }
 
     function pendingFees(uint256 tokenId)
@@ -394,8 +362,8 @@ contract VenaHook is Ownable, ReentrancyGuard {
     // ─── Internal: fees ───────────────────────────────────────────────────────
 
     function _splitFee(uint256 feeAmount, bool isEth) internal {
-        uint256 holderShare    = (feeAmount * HOLDER_SHARE_BPS) / 10_000;
-        uint256 treasuryShare  = feeAmount - holderShare;
+        uint256 holderShare   = (feeAmount * HOLDER_SHARE_BPS) / 10_000;
+        uint256 treasuryShare = feeAmount - holderShare;
 
         if (isEth) {
             pendingEth += holderShare;
@@ -415,6 +383,82 @@ contract VenaHook is Ownable, ReentrancyGuard {
         emit SwapFeeCollected(isEth, feeAmount, holderShare, treasuryShare);
     }
 
+    function _claimFeesForUser(address holder) internal {
+        uint256[] memory ids = _userTokenIds[holder];
+        if (ids.length == 0) return;
+
+        uint256[] memory claimIds = new uint256[](ids.length);
+        uint256 n;
+        for (uint256 i; i < ids.length; ++i) {
+            if (!_ownsNFT(holder, ids[i])) continue;
+            if (tokenAcquiredAt[ids[i]] == 0) continue;
+            claimIds[n++] = ids[i];
+        }
+        if (n == 0) return;
+
+        assembly {
+            mstore(claimIds, n)
+        }
+
+        _claimFees(holder, claimIds);
+    }
+
+    function _claimFees(address holder, uint256[] memory tokenIds)
+        internal
+        returns (uint256 totalEthClaim, uint256 totalVenaClaim)
+    {
+        require(tokenIds.length > 0 && tokenIds.length <= 100, "1-100 tokens");
+
+        for (uint256 i; i < tokenIds.length; ++i) {
+            uint256 id = tokenIds[i];
+            require(_ownsNFT(holder, id), "Not owner");
+            require(tokenAcquiredAt[id] != 0, "Not registered");
+
+            (uint256 e, uint256 v) = _pendingForToken(id);
+
+            tokenEthSnapshot[id]         = pendingEth;
+            tokenVenaSnapshot[id]        = pendingVena;
+            tokenTotalWeightSnapshot[id] = totalEffectiveWeightScaled;
+
+            _refreshEffectiveWeight(id);
+
+            totalEthClaim  += e;
+            totalVenaClaim += v;
+        }
+
+        if (totalEthClaim == 0 && totalVenaClaim == 0) return (0, 0);
+
+        uint256 ethBal = address(this).balance;
+        uint256 venaBal = venaToken.balanceOf(address(this));
+        if (totalEthClaim  > ethBal)  totalEthClaim  = ethBal;
+        if (totalVenaClaim > venaBal) totalVenaClaim = venaBal;
+
+        if (totalEthClaim == 0 && totalVenaClaim == 0) return (0, 0);
+
+        totalEthDistributed  += totalEthClaim;
+        totalVenaDistributed += totalVenaClaim;
+
+        if (totalEthClaim > 0) {
+            (bool ok, ) = payable(holder).call{value: totalEthClaim}("");
+            require(ok, "ETH transfer failed");
+        }
+        if (totalVenaClaim > 0) {
+            require(venaToken.transfer(holder, totalVenaClaim), "VENA transfer failed");
+        }
+
+        emit FeesClaimed(holder, tokenIds, totalEthClaim, totalVenaClaim);
+    }
+
+    function _validatePoolKey(PoolKey calldata key) internal view {
+        if (
+            key.currency0 != address(0) ||
+            key.currency1 != address(venaToken) ||
+            key.fee != 0 ||
+            key.tickSpacing != 1 ||
+            key.hooks != address(this)
+        ) revert InvalidPoolKey();
+    }
+
     function _resolveSwapper(bytes calldata hookData) internal view returns (address) {
         if (hookData.length == 32) {
             address swapper = abi.decode(hookData, (address));
@@ -425,48 +469,15 @@ contract VenaHook is Ownable, ReentrancyGuard {
         return address(0);
     }
 
-    // ─── Internal: tier logic ─────────────────────────────────────────────────
-
-    function _tierForCumulative(uint256 cumulative)
-        internal pure
-        returns (PickaxeNFT.Tier)
-    {
-        if (cumulative >= TIER_EMERALD)  return PickaxeNFT.Tier.Emerald;
-        if (cumulative >= TIER_DIAMOND)  return PickaxeNFT.Tier.Diamond;
-        if (cumulative >= TIER_PLATINUM) return PickaxeNFT.Tier.Platinum;
-        if (cumulative >= TIER_GOLD)     return PickaxeNFT.Tier.Gold;
-        return PickaxeNFT.Tier.Silver;
-    }
-
-    function _upgradeAllForUser(address user, PickaxeNFT.Tier newTier) internal {
-        uint256[] storage ids = _userTokenIds[user];
-        uint256 upgraded;
-
-        for (uint256 i; i < ids.length; ++i) {
-            uint256 id = ids[i];
-            if (!_tokenExists(id)) continue;
-
-            PickaxeNFT.Tier current = pickaxe.tokenTier(id);
-            if (newTier > current) {
-                pickaxe.upgradeTierByHook(id, newTier);
-                _refreshEffectiveWeight(id);
-                upgraded++;
-            }
-        }
-
-        if (upgraded > 0) emit TierUpgradedBatch(user, newTier, upgraded);
-    }
-
-    function _burnAllForUser(address user) internal {
+    function _burnForUser(address user, uint256 burnCount) internal {
         uint256[] memory ids = _userTokenIds[user];
+        bool[] memory used = new bool[](ids.length);
         uint256 burned;
 
-        for (uint256 i; i < ids.length; ++i) {
-            uint256 id = ids[i];
-            if (!_tokenExists(id)) {
-                _removeFromRegistry(user, id);
-                continue;
-            }
+        for (uint256 step; step < burnCount; ++step) {
+            (bool found, uint256 id, uint256 idx) = _selectStrongestBurnable(user, ids, used);
+            if (!found) break;
+            used[idx] = true;
 
             if (venaMining.stakedBy(id) != address(0)) {
                 venaMining.forceUnstakeAndBurn(id);
@@ -481,6 +492,41 @@ contract VenaHook is Ownable, ReentrancyGuard {
         }
 
         if (burned > 0) emit PickaxesBurned(user, burned);
+    }
+
+    function _selectStrongestBurnable(
+        address user,
+        uint256[] memory ids,
+        bool[] memory used
+    ) internal view returns (bool found, uint256 tokenId, uint256 selectedIdx) {
+        uint256 bestScore;
+        uint256 bestId;
+        uint256 bestIdx = type(uint256).max;
+
+        for (uint256 i; i < ids.length; ++i) {
+            if (used[i]) continue;
+            uint256 id = ids[i];
+            if (!_tokenExists(id)) continue;
+
+            bool burnable = (venaMining.stakedBy(id) != address(0)) || (pickaxe.ownerOf(id) == user);
+            if (!burnable) continue;
+
+            uint256 score = _burnPriorityScore(id);
+            if (bestIdx == type(uint256).max || score > bestScore) {
+                bestScore = score;
+                bestId = id;
+                bestIdx = i;
+            }
+        }
+
+        if (bestIdx == type(uint256).max) return (false, 0, 0);
+        return (true, bestId, bestIdx);
+    }
+
+    function _burnPriorityScore(uint256 tokenId) internal view returns (uint256) {
+        uint256 rarity = RARITY_WEIGHTS[uint256(pickaxe.tokenTier(tokenId))];
+        (, uint256 mult) = _stratumFromHeld(_heldDuration(tokenId));
+        return rarity * 1000 + mult;
     }
 
     // ─── Internal: registry + weights ─────────────────────────────────────────

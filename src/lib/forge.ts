@@ -80,3 +80,18 @@ export function primaryTierUpgrade(target: Exclude<Rarity, "Silver">): ForgePath
   if (!prevTier || prevTier === "Silver") return paths[1] ?? paths[0] ?? null;
   return paths.find((p) => p.ingredients[prevTier] === 2) ?? null;
 }
+
+/** On-chain Forge recipes (must match Forge.sol) */
+export type ForgeRecipe = {
+  inputTier: Exclude<Rarity, "Emerald">;
+  inputCount: number;
+  outputTier: Exclude<Rarity, "Silver">;
+  label: string;
+};
+
+export const FORGE_RECIPES: ForgeRecipe[] = [
+  { inputTier: "Silver", inputCount: 4, outputTier: "Gold", label: "4 Silver" },
+  { inputTier: "Gold", inputCount: 2, outputTier: "Platinum", label: "2 Gold" },
+  { inputTier: "Platinum", inputCount: 2, outputTier: "Diamond", label: "2 Platinum" },
+  { inputTier: "Diamond", inputCount: 2, outputTier: "Emerald", label: "2 Diamond" },
+];

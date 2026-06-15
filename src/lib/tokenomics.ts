@@ -36,7 +36,7 @@ export const SUPPLY_ALLOCATIONS = [
     amount: SUPPLY_BREAKDOWN.liquidity,
     pct: TOKENOMICS.liquidityPoolPct,
     color: "#00d4ff",
-    note: "Launch depth · LP locked",
+    note: "Live LP on Base",
   },
   {
     key: "mining",
@@ -52,7 +52,7 @@ export const SUPPLY_ALLOCATIONS = [
     amount: SUPPLY_BREAKDOWN.treasury,
     pct: TOKENOMICS.treasuryAllocationPct,
     color: "#94a3b8",
-    note: "Dev · ops · protocol reserve",
+    note: "1,000 VENA · 180d linear vest (TreasuryVesting)",
   },
 ] as const;
 
@@ -157,7 +157,7 @@ export const HOW_IT_WORKS = [
     step: "03",
     title: "Claim",
     description:
-      "1% pool fees flow to holders by rarity × Stratum weight. Stake for mining from the 4,000 VENA pool over 180 days.",
+      "1% swap fees flow to Pickaxe holders by rarity × Stratum. Claim on-site or automatically when selling VENA. Stake for mining from the 4,000 VENA pool.",
   },
 ] as const;
 

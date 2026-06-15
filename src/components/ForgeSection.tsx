@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FORGE_PATHS } from "@/lib/forge";
 import { RARITY_TIERS, TIER_MAX_SUPPLY } from "@/lib/tokenomics";
 import SectionShell from "./SectionShell";
+import ForgeUpgradeBlock from "./ForgeUpgradeBlock";
 
 export default function ForgeSection() {
   return (
@@ -120,6 +121,8 @@ export default function ForgeSection() {
         Example: 32 tokens → 32 Silver, or 8 Gold, or 4 Platinum, or 2 Diamond, or 1 Emerald.
         Same token lock — your route depends on what the market still holds.
       </p>
+
+      <ForgeUpgradeBlock />
     </SectionShell>
   );
 }

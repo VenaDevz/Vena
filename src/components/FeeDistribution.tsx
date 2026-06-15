@@ -42,11 +42,11 @@ export default function FeeDistribution() {
             },
             {
               title: "Weighted claims",
-              body: "claim(tokenId) or claimMany — ETH share vs total live protocol weight.",
+              body: "Claim on-site anytime, or auto-claim when you sell VENA. You only receive your own NFT share — never others' fees.",
             },
             {
               title: "Transfer reset",
-              body: "Received Pickaxes restart Stratum at Level 1. Soulbound recommended at launch.",
+              body: "Received Pickaxes restart Stratum at Level 1. Soulbound transfer lock available via owner config.",
             },
           ].map((item) => (
             <div

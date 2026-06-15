@@ -3,9 +3,12 @@
 import { useState, useCallback } from "react";
 import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { parseEther, parseUnits, formatEther, formatUnits } from "viem";
+import { getUniswapBuyVenaUrl, getUniswapPoolUrl, preferUniswapForBuy } from "@/lib/links";
+import { handleSectionLink } from "@/lib/scroll";
 
 const VENA_TOKEN   = (process.env.NEXT_PUBLIC_VENA_TOKEN   ?? "") as `0x${string}`;
 const SWAP_ROUTER  = (process.env.NEXT_PUBLIC_SWAP_ROUTER  ?? "") as `0x${string}`;
+const swapConfigured = Boolean(VENA_TOKEN && SWAP_ROUTER);
 
 const ROUTER_ABI = [
   {
@@ -142,13 +145,13 @@ export default function SwapSection() {
   const ethBalFmt  = ethBalance ? formatEther(ethBalance.value) : "0";
 
   return (
-    <section className="py-20 px-4" id="swap">
+    <section className="py-20 px-4 scroll-mt-24" id="swap">
       <div className="max-w-md mx-auto">
         <h2 className="text-2xl font-bold text-center mb-2 text-white">
           Swap
         </h2>
         <p className="text-center text-sm text-gray-400 mb-8">
-          ETH ↔ VENA via Uniswap v4
+          ETH ↔ VENA on the live v4 hook pool. Buys mint Silver pickaxes; sells burn and auto-claim your fees.
         </p>
 
         <div
@@ -211,7 +214,11 @@ export default function SwapSection() {
           </div>
 
           {/* Action button */}
-          {!isConnected ? (
+          {!swapConfigured ? (
+            <p className="text-center text-amber-400/90 text-sm py-2">
+              Swap router not configured. Set NEXT_PUBLIC_SWAP_ROUTER in env.
+            </p>
+          ) : !isConnected ? (
             <div className="text-center text-gray-500 text-sm py-2">
               Connect wallet to swap
             </div>
@@ -226,10 +233,10 @@ export default function SwapSection() {
           ) : (
             <button
               onClick={handleSwap}
-              disabled={!inputAmount || txPending || !SWAP_ROUTER}
+              disabled={!inputAmount || txPending || !swapConfigured}
               className="w-full py-3 rounded-xl font-semibold text-sm transition-colors disabled:opacity-40"
               style={{
-                background: inputAmount && SWAP_ROUTER
+                background: inputAmount && swapConfigured
                   ? "linear-gradient(135deg, rgba(0,212,255,0.3), rgba(0,255,136,0.2))"
                   : undefined,
                 borderColor: "rgba(0,212,255,0.4)",
@@ -266,6 +273,44 @@ export default function SwapSection() {
           <p className="text-xs text-gray-600 text-center">
             1% slippage tolerance · Uniswap v4 hook pool
           </p>
+
+          <div className="pt-2 border-t border-cyan-900/20 space-y-2 text-center">
+            {preferUniswapForBuy() ? (
+              <>
+                <p className="text-xs text-gray-500">
+                  Primary buy route is Uniswap. Use this panel to sell VENA on-site.
+                </p>
+                <a
+                  href={getUniswapBuyVenaUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-sm text-cyan-400 hover:text-cyan-300 hover:underline"
+                >
+                  Buy VENA on Uniswap →
+                </a>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-gray-500">Prefer the official Uniswap app?</p>
+                <a
+                  href={getUniswapBuyVenaUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-sm text-cyan-400 hover:text-cyan-300 hover:underline"
+                >
+                  Buy VENA with ETH on Uniswap →
+                </a>
+              </>
+            )}
+            <a
+              href={getUniswapPoolUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-xs text-gray-600 hover:text-gray-400 hover:underline"
+            >
+              View ETH/VENA pool
+            </a>
+          </div>
         </div>
       </div>
     </section>
