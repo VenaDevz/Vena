@@ -1,58 +1,88 @@
 /**
- * VENA Tokenomics v3 — 10,000 supply (1 whole token = 1 Pickaxe NFT)
- * Forge: Silver-equivalent ladder 1→4→8→16→32 with 2× tier-to-tier paths.
+ * VENA Tokenomics — $VENA via Virtuals Protocol on Robinhood Chain
+ *
+ * Supply (1B, Virtuals default split — NO dedicated staking allocation):
+ *   - 50%  Liquidity Pool (fixed supply)
+ *   - 25%  Automated Capital Formation (Limit Order Program, 2m → 160m FDV)
+ *   - 25%  Team / Treasury (6-month linear release)
+ *
+ * Two flywheels, both market-driven (no pre-minted staking pool):
+ *   1. Mint / upgrade revenue  → buy $VENA on market → add to STAKING POOL.
+ *   2. Virtuals trade fees      → random-timed buybacks → BURN $VENA.
+ *
+ * NFTs:
+ *   - Mint Silver with 0.01 ETH on Robinhood Chain.
+ *   - Upgrade a tier by paying $VENA + burning the lower Pickaxe.
+ *   - Stake Pickaxes to earn $VENA from the buyback-fed staking pool.
  */
 
 import type { Rarity } from "./types";
 
+/** Silver mint price — fixed ETH on Robinhood Chain. */
+export const SILVER_MINT_ETH = "0.01";
+
+/** Virtuals trade-fee take → random-timed buyback → BURN. */
+export const BUYBACK_POLICY = {
+  tradeFeeTakePct: 100,
+  action: "burn" as const,
+} as const;
+
+/** NFT mint & upgrade revenue → buy $VENA → STAKING POOL. */
+export const MINT_REVENUE_POLICY = {
+  action: "stakingPool" as const,
+  toPoolPct: 100,
+} as const;
+
 export const TOKENOMICS = {
-  maxTokenSupply: 10_000,
+  maxTokenSupply: 1_000_000_000,
   maxNftSupply: 10_000,
-  wholeTokenPerNft: 1,
-  poolFeeBps: 100, // 1%
-  lpFeeToHoldersPct: 80,
-  lpFeeToTreasuryPct: 20,
-  miningPoolPct: 40,
-  liquidityPoolPct: 50,
-  treasuryAllocationPct: 10,
-  miningStakeBonusPerDayPct: 2,
-  miningStakeBonusMaxPct: 30,
+  /** Virtuals universal trade fee */
+  tradeFeeBps: 100, // 1%
+  /** Share of the 1% fee routed to the project (as $VIRTUAL) */
+  projectFeeSharePct: 70,
+  buyback: BUYBACK_POLICY,
+  mintRevenue: MINT_REVENUE_POLICY,
+  liquidityPct: 50,
+  acfPct: 25,
+  teamTreasuryPct: 25,
+  /** Stake-duration reward bonus (mining) */
+  stakeBonusPerDayPct: 2,
+  stakeBonusMaxPct: 30,
   stratumMaxMultiplier: 6.5,
   transferResetsStratum: true,
-  emissionDays: 180,
 } as const;
 
 export const SUPPLY_BREAKDOWN = {
   total: TOKENOMICS.maxTokenSupply,
-  liquidity: 5_000,
-  mining: 4_000,
-  treasury: 1_000,
+  liquidity: 500_000_000,
+  acf: 250_000_000,
+  teamTreasury: 250_000_000,
 } as const;
 
 export const SUPPLY_ALLOCATIONS = [
   {
     key: "liquidity",
-    label: "Liquidity (v4 pool)",
+    label: "Liquidity Pool",
     amount: SUPPLY_BREAKDOWN.liquidity,
-    pct: TOKENOMICS.liquidityPoolPct,
-    color: "#00d4ff",
-    note: "Live LP on Base",
+    pct: TOKENOMICS.liquidityPct,
+    color: "#5ec9d4",
+    note: "Fixed supply",
   },
   {
-    key: "mining",
-    label: "Mining emissions",
-    amount: SUPPLY_BREAKDOWN.mining,
-    pct: TOKENOMICS.miningPoolPct,
-    color: "#00ff88",
-    note: `${SUPPLY_BREAKDOWN.mining.toLocaleString("en-US")} VENA over ${TOKENOMICS.emissionDays}d · ~${(SUPPLY_BREAKDOWN.mining / TOKENOMICS.emissionDays).toFixed(2)}/day`,
+    key: "acf",
+    label: "Automated Capital Formation",
+    amount: SUPPLY_BREAKDOWN.acf,
+    pct: TOKENOMICS.acfPct,
+    color: "#e8873a",
+    note: "Follows Limit Order Program from 2m to 160m FDV",
   },
   {
-    key: "treasury",
-    label: "Treasury",
-    amount: SUPPLY_BREAKDOWN.treasury,
-    pct: TOKENOMICS.treasuryAllocationPct,
-    color: "#94a3b8",
-    note: "1,000 VENA · 180d linear vest (TreasuryVesting)",
+    key: "teamTreasury",
+    label: "Team – Treasury",
+    amount: SUPPLY_BREAKDOWN.teamTreasury,
+    pct: TOKENOMICS.teamTreasuryPct,
+    color: "#b5c334",
+    note: "100% released linearly over 6 months",
   },
 ] as const;
 
@@ -128,9 +158,9 @@ export const TIER_MAX_SUPPLY: Record<Rarity, number> = {
   Emerald: 312,
 };
 
-/** Stratum — holding-duration fee multiplier */
+/** Stratum — stake-duration reward multiplier (mining) */
 export const STRATUM_LEVELS = [
-  { level: 1, label: "Mint", duration: "At mint", multiplier: 1.0 },
+  { level: 1, label: "Staked", duration: "At stake", multiplier: 1.0 },
   { level: 2, label: "1 hour", duration: "1 hour", multiplier: 1.25 },
   { level: 3, label: "6 hours", duration: "6 hours", multiplier: 1.6 },
   { level: 4, label: "24 hours", duration: "24 hours", multiplier: 2.1 },
@@ -143,25 +173,25 @@ export const STRATUM_LEVELS = [
 export const HOW_IT_WORKS = [
   {
     step: "01",
-    title: "Acquire",
+    title: "Mint",
     description:
-      "Every whole $VENA mints one Silver Pickaxe. Ten tokens in your wallet means ten NFTs — fair and proportional.",
+      "Pay 0.01 ETH to mint a Silver Pickaxe. Every mint buys $VENA on the market and adds it to the staking pool.",
   },
   {
     step: "02",
-    title: "Forge",
+    title: "Upgrade",
     description:
-      "Upgrade via Silver (4→Gold) or tier-to-tier (2 Gold→Platinum, 2 Platinum→Diamond…). No Silver required once the market has depth.",
+      "Burn your current Pickaxe and pay $VENA to mint the next tier. That $VENA is bought back into the pool too.",
   },
   {
     step: "03",
-    title: "Claim",
+    title: "Stake & Earn",
     description:
-      "1% swap fees flow to Pickaxe holders by rarity × Stratum. Claim on-site or automatically when selling VENA. Stake for mining from the 4,000 VENA pool.",
+      "Stake Pickaxes to earn $VENA from the staking pool — a pool that grows with every mint and upgrade.",
   },
 ] as const;
 
-export function computeFeeWeight(
+export function computeStakeWeight(
   rarityMultiplier: number,
   stratumMultiplier: number
 ): number {
@@ -171,4 +201,22 @@ export function computeFeeWeight(
 export function formatSupplyCap(current?: number): string {
   if (current === undefined) return `— / ${TOKENOMICS.maxNftSupply.toLocaleString("en-US")}`;
   return `${current.toLocaleString("en-US")} / ${TOKENOMICS.maxNftSupply.toLocaleString("en-US")}`;
+}
+
+/**
+ * Base $VENA cost unit for upgrades. On-chain values live in VenaForge;
+ * this is the display ladder (Gold = base, scaling by silverEquivalent).
+ */
+export const UPGRADE_BASE_VENA = 1_000_000;
+
+/** $VENA cost to UPGRADE INTO a given tier (Silver has no upgrade cost). */
+export function tierUpgradeVena(tier: Rarity): number {
+  if (tier === "Silver") return 0;
+  const row = RARITY_TIERS.find((t) => t.id === tier);
+  return UPGRADE_BASE_VENA * (row?.silverEquivalent ?? 1);
+}
+
+/** @deprecated legacy alias — now returns the $VENA upgrade cost. */
+export function tierMintOrUpgradeCost(tier: Rarity): number {
+  return tierUpgradeVena(tier);
 }

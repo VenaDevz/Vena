@@ -1,0 +1,133 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  GAME_CONFIG,
+  formatDuration,
+  formatVena,
+  getUpgradeCostVena,
+} from "../config/game-config";
+import { useMinerStore } from "../store/miner-store";
+
+type UpgradePanelProps = {
+  balanceVena: number;
+  onStartUpgrade: () => boolean;
+  onSkipUpgrade: () => boolean;
+  onUpgradeComplete: () => void;
+  onNotify: (message: string) => void;
+};
+
+export default function UpgradePanel({
+  balanceVena,
+  onStartUpgrade,
+  onSkipUpgrade,
+  onUpgradeComplete,
+  onNotify,
+}: UpgradePanelProps) {
+  const level = useMinerStore((s) => s.level);
+  const upgradeEndsAt = useMinerStore((s) => s.upgradeEndsAt);
+  const [now, setNow] = useState(Date.now());
+
+  const isUpgrading = upgradeEndsAt !== null && upgradeEndsAt > now;
+  const remainingMs = isUpgrading ? upgradeEndsAt - now : 0;
+  const nextCost = getUpgradeCostVena(level);
+  const skipCost = GAME_CONFIG.upgrade.timeSkipCostVena;
+
+  useEffect(() => {
+    if (!isUpgrading) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [isUpgrading]);
+
+  useEffect(() => {
+    if (upgradeEndsAt !== null && upgradeEndsAt <= now) {
+      onUpgradeComplete();
+    }
+  }, [now, upgradeEndsAt, onUpgradeComplete]);
+
+  const handleStart = () => {
+    if (isUpgrading) return;
+    if (balanceVena < nextCost) {
+      onNotify("Insufficient balance");
+      return;
+    }
+    const ok = onStartUpgrade();
+    if (ok) {
+      onNotify(`Upgrade started — ${formatVena(nextCost)} VENA spent`);
+    }
+  };
+
+  const handleSkip = () => {
+    if (!isUpgrading) return;
+    if (balanceVena < skipCost) {
+      onNotify("Insufficient balance");
+      return;
+    }
+    const ok = onSkipUpgrade();
+    if (ok) {
+      onNotify(`Timer skipped — ${formatVena(skipCost)} VENA spent`);
+    }
+  };
+
+  return (
+    <section className="miner-glass rounded-2xl p-5" aria-label="Level upgrade">
+      <div className="mb-4">
+        <p className="miner-panel-title text-[10px] uppercase tracking-[0.2em] text-[#7000ff]/80">
+          Development
+        </p>
+        <h2 className="miner-panel-title text-sm font-semibold text-white">
+          Level upgrade
+        </h2>
+      </div>
+
+      <div className="rounded-xl border border-white/5 bg-black/25 p-4">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">Current level</span>
+          <span className="miner-panel-title font-semibold text-white">
+            {level}
+          </span>
+        </div>
+        <div className="mt-2 flex items-center justify-between text-sm">
+          <span className="text-slate-500">Next upgrade</span>
+          <span className="font-medium text-[#00f0ff]">
+            {formatVena(nextCost)} VENA
+          </span>
+        </div>
+        <div className="mt-2 flex items-center justify-between text-sm">
+          <span className="text-slate-500">Duration</span>
+          <span className="text-slate-400">4 hours</span>
+        </div>
+      </div>
+
+      {isUpgrading && (
+        <div className="mt-4 rounded-xl border border-[#7000ff]/30 bg-[#7000ff]/10 p-4 text-center">
+          <p className="text-[10px] uppercase tracking-wider text-slate-500">
+            Time remaining
+          </p>
+          <p className="miner-panel-title mt-1 text-3xl font-bold tabular-nums text-[#7000ff]">
+            {formatDuration(remainingMs)}
+          </p>
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <button
+          type="button"
+          onClick={handleStart}
+          disabled={isUpgrading}
+          className="miner-panel-title flex-1 rounded-xl border border-[#00f0ff]/40 bg-[#00f0ff]/10 py-3 text-sm font-semibold text-[#00f0ff] transition-colors hover:bg-[#00f0ff]/20 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Upgrade level
+        </button>
+        <button
+          type="button"
+          onClick={handleSkip}
+          disabled={!isUpgrading}
+          className="miner-panel-title flex-1 rounded-xl border border-[#7000ff]/40 bg-[#7000ff]/10 py-3 text-sm font-semibold text-[#7000ff] transition-colors hover:bg-[#7000ff]/20 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Finish now ({formatVena(skipCost)} VENA)
+        </button>
+      </div>
+    </section>
+  );
+}

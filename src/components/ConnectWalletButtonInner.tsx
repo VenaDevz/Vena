@@ -5,6 +5,7 @@ import { useAccount, useSwitchChain } from "wagmi";
 import { motion } from "framer-motion";
 import { Activity, AlertTriangle } from "lucide-react";
 import { baseChainId } from "@/config/wagmi";
+import { PROJECT } from "@/lib/project";
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -42,7 +43,7 @@ export default function ConnectWalletButtonInner({
   const label = isConnecting || isSwitching
     ? "Connecting..."
     : isWrongNetwork
-      ? "Switch to Base"
+      ? `Switch to ${PROJECT.network}`
       : isConnected && address
         ? truncateAddress(address)
         : "Connect Wallet";

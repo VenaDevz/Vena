@@ -1,6 +1,7 @@
 /**
- * Pyramid mining — 4,000 VENA (40%) / 180 days fixed schedule.
- * Tuned for v3 forge ladder (1→4→8→16→32) + tier-to-tier paths.
+ * Pyramid mining — staking rewards paid from a BUYBACK-FED pool.
+ * No pre-minted allocation: the pool grows from mint/upgrade revenue → $VENA buybacks.
+ * The reference daily cap below is illustrative for yield estimates only.
  */
 
 import type { Rarity } from "./types";
@@ -10,12 +11,14 @@ import {
   FORGE_PATHS,
   type ForgePath,
 } from "./forge";
-import { RARITY_TIERS, SUPPLY_BREAKDOWN, TOKENOMICS } from "./tokenomics";
+import { RARITY_TIERS, TOKENOMICS, tierMintOrUpgradeCost } from "./tokenomics";
 
 export const MINING_EMISSION = {
-  poolVena: SUPPLY_BREAKDOWN.mining,
-  emissionDays: TOKENOMICS.emissionDays,
-  launchReferencePower: 3_500,
+  /** Illustrative reference pool size for yield preview (not a fixed allocation). */
+  poolVena: 250_000_000,
+  /** Illustrative distribution window for the yield preview. */
+  emissionDays: 730,
+  launchReferencePower: 50_000,
   uiTickMs: 1_000,
 } as const;
 
@@ -51,7 +54,7 @@ export function getMiningPyramidMultiplier(rarity: Rarity): number {
 }
 
 export function getForgeTokenCost(rarity: Rarity): number {
-  return getSilverEquivalent(rarity);
+  return tierMintOrUpgradeCost(rarity);
 }
 
 export function effectiveMiningPower(hashrate: number, rarity: Rarity): number {
@@ -138,17 +141,15 @@ export function venaPerSecond(totalEffectivePower: number): number {
 function buildMiningYields(networkPower: number) {
   return RARITY_TIERS.map((tier) => {
     const daily = venaPerDayForPickaxe(tier.id, tier.hashrate, networkPower);
-    const payback = estimatePaybackDays(tier.id, tier.hashrate, networkPower);
     return {
       tier: tier.id,
       hashrate: tier.hashrate,
-      tokenCost: tier.silverEquivalent,
+      tokenCost: tierMintOrUpgradeCost(tier.id),
       pyramidMult: tier.miningPyramidMultiplier,
       miningPower: effectiveMiningPower(tier.hashrate, tier.id),
       daily,
       hourly: daily / 24,
       monthly: daily * 30,
-      paybackDays: Math.round(payback * 10) / 10,
     };
   });
 }
@@ -216,11 +217,11 @@ export const FORGE_MINING_CHECKS = RARITY_TIERS.filter(
   };
 });
 
-/** Pool schedule — always depletes on day 180 */
+/** Illustrative pool reference — grows with buybacks, not a fixed calendar. */
 export const MINING_POOL_SCHEDULE = {
   totalVena: MINING_EMISSION.poolVena,
   days: MINING_EMISSION.emissionDays,
   dailyCap: DAILY_GLOBAL_CAP,
   endsOnDay: MINING_EMISSION.emissionDays,
-  note: "Fixed calendar — not payback-dependent",
+  note: "Buyback-fed — pool grows with mint & upgrade volume",
 } as const;

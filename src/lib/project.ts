@@ -7,12 +7,12 @@ export const PROJECT = {
   taglineShort: "Mining Protocol",
   tokenSymbol: "VENA",
   tokenDisplay: "$VENA",
-  network: "Base",
-  chainId: 8453,
+  network: process.env.NEXT_PUBLIC_NETWORK ?? "Robinhood Chain",
+  chainId: Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 4663),
   /** Hero headline — two lines */
-  heroLine1: "STAKE DEPTH",
-  heroLine2: "COMPOUND YIELD",
-  subtitle: "Base / Uniswap V4 / Live Hook Pool",
+  heroLine1: "MINT. UPGRADE.",
+  heroLine2: "STAKE & EARN",
+  subtitle: "Robinhood Chain / Mining Protocol",
   maxSupply: TOKENOMICS.maxTokenSupply,
   maxNfts: TOKENOMICS.maxNftSupply,
   timeBonusName: "Stratum",
@@ -22,6 +22,13 @@ export const PROJECT = {
     xHandle: "@VenaOnBase",
     xUrl: "https://x.com/VenaOnBase",
   },
+  routes: {
+    home: "/",
+    mint: "/mint",
+    miner: "/miner",
+  },
+  /** Virtuals Protocol agent page — set via NEXT_PUBLIC_VIRTUALS_AGENT_URL */
+  launchpad: "Virtuals Protocol",
 } as const;
 
 export const PHASES = {

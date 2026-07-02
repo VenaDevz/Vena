@@ -4,6 +4,8 @@ import Image from "next/image";
 import { PROJECT } from "@/lib/project";
 import BrandLogo from "@/components/BrandLogo";
 import XIcon from "@/components/XIcon";
+import SiteNavLink from "@/components/SiteNavLink";
+import { FOOTER_NAV_LINKS } from "@/lib/site-nav";
 
 export default function Footer() {
   return (
@@ -27,9 +29,19 @@ export default function Footer() {
           </div>
 
           <p className="text-xs text-slate-600 font-mono text-center max-w-md">
-            Live on {PROJECT.network} · Uniswap v4 · {PROJECT.timeBonusName} depth ·{" "}
+            Live on {PROJECT.network} · {PROJECT.launchpad} · {PROJECT.timeBonusName} staking ·{" "}
             <span className="text-[#00ff88]">{PROJECT.network} mainnet</span>
           </p>
+
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            {FOOTER_NAV_LINKS.map((link) => (
+              <SiteNavLink
+                key={link.label}
+                link={link}
+                className="text-xs font-mono tracking-wider text-slate-500 transition-colors hover:text-[#00d4ff]"
+              />
+            ))}
+          </nav>
 
           <a
             href={PROJECT.social.xUrl}

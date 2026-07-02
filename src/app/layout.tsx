@@ -25,24 +25,24 @@ const orbitron = Orbitron({
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  title: "VENA — Stake Depth. Compound Yield.",
+  title: "VENA — Mint. Upgrade. Stake & Earn.",
   description:
-    "10,000 $VENA on Base. Buy on the live v4 pool — one token, one Silver Pickaxe. Stratum depth, forge upgrades, LP fee rewards, and mining emissions.",
+    "$VENA on Robinhood Chain via Virtuals Protocol. Mint a Silver Pickaxe, upgrade by burning lower tiers, and stake to earn from a 250M VENA mining pool.",
   icons: {
     icon: "/logo.jpg",
     apple: "/logo.jpg",
   },
   openGraph: {
-    title: "VENA — Mining Protocol on Base",
+    title: "VENA — Mining Protocol on Robinhood Chain",
     description:
-      "10,000 $VENA on Base. Live Uniswap v4 hook pool. Stratum depth, forgeable rarity, on-site swap.",
+      "$VENA agent token on Virtuals Protocol (Robinhood Chain). Mint, upgrade, and stake Pickaxes for VENA rewards.",
     images: [{ url: "/banner.jpg", width: 1500, height: 500, alt: "VENA" }],
     siteName: "VENA",
   },
   twitter: {
     card: "summary_large_image",
-    title: "VENA — Mining Protocol on Base",
-    description: "Depth creates value. Built on Base · Uniswap v4.",
+    title: "VENA — Mining Protocol on Robinhood Chain",
+    description: "Mint. Upgrade. Stake & earn. Robinhood Chain · Virtuals Protocol.",
     images: ["/banner.jpg"],
     creator: "@VenaOnBase",
   },

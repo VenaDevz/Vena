@@ -1,0 +1,17 @@
+[profile.default]
+src = "contracts/robinhood"
+script = "script/robinhood"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.24"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+
+[rpc_endpoints]
+robinhood = "${RH_MAINNET_RPC}"
+robinhood_testnet = "${RH_TESTNET_RPC}"
+
+[etherscan]
+robinhood = { key = "${BLOCKSCOUT_API_KEY}", url = "https://robinhoodchain.blockscout.com/api", chain = 4663 }
+robinhood_testnet = { key = "${BLOCKSCOUT_API_KEY}", url = "https://explorer.testnet.chain.robinhood.com/api", chain = 46630 }

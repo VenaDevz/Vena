@@ -1,39 +1,52 @@
+import { PROJECT } from "./project";
+import { robinhoodMainnet } from "./chains/robinhood";
+
 const VENA_TOKEN =
-  process.env.NEXT_PUBLIC_VENA_TOKEN ?? "0xFE96b62c837F85f453a9b42ad1304C10588181fA";
+  process.env.NEXT_PUBLIC_VENA_TOKEN ?? "";
 
-const POOL_ID =
-  process.env.NEXT_PUBLIC_VENA_POOL_ID ??
-  "0x69dcdab302d501d55863810b6039498b09308c8e81f698b58824eb08b5ac13b4";
+/** Virtuals agent page for $VENA (trade happens here). */
+const VIRTUALS_AGENT_URL = process.env.NEXT_PUBLIC_VIRTUALS_AGENT_URL ?? "";
 
-/** When "1", Buy CTAs open Uniswap instead of on-site #swap (use after LP is live on Uniswap). */
-export function preferUniswapForBuy(): boolean {
-  return process.env.NEXT_PUBLIC_BUY_VIA_UNISWAP === "1";
+/** Fallback Virtuals base — link to the token by address if no agent URL is set. */
+function virtualsFallbackUrl(): string {
+  if (VENA_TOKEN) {
+    return `https://app.virtuals.io/geneses/${VENA_TOKEN}`;
+  }
+  return "https://app.virtuals.io";
 }
 
-/** Hero / header Buy link: site swap first, Uniswap when env flag is set. */
+/** Where the "Buy / Trade VENA" CTA points — always Virtuals now. */
 export function getBuyVenaHref(): string {
-  if (preferUniswapForBuy()) return getUniswapBuyVenaUrl();
-  return "#swap";
+  return VIRTUALS_AGENT_URL || virtualsFallbackUrl();
 }
 
+/** Buy CTAs always open Virtuals (external). */
 export function isBuyVenaExternal(): boolean {
-  return preferUniswapForBuy();
+  return true;
 }
 
-/** ETH → VENA on Uniswap (Base). Works once routing allowlist is approved. */
-export function getUniswapBuyVenaUrl(): string {
-  const override = process.env.NEXT_PUBLIC_UNISWAP_BUY_URL;
-  if (override) return override;
-
-  const params = new URLSearchParams({
-    chain: "base",
-    inputCurrency: "NATIVE",
-    outputCurrency: VENA_TOKEN,
-  });
-  return `https://app.uniswap.org/swap?${params.toString()}`;
+/** Trade $VENA on Virtuals Protocol. */
+export function getVirtualsTradeUrl(): string {
+  return VIRTUALS_AGENT_URL || virtualsFallbackUrl();
 }
 
-/** Direct link to the ETH/VENA v4 pool page. */
-export function getUniswapPoolUrl(): string {
-  return `https://app.uniswap.org/explore/pools/base/${POOL_ID}`;
+/** Block explorer token page for $VENA. */
+export function getVenaTokenExplorerUrl(): string {
+  if (!VENA_TOKEN) {
+    return PROJECT.chainId === robinhoodMainnet.id ||
+      PROJECT.chainId === 46630
+      ? "https://robinhoodchain.blockscout.com"
+      : "https://basescan.org";
+  }
+  if (
+    PROJECT.chainId === robinhoodMainnet.id ||
+    PROJECT.chainId === 46630
+  ) {
+    const base =
+      PROJECT.chainId === 46630
+        ? "https://explorer.testnet.chain.robinhood.com"
+        : "https://robinhoodchain.blockscout.com";
+    return `${base}/token/${VENA_TOKEN}`;
+  }
+  return `https://basescan.org/token/${VENA_TOKEN}`;
 }

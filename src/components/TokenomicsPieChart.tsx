@@ -20,7 +20,7 @@ export default function TokenomicsPieChart() {
           boxShadow: "0 0 40px rgba(0,212,255,0.12)",
         }}
         role="img"
-        aria-label="VENA supply: 50% liquidity, 40% mining, 10% treasury"
+        aria-label="VENA supply: 50% liquidity, 25% automated capital formation, 25% team-treasury"
       >
         <div
           className="absolute inset-[18%] rounded-full flex flex-col items-center justify-center text-center"
@@ -29,14 +29,14 @@ export default function TokenomicsPieChart() {
             border: "1px solid rgba(0,212,255,0.15)",
           }}
         >
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">
+            Total
+          </span>
           <span
-            className="text-2xl sm:text-3xl font-black text-white"
+            className="text-lg sm:text-xl font-black text-white"
             style={{ fontFamily: "var(--font-orbitron)" }}
           >
-            10K
-          </span>
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mt-1">
-            Total supply
+            1,000,000,000
           </span>
         </div>
       </div>

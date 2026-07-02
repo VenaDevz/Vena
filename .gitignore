@@ -41,9 +41,18 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# foundry
+/lib/
+/cache/
+/broadcast/
+/out/
+/contracts/robinhood/out/
+
+# miner asset generation debug output (large, local only)
+/public/miner/debug/
+
 # hardhat / verify artifacts
 /artifacts/
-/cache/
 /verify-build/
 hardhat.verify.config.js
 hardhat.flatten.config.js
@@ -62,7 +71,10 @@ contracts/LAUNCH_CHECKLIST.md
 contracts/v3-hook-deploy.env
 contracts/v4-hook-deploy.env
 contracts/v3-hook-initcode.txt
-contracts/v4-hook-initcode.txt
+contracts/prism-hook-initcode.txt
 contracts/v3-hook-calldata.txt
 contracts/v3-hook-abi-calldata.txt
 contracts/metadata/
+contracts/V4_LIVE_SNAPSHOT.md
+contracts/PRISM_MIGRATION_PLAN.md
+contracts/PRISM_DEPLOY.md

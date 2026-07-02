@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, ExternalLink, Layers } from "lucide-react";
+import { ExternalLink, Layers, Pickaxe } from "lucide-react";
 import { PROJECT } from "@/lib/project";
-import { getBuyVenaHref, getUniswapBuyVenaUrl, isBuyVenaExternal } from "@/lib/links";
-import { handleSectionLink } from "@/lib/scroll";
-import { SUPPLY_BREAKDOWN } from "@/lib/tokenomics";
+import { getBuyVenaHref } from "@/lib/links";
+import { SILVER_MINT_ETH } from "@/lib/tokenomics";
 import HeroParticles from "./HeroParticles";
 import XIcon from "./XIcon";
 import ProtocolMetrics from "./ProtocolMetrics";
@@ -83,9 +83,10 @@ export default function HeroSection() {
           transition={{ delay: 0.25, duration: 0.6 }}
           className="max-w-xl mx-auto text-center text-slate-400 text-base sm:text-lg mt-6 mb-10 leading-relaxed"
         >
-          One whole {PROJECT.tokenDisplay} mints one Pickaxe.{" "}
-          <span className="text-[#00d4ff]">Stratum</span> depth weights LP fees — mining runs on a
-          fixed {SUPPLY_BREAKDOWN.mining.toLocaleString("en-US")} token emission schedule.
+          Mint a Silver Pickaxe for {SILVER_MINT_ETH} ETH on {PROJECT.network}. Every
+          mint buys {PROJECT.tokenDisplay} into the staking pool — then{" "}
+          <span className="text-[#00d4ff]">stake</span> to earn from a pool that
+          grows with real mint &amp; upgrade volume.
         </motion.p>
 
         <motion.div
@@ -95,15 +96,7 @@ export default function HeroSection() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14"
         >
           <motion.a
-            href={isBuyVenaExternal() ? getBuyVenaHref() : "#swap"}
-            onClick={
-              isBuyVenaExternal()
-                ? undefined
-                : (e) => handleSectionLink(e, "swap")
-            }
-            {...(isBuyVenaExternal()
-              ? { target: "_blank", rel: "noopener noreferrer" }
-              : {})}
+            href={PROJECT.routes.mint}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
             className="flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm tracking-wider text-[#030609]"
@@ -113,12 +106,11 @@ export default function HeroSection() {
               boxShadow: "0 0 28px rgba(0,255,136,0.3)",
             }}
           >
-            Buy {PROJECT.tokenDisplay}
-            {isBuyVenaExternal() ? <ExternalLink size={15} /> : <ArrowRight size={15} />}
+            <Pickaxe size={16} />
+            Mint Pickaxe
           </motion.a>
-          {!isBuyVenaExternal() && (
           <motion.a
-            href={getUniswapBuyVenaUrl()}
+            href={getBuyVenaHref()}
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.03 }}
@@ -126,10 +118,9 @@ export default function HeroSection() {
             className="flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm tracking-wider border border-[rgba(0,212,255,0.35)] text-[#00d4ff] hover:bg-[rgba(0,212,255,0.08)] transition-colors"
             style={{ fontFamily: "var(--font-orbitron)" }}
           >
-            Uniswap
+            Trade {PROJECT.tokenDisplay}
             <ExternalLink size={15} />
           </motion.a>
-          )}
           <motion.a
             href="#stratum"
             whileHover={{ scale: 1.03 }}
@@ -140,6 +131,16 @@ export default function HeroSection() {
             <Layers size={16} />
             View Stratum
           </motion.a>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+            <Link
+              href={PROJECT.routes.miner}
+              className="flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm tracking-wider border border-[rgba(167,139,250,0.35)] text-[#a78bfa] hover:bg-[rgba(167,139,250,0.08)] transition-colors"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
+              <Pickaxe size={16} />
+              Miner Command
+            </Link>
+          </motion.div>
           <motion.a
             href={PROJECT.social.xUrl}
             target="_blank"

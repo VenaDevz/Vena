@@ -1,15 +1,16 @@
 "use client";
 
-import { TOKENOMICS } from "@/lib/tokenomics";
+import { PROJECT } from "@/lib/project";
+import { BUYBACK_POLICY, MINT_REVENUE_POLICY } from "@/lib/tokenomics";
 import SectionShell from "./SectionShell";
 
 export default function FeeDistribution() {
   return (
     <SectionShell
       id="fees"
-      eyebrow="Fee Distribution"
-      title="Weighted by depth & rarity."
-      subtitle="Every swap pays 1% pool fee. Holders receive 80% by total weight — rarity multiplier × Stratum multiplier. Treasury keeps 20%."
+      eyebrow="Revenue"
+      title="Two flywheels."
+      subtitle="Every Pickaxe mint and upgrade buys $VENA into the staking pool. Trade fees trigger random-timed buybacks that are burned. One grows rewards, the other tightens supply."
     >
       <div className="grid lg:grid-cols-2 gap-8 items-start">
         <div
@@ -19,34 +20,49 @@ export default function FeeDistribution() {
             border: "1px solid rgba(0,255,136,0.12)",
           }}
         >
-          <div className="font-mono text-sm text-slate-500 mb-6">Per swap</div>
+          <div className="font-mono text-sm text-slate-500 mb-6">
+            Where revenue goes
+          </div>
           <div className="space-y-4">
-            <FeeBar label="NFT Holders" pct={TOKENOMICS.lpFeeToHoldersPct} color="#00ff88" />
-            <FeeBar label="Treasury" pct={TOKENOMICS.lpFeeToTreasuryPct} color="#00d4ff" />
+            <FeeBar
+              label="NFT mint & upgrades"
+              action="Staking pool"
+              pct={MINT_REVENUE_POLICY.toPoolPct}
+              detail="ETH mint + $VENA upgrades → buy $VENA → staking pool"
+              color="#00ff88"
+            />
+            <FeeBar
+              label="Virtuals trade fees"
+              action="Buyback & burn"
+              pct={BUYBACK_POLICY.tradeFeeTakePct}
+              detail="Random-timed buybacks → permanently burned"
+              color="#00d4ff"
+            />
           </div>
           <p className="mt-8 text-xs text-slate-500 font-mono leading-relaxed">
-            Weight = rarity power × Stratum level. Level upgrades sync on-chain before
-            retroactive fee amplification — same lazy-sync safety as proven v4 hooks.
+            No dedicated staking allocation is pre-minted. The reward pool is
+            fed entirely by real product volume — the more Pickaxes minted and
+            upgraded, the bigger the pool.
           </p>
         </div>
 
         <div className="space-y-4">
           {[
             {
-              title: "Whole token mint",
-              body: "Each integer $VENA creates one Silver Pickaxe with Stratum Level 1.",
+              title: "Mint → pool",
+              body: "ETH from every Silver mint is swapped into $VENA and added to the staking pool. Upgrades pay $VENA that flows to the same pool.",
             },
             {
-              title: "Lazy sync",
-              body: "Anyone can sync eligible Stratum levels. Unclaimed fees lock at the prior weight.",
+              title: "Trade → burn",
+              body: "Virtuals trade fees come back to the project as $VIRTUAL, are swapped into $VENA at random intervals, and burned — reducing supply over time.",
             },
             {
-              title: "Weighted claims",
-              body: "Claim on-site anytime, or auto-claim when you sell VENA. You only receive your own NFT share — never others' fees.",
+              title: "Staking rewards",
+              body: `Stake Pickaxes to earn from the buyback-fed pool. Rewards scale with real ${PROJECT.tokenSymbol} demand, not an emission schedule.`,
             },
             {
-              title: "Transfer reset",
-              body: "Received Pickaxes restart Stratum at Level 1. Soulbound transfer lock available via owner config.",
+              title: "Weighted emissions",
+              body: "Your share = rarity weight × Stratum (stake duration). Higher tiers and longer stakes earn a larger slice of the pool.",
             },
           ].map((item) => (
             <div
@@ -67,19 +83,26 @@ export default function FeeDistribution() {
 
 function FeeBar({
   label,
+  action,
   pct,
+  detail,
   color,
 }: {
   label: string;
+  action: string;
   pct: number;
+  detail: string;
   color: string;
 }) {
   return (
     <div>
-      <div className="flex justify-between text-sm mb-2">
+      <div className="flex justify-between text-sm mb-1">
         <span className="text-slate-300 font-medium">{label}</span>
-        <span className="font-mono text-white">{pct}%</span>
+        <span className="font-mono text-white">
+          {pct}% → {action}
+        </span>
       </div>
+      <p className="text-[10px] text-slate-600 font-mono mb-2">{detail}</p>
       <div className="h-2 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-700"

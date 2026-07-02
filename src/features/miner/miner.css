@@ -1,0 +1,91 @@
+/* Vena Protocol — Miner Command UI */
+
+.miner-root {
+  --miner-bg: #0a0a0f;
+  --miner-cyan: #00f0ff;
+  --miner-purple: #7000ff;
+  background-color: var(--miner-bg);
+  color: #e2e8f0;
+}
+
+.miner-header {
+  background: rgba(10, 10, 15, 0.85);
+}
+
+.miner-glass {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(112, 0, 255, 0.04) 100%
+  );
+  border: 1px solid rgba(0, 240, 255, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4) inset,
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 0 60px rgba(0, 240, 255, 0.03);
+  backdrop-filter: blur(16px);
+}
+
+.miner-grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 75%);
+}
+
+.miner-vignette {
+  background: radial-gradient(
+    ellipse 100% 100% at 50% 50%,
+    transparent 40%,
+    rgba(10, 10, 15, 0.85) 100%
+  );
+}
+
+.miner-panel-title {
+  font-family: var(--font-orbitron);
+}
+
+/* Miner unit — robot-first layout */
+.miner-unit-panel {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5) inset,
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 80px rgba(0, 240, 255, 0.04);
+}
+
+.miner-arena {
+  isolation: isolate;
+}
+
+.miner-robot-stage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.miner-robot-img {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 8px 32px rgba(0, 240, 255, 0.25));
+}
+
+.miner-robot-platform {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 240, 255, 0.18) 0%,
+    rgba(0, 240, 255, 0.04) 55%,
+    transparent 75%
+  );
+  box-shadow:
+    0 0 40px rgba(0, 240, 255, 0.1),
+    inset 0 1px 0 rgba(0, 240, 255, 0.2);
+}

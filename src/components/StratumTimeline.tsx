@@ -10,7 +10,7 @@ export default function StratumTimeline() {
       id="stratum"
       eyebrow={`${PROJECT.timeBonusName} / Time`}
       title="Eight levels of depth."
-      subtitle={`New Pickaxes begin at Stratum 1. Holding duration raises fee weight up to ${TOKENOMICS.stratumMaxMultiplier}x after 30 days — per NFT, not per wallet.`}
+      subtitle={`Staked Pickaxes begin at Stratum 1. Stake duration raises your reward multiplier up to ${TOKENOMICS.stratumMaxMultiplier}x after 30 days — per NFT, not per wallet.`}
     >
       <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         <table className="w-full min-w-[640px] text-left border-collapse">
@@ -23,7 +23,7 @@ export default function StratumTimeline() {
                 Duration
               </th>
               <th className="py-3 text-[10px] font-mono tracking-widest text-slate-500 uppercase">
-                Fee Multiplier
+                Reward Multiplier
               </th>
             </tr>
           </thead>
@@ -57,8 +57,8 @@ export default function StratumTimeline() {
         {[
           { label: "Max Pickaxes", value: "10,000" },
           { label: "Max Stratum", value: `${TOKENOMICS.stratumMaxMultiplier}x` },
-          { label: "Transfer rule", value: "Reset Lv.1" },
-          { label: "Forge", value: "Optional" },
+          { label: "Unstake", value: "Reset Lv.1" },
+          { label: "Upgrade", value: "Burn + Pay" },
         ].map((stat) => (
           <div
             key={stat.label}

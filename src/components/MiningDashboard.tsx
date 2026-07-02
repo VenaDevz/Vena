@@ -328,6 +328,7 @@ export default function MiningDashboard() {
 
             {isConnected && (
               <ForgeUpgradePanel
+                compact
                 nfts={nfts}
                 onForged={() => {
                   void Promise.all([refetchOwners(), refetchUserInfo()]);
@@ -391,7 +392,7 @@ export default function MiningDashboard() {
                     No Pickaxes found
                   </h3>
                   <p className="text-sm text-slate-500 max-w-sm">
-                    You don&apos;t own any Pickaxe NFTs yet. Buy whole $VENA in the swap panel to mint Silver pickaxes.
+                    You don&apos;t own any Pickaxe NFTs yet. Mint a Silver Pickaxe for 0.01 ETH on /mint.
                   </p>
                   <a
                     href="#swap"

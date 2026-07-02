@@ -1,29 +1,36 @@
 "use client";
 
 import Image from "next/image";
-import { FORGE_PATHS } from "@/lib/forge";
-import { RARITY_TIERS, TIER_MAX_SUPPLY } from "@/lib/tokenomics";
+import { RARITY_TIERS, TIER_MAX_SUPPLY, tierUpgradeVena, SILVER_MINT_ETH } from "@/lib/tokenomics";
+import { formatVena } from "@/lib/mint-pricing";
+import { getPickaxeImage, type Rarity } from "@/lib/types";
 import SectionShell from "./SectionShell";
 import ForgeUpgradeBlock from "./ForgeUpgradeBlock";
+
+/** Label of the tier directly below the given one (upgrade source). */
+function prevTierLabel(id: Rarity): string {
+  const idx = RARITY_TIERS.findIndex((t) => t.id === id);
+  return RARITY_TIERS[idx - 1]?.label ?? "Silver";
+}
 
 export default function ForgeSection() {
   return (
     <SectionShell
       id="forge"
       eyebrow="Rarity"
-      title="Forge higher tiers."
-      subtitle="Mint is always Silver. Upgrade with Silver or burn lower tiers — 2× Gold → Platinum, 2× Platinum → Diamond, and so on. Silver dries up? The market still climbs."
+      title="Upgrade your Pickaxe."
+      subtitle="Everyone mints Silver with 0.01 ETH. To climb a tier, pay $VENA and burn your current Pickaxe — that $VENA feeds the staking pool."
     >
       <div className="mb-10 p-5 sm:p-6 rounded-2xl border border-[rgba(0,212,255,0.12)] bg-[rgba(10,15,22,0.7)]">
         <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">
-          Silver-equivalent ladder
+          Upgrade ladder — burn + pay to climb
         </p>
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm font-mono">
           {RARITY_TIERS.map((tier, i) => (
             <span key={tier.id} className="flex items-center gap-2 sm:gap-3">
               <span style={{ color: tier.color }} className="font-semibold">
                 {tier.label}
-                <span className="text-slate-500 font-normal ml-1">({tier.silverEquivalent})</span>
+                <span className="text-slate-500 font-normal ml-1">×{tier.powerMultiplier}</span>
               </span>
               {i < RARITY_TIERS.length - 1 && (
                 <span className="text-slate-600">→</span>
@@ -35,11 +42,6 @@ export default function ForgeSection() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {RARITY_TIERS.map((tier) => {
-          const paths =
-            tier.id === "Silver"
-              ? null
-              : FORGE_PATHS[tier.id as keyof typeof FORGE_PATHS];
-
           return (
             <div
               key={tier.id}
@@ -51,7 +53,7 @@ export default function ForgeSection() {
             >
               <div className="aspect-square relative overflow-hidden">
                 <Image
-                  src={`/${tier.id.toLowerCase()}.jpeg`}
+                  src={getPickaxeImage(tier.id as Rarity)}
                   alt={`${tier.label} Pickaxe`}
                   fill
                   className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
@@ -77,11 +79,11 @@ export default function ForgeSection() {
                     <dd className="text-white">{tier.powerMultiplier}x</dd>
                   </div>
                   <div className="flex justify-between text-slate-500">
-                    <dt>Mining pyramid</dt>
-                    <dd className="text-[#a78bfa]">{tier.miningPyramidMultiplier}x</dd>
+                    <dt>Stake weight</dt>
+                    <dd className="text-[#a78bfa]">{tier.powerMultiplier}x</dd>
                   </div>
                   <div className="flex justify-between text-slate-500">
-                    <dt>Hashrate</dt>
+                    <dt>Base hashrate</dt>
                     <dd className="text-[#00ff88]">{tier.hashrate} H/s</dd>
                   </div>
                   <div className="flex justify-between text-slate-500">
@@ -93,23 +95,17 @@ export default function ForgeSection() {
                 </dl>
                 {tier.id === "Silver" ? (
                   <p className="mt-3 text-[10px] text-slate-500 font-mono">
-                    1 whole $VENA = 1 mint
+                    Mint · {SILVER_MINT_ETH} ETH
                   </p>
                 ) : (
                   <div className="mt-3 pt-3 border-t border-[rgba(255,255,255,0.06)]">
                     <p className="text-[10px] text-slate-600 uppercase tracking-wider mb-2">
-                      Forge paths
+                      Upgrade from
                     </p>
-                    <ul className="space-y-1">
-                      {paths?.map((path) => (
-                        <li
-                          key={path.label}
-                          className="text-[10px] font-mono text-[#00d4ff]/90"
-                        >
-                          {path.label}
-                        </li>
-                      ))}
-                    </ul>
+                    <p className="text-[10px] font-mono text-[#00d4ff]/90">
+                      Burn {prevTierLabel(tier.id)} +{" "}
+                      {formatVena(tierUpgradeVena(tier.id))} $VENA
+                    </p>
                   </div>
                 )}
               </div>
@@ -118,8 +114,8 @@ export default function ForgeSection() {
         })}
       </div>
       <p className="mt-8 text-center text-sm text-slate-500 font-mono max-w-3xl mx-auto leading-relaxed">
-        Example: 32 tokens → 32 Silver, or 8 Gold, or 4 Platinum, or 2 Diamond, or 1 Emerald.
-        Same token lock — your route depends on what the market still holds.
+        Every upgrade burns your lower-tier Pickaxe. Mint ETH and upgrade $VENA
+        both feed the staking pool — holders earn more as the flywheel spins.
       </p>
 
       <ForgeUpgradeBlock />

@@ -2,15 +2,15 @@
 
 import {
   DAILY_GLOBAL_CAP,
-  FORGE_MINING_CHECKS,
   MINING_POOL_SCHEDULE,
   RARITY_MINING_YIELDS,
-  RARITY_MINING_YIELDS_FULL,
   MINING_EMISSION,
   MINING_SCENARIOS,
 } from "@/lib/mining";
+import { UPGRADE_MINING_ADVANTAGE } from "@/lib/economy";
 import { PROJECT } from "@/lib/project";
-import { SUPPLY_ALLOCATIONS, SUPPLY_BREAKDOWN } from "@/lib/tokenomics";
+import { SUPPLY_ALLOCATIONS, SILVER_MINT_ETH } from "@/lib/tokenomics";
+import { formatVena } from "@/lib/mint-pricing";
 import SectionShell from "./SectionShell";
 import TokenomicsPieChart from "./TokenomicsPieChart";
 
@@ -19,8 +19,8 @@ export default function TokenomicsSection() {
     <SectionShell
       id="tokenomics"
       eyebrow="Tokenomics"
-      title="10,000 $VENA. 10,000 Pickaxes."
-      subtitle={`One whole token always equals one NFT. ${SUPPLY_BREAKDOWN.mining.toLocaleString("en-US")} VENA funds mining — separate from LP fees.`}
+      title="1B $VENA. 10,000 Pickaxes."
+      subtitle="No staking allocation is pre-minted. The reward pool is fed by buybacks: mint & upgrade revenue buys $VENA into the pool, trade fees buy back and burn."
     >
       <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-10 lg:gap-14 items-start">
         <TokenomicsPieChart />
@@ -57,22 +57,23 @@ export default function TokenomicsSection() {
             className="text-lg font-bold text-white"
             style={{ fontFamily: "var(--font-orbitron)" }}
           >
-            Mining vs LP fees
+            Buyback flywheels
           </h3>
           <div className="space-y-4 text-sm text-slate-400">
             <p>
-              <span className="text-[#00d4ff] font-semibold">LP fees (1%)</span> — Real ETH from
-              swaps. 80% to Pickaxe holders by weight. Claim anytime.
+              <span className="text-[#00ff88] font-semibold">Mint → pool</span> —
+              0.01 ETH per Silver mint buys $VENA on the market and adds it to the
+              staking pool. Upgrades pay $VENA into the same pool.
             </p>
             <p>
-              <span className="text-[#00ff88] font-semibold">
-                Mining ({SUPPLY_BREAKDOWN.mining.toLocaleString("en-US")} VENA /{" "}
-                {MINING_EMISSION.emissionDays}d)
-              </span>{" "}
-              — Fixed schedule: ~{DAILY_GLOBAL_CAP.toFixed(2)} {PROJECT.tokenSymbol}/day for exactly{" "}
-              {MINING_EMISSION.emissionDays} days. Pool always depletes on day{" "}
-              {MINING_EMISSION.emissionDays}, regardless of stake count. Payback speed depends on
-              network dilution — early stakers earn more per token.
+              <span className="text-[#00d4ff] font-semibold">Trade → burn</span> —
+              Virtuals trade fees trigger random-timed $VENA buybacks that are
+              permanently burned, tightening supply.
+            </p>
+            <p>
+              <span className="text-[#a78bfa] font-semibold">Staking</span> — Stake
+              Pickaxes to earn from the buyback-fed pool. Payout scales with rarity
+              weight, Stratum (stake duration), and total staked power.
             </p>
           </div>
           <div className="pt-4 border-t border-[rgba(255,255,255,0.06)] grid grid-cols-3 gap-4 text-center">
@@ -81,10 +82,10 @@ export default function TokenomicsSection() {
                 className="text-2xl font-black text-white"
                 style={{ fontFamily: "var(--font-orbitron)" }}
               >
-                {MINING_POOL_SCHEDULE.days}d
+                0.01Ξ
               </div>
               <div className="text-[10px] font-mono text-slate-500 uppercase mt-1">
-                Mining program
+                Silver mint
               </div>
             </div>
             <div>
@@ -92,10 +93,10 @@ export default function TokenomicsSection() {
                 className="text-2xl font-black text-[#00ff88]"
                 style={{ fontFamily: "var(--font-orbitron)" }}
               >
-                {MINING_POOL_SCHEDULE.dailyCap.toFixed(1)}
+                100%
               </div>
               <div className="text-[10px] font-mono text-slate-500 uppercase mt-1">
-                VENA / day cap
+                Mint → pool
               </div>
             </div>
             <div>
@@ -103,10 +104,10 @@ export default function TokenomicsSection() {
                 className="text-2xl font-black text-[#00d4ff]"
                 style={{ fontFamily: "var(--font-orbitron)" }}
               >
-                4K
+                Burn
               </div>
               <div className="text-[10px] font-mono text-slate-500 uppercase mt-1">
-                Total emission
+                Trade fees
               </div>
             </div>
           </div>
@@ -115,26 +116,22 @@ export default function TokenomicsSection() {
 
       <div className="mt-12 overflow-x-auto">
         <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-2">
-          Pyramid mining — {MINING_SCENARIOS.early.label} (
-          {MINING_EMISSION.launchReferencePower.toLocaleString("en-US")} other miners ·{" "}
+          Estimated staking yield — {MINING_SCENARIOS.early.label} (
+          {MINING_EMISSION.launchReferencePower.toLocaleString("en-US")} network power ·{" "}
           {DAILY_GLOBAL_CAP.toFixed(2)} {PROJECT.tokenSymbol}/day cap)
         </p>
         <p className="text-xs text-slate-500 mb-4 max-w-3xl">
-          Higher tiers amortize faster — Emerald ~7 days at launch, Silver ~16 days. One
-          forged tier always out-earns the same number of Silvers (e.g. 3 Silver &lt; 1 Gold).
-          If all 10,000 Pickaxes stake day one, Silver payback
-          stretches to ~{RARITY_MINING_YIELDS_FULL[0]?.paybackDays ?? "600"}d, but the pool still
-          runs {MINING_EMISSION.emissionDays} days total.
+          Illustrative daily {PROJECT.tokenSymbol} at the reference network size. Actual yield
+          changes with dilution, Stratum depth, and accessory bonuses.
         </p>
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead>
             <tr className="border-b border-[rgba(0,212,255,0.12)] text-[10px] font-mono text-slate-500 uppercase">
               <th className="py-2 pr-3">Tier</th>
-              <th className="py-2 pr-3">Cost</th>
-              <th className="py-2 pr-3">Pyramid</th>
-              <th className="py-2 pr-3">Daily</th>
-              <th className="py-2 pr-3">Monthly</th>
-              <th className="py-2">Payback</th>
+              <th className="py-2 pr-3">Mint / upgrade</th>
+              <th className="py-2 pr-3">Power</th>
+              <th className="py-2 pr-3">Est. daily</th>
+              <th className="py-2">Est. monthly</th>
             </tr>
           </thead>
           <tbody>
@@ -144,49 +141,47 @@ export default function TokenomicsSection() {
                 className="border-b border-[rgba(255,255,255,0.04)] text-slate-400"
               >
                 <td className="py-3 pr-3 font-semibold text-white">{row.tier}</td>
-                <td className="py-3 pr-3 font-mono">{row.tokenCost} {PROJECT.tokenSymbol}</td>
-                <td className="py-3 pr-3 font-mono text-[#a78bfa]">{row.pyramidMult}x</td>
-                <td className="py-3 pr-3 font-mono text-[#00ff88]">
-                  {row.daily.toFixed(3)} {PROJECT.tokenSymbol}
+                <td className="py-3 pr-3 font-mono">
+                  {row.tier === "Silver"
+                    ? `${SILVER_MINT_ETH} ETH`
+                    : `${formatVena(row.tokenCost)} ${PROJECT.tokenSymbol}`}
                 </td>
-                <td className="py-3 pr-3 font-mono">{row.monthly.toFixed(2)} {PROJECT.tokenSymbol}</td>
-                <td className="py-3 font-mono text-[#00d4ff]">~{row.paybackDays}d</td>
+                <td className="py-3 pr-3 font-mono text-[#a78bfa]">
+                  {row.miningPower.toFixed(0)}
+                </td>
+                <td className="py-3 pr-3 font-mono text-[#00ff88]">
+                  ~{row.daily.toFixed(3)} {PROJECT.tokenSymbol}
+                </td>
+                <td className="py-3 font-mono">~{row.monthly.toFixed(1)} {PROJECT.tokenSymbol}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
         <div className="mt-8 grid sm:grid-cols-2 gap-3">
-          {FORGE_MINING_CHECKS.map((row) => (
+          {UPGRADE_MINING_ADVANTAGE.map((row) => (
             <div
               key={row.tier}
               className="p-4 rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(10,15,22,0.6)]"
             >
               <p className="text-[10px] font-mono text-slate-500 uppercase mb-2">
-                → {row.tier} ({row.silverEquivalent} token lock)
+                Upgrade → {row.tier} ({row.upgradeCostVena.toLocaleString("en-US")} {PROJECT.tokenSymbol})
               </p>
               <p className="text-xs text-slate-400">
-                {row.silverEquivalent}× Silver stack:{" "}
+                Same-cost Silver stack:{" "}
                 <span className="text-slate-300 font-mono">
-                  {row.silverStackDaily.toFixed(3)}
+                  ~{row.silverStackDaily.toFixed(3)}
                 </span>
                 /day
               </p>
               <p className="text-xs text-slate-400 mt-1">
                 1× {row.tier}:{" "}
                 <span className="text-[#00ff88] font-mono">
-                  {row.forgedDaily.toFixed(3)}
+                  ~{row.upgradedDaily.toFixed(3)}
                 </span>
                 /day{" "}
-                <span className="text-[#00d4ff]">(+{row.dailyAdvantagePct}%)</span>
+                <span className="text-[#00d4ff]">(+{row.miningAdvantagePct}% mining power)</span>
               </p>
-              <ul className="mt-3 space-y-1 border-t border-[rgba(255,255,255,0.04)] pt-2">
-                {row.pathChecks.map((pc) => (
-                  <li key={pc.label} className="text-[10px] font-mono text-slate-600">
-                    {pc.label}: {pc.stackDaily.toFixed(3)}/day → forge wins
-                  </li>
-                ))}
-              </ul>
             </div>
           ))}
         </div>

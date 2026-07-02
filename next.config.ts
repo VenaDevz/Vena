@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
   images: {
     qualities: [75, 95],
   },
+  async redirects() {
+    return [
+      { source: "/robot-os", destination: "/miner", permanent: true },
+      { source: "/robot-os/:path*", destination: "/miner", permanent: true },
+    ];
+  },
   turbopack: {
     resolveAlias: {
       accounts: emptyModule,

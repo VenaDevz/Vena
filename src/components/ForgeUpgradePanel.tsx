@@ -177,8 +177,7 @@ export default function ForgeUpgradePanel({ nfts, onForged, compact }: Props) {
 
   return (
     <div
-      id="forge-upgrade"
-      className={`${compact ? "" : "mb-6 "}scroll-mt-24 p-4 sm:p-5 rounded-2xl border border-[rgba(167,139,250,0.2)]`}
+      className={`${compact ? "" : "mb-6 "}p-4 sm:p-5 rounded-2xl border border-[rgba(167,139,250,0.2)]`}
       style={{ background: "rgba(13,21,32,0.85)" }}
     >
       <div className="flex items-center gap-2 mb-3">

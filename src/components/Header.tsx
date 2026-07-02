@@ -6,8 +6,9 @@ import { Menu, X as CloseIcon } from "lucide-react";
 import ConnectWalletButton from "@/components/ConnectWalletButton";
 import BrandLogo from "@/components/BrandLogo";
 import XIcon from "@/components/XIcon";
+import SiteNavLink from "@/components/SiteNavLink";
 import { PROJECT } from "@/lib/project";
-import { handleSectionLink } from "@/lib/scroll";
+import { MAIN_NAV_LINKS } from "@/lib/site-nav";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -19,14 +20,7 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { label: "Protocol", href: "#protocol" },
-    { label: "Swap", href: "#swap" },
-    { label: "Stratum", href: "#stratum" },
-    { label: "Forge", href: "#forge-upgrade" },
-    { label: "Fees", href: "#claim-fees" },
-    { label: "Mining", href: "#mining" },
-  ];
+  const navLinks = MAIN_NAV_LINKS;
 
   return (
     <motion.header
@@ -51,16 +45,11 @@ export default function Header() {
 
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <SiteNavLink
                 key={link.label}
-                href={link.href}
-                onClick={(e) => handleSectionLink(e, link.href.slice(1))}
+                link={link}
                 className="relative text-sm font-medium tracking-wider text-slate-400 hover:text-[#00d4ff] transition-colors duration-200 group"
-                style={{ fontFamily: "var(--font-orbitron)" }}
-              >
-                {link.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#00d4ff] group-hover:w-full transition-all duration-300" />
-              </a>
+              />
             ))}
             <a
               href={PROJECT.social.xUrl}
@@ -107,18 +96,12 @@ export default function Header() {
           >
             <div className="px-4 py-6 space-y-4">
               {navLinks.map((link) => (
-                <a
+                <SiteNavLink
                   key={link.label}
-                  href={link.href}
-                  onClick={(e) => {
-                    handleSectionLink(e, link.href.slice(1));
-                    setMenuOpen(false);
-                  }}
-                  className="block text-sm font-medium tracking-wider text-slate-400 hover:text-[#00d4ff] transition-colors py-2"
-                  style={{ fontFamily: "var(--font-orbitron)" }}
-                >
-                  {link.label}
-                </a>
+                  link={link}
+                  className="block py-2 text-sm font-medium tracking-wider text-slate-400 transition-colors hover:text-[#00d4ff]"
+                  onNavigate={() => setMenuOpen(false)}
+                />
               ))}
               <a
                 href={PROJECT.social.xUrl}

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "forge:build": "forge build",
+    "forge:deploy:nft": "forge script script/robinhood/DeployNFT.s.sol --rpc-url robinhood --broadcast",
+    "forge:deploy:forge": "forge script script/robinhood/DeployForge.s.sol --rpc-url robinhood --broadcast"
   },
   "dependencies": {
     "@reown/appkit": "^1.8.20",
@@ -19,7 +22,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "viem": "^2.52.2",
-    "wagmi": "^3.6.16"
+    "wagmi": "^3.6.16",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -3,13 +3,14 @@
 import { type ReactNode, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppKitProvider } from "@reown/appkit/react";
-import { base, type AppKitNetwork } from "@reown/appkit/networks";
+import { type AppKitNetwork } from "@reown/appkit/networks";
 import {
   cookieToInitialState,
   WagmiProvider,
   type Config,
 } from "wagmi";
 import {
+  activeChain,
   isWalletConfigured,
   reownProjectId,
   wagmiAdapter,
@@ -22,8 +23,8 @@ const queryClient = new QueryClient();
 const appKitOptions = {
   adapters: [wagmiAdapter],
   projectId: reownProjectId || "00000000000000000000000000000000",
-  networks: [base] as [AppKitNetwork, ...AppKitNetwork[]],
-  defaultNetwork: base,
+  networks: [activeChain] as [AppKitNetwork, ...AppKitNetwork[]],
+  defaultNetwork: activeChain,
   metadata: walletMetadata,
   themeMode: "dark" as const,
   themeVariables: {

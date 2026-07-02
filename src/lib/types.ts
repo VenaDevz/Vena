@@ -61,7 +61,7 @@ export const RARITY_CONFIG: Record<
     glowClass: "rarity-emerald",
     hashrate: 320,
     bgGradient: "linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(10,15,22,0.9) 100%)",
-    image: "/emerald.jpeg",
+    image: "/emerald.png",
   },
 };
 
@@ -71,7 +71,7 @@ export function getPickaxeImage(rarity: Rarity): string {
 
 /** Preview data — shown when wallet is connected */
 export const MOCK_NFTS: PickaxeNFT[] = [
-  { id: 1, tokenId: "#0042", name: "Emerald Drill", rarity: "Emerald", hashrate: 320, staked: false, image: "/emerald.jpeg" },
+  { id: 1, tokenId: "#0042", name: "Emerald Drill", rarity: "Emerald", hashrate: 320, staked: false, image: "/emerald.png" },
   { id: 2, tokenId: "#0117", name: "Diamond Cutter", rarity: "Diamond", hashrate: 160, staked: false, image: "/diamond.jpeg" },
   { id: 3, tokenId: "#0391", name: "Platinum Striker", rarity: "Platinum", hashrate: 80, staked: false, image: "/platinum.jpeg" },
   { id: 4, tokenId: "#0884", name: "Gold Excavator", rarity: "Gold", hashrate: 40, staked: false, image: "/gold.jpeg" },
