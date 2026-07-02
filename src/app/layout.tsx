@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     apple: "/logo.jpg",
   },
   other: {
-    "virtual-protocol-site-verification": "66195a9f973766c036a8ce6d53db2732",
+    "virtual-protocol-site-verification": "66195a9f973766bb36a8ce6d53db2732",
   },
   openGraph: {
     title: "VENA — Mining Protocol on Robinhood Chain",
