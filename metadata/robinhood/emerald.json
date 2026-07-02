@@ -1,0 +1,11 @@
+{
+  "name": "Vena Emerald Pickaxe",
+  "description": "Emerald tier VPICK on Vena Protocol. Stake to earn $VENA from the buyback-fed pool on Robinhood Chain.",
+  "image": "ipfs://bafybeihjbqaf6qfsmv4caneajkvfpq2p7vigii4v7knftmylgfkpr54rpm",
+  "external_url": "https://vena.dev/mint",
+  "attributes": [
+    { "trait_type": "Tier", "value": "Emerald" },
+    { "trait_type": "Mining Power", "value": 906, "display_type": "number" },
+    { "trait_type": "Max Supply", "value": 312, "display_type": "number" }
+  ]
+}

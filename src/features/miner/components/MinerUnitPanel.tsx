@@ -13,6 +13,7 @@ import {
   SLOT_DEFINITIONS,
   type StoreItem,
   getSlotUnlockCostVena,
+  isSlotUnlockable,
   resolveDisplayPickaxe,
   type DisplayPickaxeMode,
 } from "../config/game-config";
@@ -73,6 +74,10 @@ export default function MinerUnitPanel({
 
   const handleAccessoryClick = (slotIndex: number) => {
     if (!unlockedSlots[slotIndex]) {
+      if (!isSlotUnlockable(slotIndex)) {
+        onNotify("Accessory slots unlock soon — cost in $VENA TBD");
+        return;
+      }
       setPendingUnlock(slotIndex);
       return;
     }
@@ -82,6 +87,11 @@ export default function MinerUnitPanel({
   const handleConfirmUnlock = () => {
     if (pendingUnlock === null) return;
     const cost = getSlotUnlockCostVena(pendingUnlock);
+    if (cost === null) {
+      onNotify("This slot is not unlockable yet");
+      setPendingUnlock(null);
+      return;
+    }
     if (balanceVena < cost) {
       onNotify("Insufficient balance");
       return;

@@ -29,7 +29,7 @@ export const RARITY_CONFIG: Record<
     glowClass: "rarity-silver",
     hashrate: 10,
     bgGradient: "linear-gradient(135deg, rgba(192,192,192,0.12) 0%, rgba(10,15,22,0.9) 100%)",
-    image: "/silver.jpeg",
+    image: "/miner/pickaxes/silver.png",
   },
   Gold: {
     label: "Gold",
@@ -37,7 +37,7 @@ export const RARITY_CONFIG: Record<
     glowClass: "rarity-gold",
     hashrate: 40,
     bgGradient: "linear-gradient(135deg, rgba(255,215,0,0.12) 0%, rgba(10,15,22,0.9) 100%)",
-    image: "/gold.jpeg",
+    image: "/miner/pickaxes/gold.png",
   },
   Platinum: {
     label: "Platinum",
@@ -45,7 +45,7 @@ export const RARITY_CONFIG: Record<
     glowClass: "rarity-platinum",
     hashrate: 80,
     bgGradient: "linear-gradient(135deg, rgba(229,228,226,0.12) 0%, rgba(10,15,22,0.9) 100%)",
-    image: "/platinum.jpeg",
+    image: "/miner/pickaxes/platinum.png",
   },
   Diamond: {
     label: "Diamond",
@@ -53,7 +53,7 @@ export const RARITY_CONFIG: Record<
     glowClass: "rarity-diamond",
     hashrate: 160,
     bgGradient: "linear-gradient(135deg, rgba(0,212,255,0.15) 0%, rgba(10,15,22,0.9) 100%)",
-    image: "/diamond.jpeg",
+    image: "/miner/pickaxes/diamond.png",
   },
   Emerald: {
     label: "Emerald",
@@ -61,7 +61,7 @@ export const RARITY_CONFIG: Record<
     glowClass: "rarity-emerald",
     hashrate: 320,
     bgGradient: "linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(10,15,22,0.9) 100%)",
-    image: "/emerald.png",
+    image: "/miner/pickaxes/emerald.png",
   },
 };
 

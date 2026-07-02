@@ -1,0 +1,11 @@
+{
+  "name": "Vena Silver Pickaxe",
+  "description": "Silver tier VPICK on Vena Protocol. Stake to earn $VENA from the buyback-fed pool on Robinhood Chain.",
+  "image": "ipfs://bafkreie433uikhtx7euhbgdpolubkuaoorpugzbvriprocbbwu357nl4am",
+  "external_url": "https://vena.dev/mint",
+  "attributes": [
+    { "trait_type": "Tier", "value": "Silver" },
+    { "trait_type": "Mining Power", "value": 10, "display_type": "number" },
+    { "trait_type": "Max Supply", "value": 10000, "display_type": "number" }
+  ]
+}

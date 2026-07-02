@@ -6,8 +6,8 @@ type RobotFigureProps = {
   displayPickaxe: PickaxeNFT | null;
 };
 
-/** Idle — no pickaxe equipped */
-const IDLE_ROBOT_SRC = "/miner/vena-robot.png";
+/** Idle — no pickaxe equipped (transparent background) */
+const IDLE_ROBOT_SRC = "/miner/vena-robot-transparent.png";
 
 /**
  * Full robot renders (body + pickaxe baked in). Drop PNGs in public/miner/.

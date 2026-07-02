@@ -137,7 +137,7 @@ export const useMinerStore = create<MinerStore>()(
       unlockSlot: (slotIndex, availableBalance) => {
         const state = get();
         const cost = getSlotUnlockCostVena(slotIndex);
-        if (state.unlockedSlots[slotIndex] || availableBalance < cost) {
+        if (cost === null || state.unlockedSlots[slotIndex] || availableBalance < cost) {
           return false;
         }
 
@@ -282,11 +282,15 @@ export const useMinerStore = create<MinerStore>()(
     }),
     {
       name: "vena-miner-command-v2",
-      version: 2,
+      version: 3,
       migrate: (persistedState, version) => {
-        if (version >= 2) return persistedState as MinerStoreState;
-
         const state = persistedState as Partial<MinerStoreState>;
+
+        if (version < 3) {
+          state.unlockedSlots = initialUnlockedSlots();
+        }
+
+        if (version >= 3) return state as MinerStoreState;
         const ids = state.selectedPickaxeIds ?? [];
         if (ids.length === 0 && state.pickaxeIdBySlot) {
           const fromSlots = [

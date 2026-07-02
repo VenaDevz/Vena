@@ -1,0 +1,11 @@
+{
+  "name": "Vena Diamond Pickaxe",
+  "description": "Diamond tier VPICK on Vena Protocol. Stake to earn $VENA from the buyback-fed pool on Robinhood Chain.",
+  "image": "ipfs://bafkreic3d3ogvbx3j5vwgrokjybahnpqwnxiimwdxm6txaaydukg353fb4",
+  "external_url": "https://vena.dev/mint",
+  "attributes": [
+    { "trait_type": "Tier", "value": "Diamond" },
+    { "trait_type": "Mining Power", "value": 304, "display_type": "number" },
+    { "trait_type": "Max Supply", "value": 625, "display_type": "number" }
+  ]
+}

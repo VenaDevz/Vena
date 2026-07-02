@@ -1,5 +1,5 @@
 import type { PickaxeNFT, Rarity } from "@/lib/types";
-import { RARITY_CONFIG, RARITY_ORDER } from "@/lib/types";
+import { RARITY_CONFIG, RARITY_ORDER, getPickaxeImage } from "@/lib/types";
 import { effectiveMiningPower, formatVenaAmount } from "@/lib/mining";
 
 export type StoreItemType = "accessory" | "pickaxe";
@@ -56,8 +56,10 @@ export const GAME_CONFIG = {
 
   slots: {
     total: 4,
-    defaultUnlockedCount: 2,
-    unlockCostsVena: [0, 0, 500, 1000] as const,
+    /** All slots locked at launch — accessory unlock costs TBD. */
+    defaultUnlockedCount: 0,
+    /** null = coming soon (not purchasable yet). */
+    unlockCostsVena: [null, null, null, null] as const,
   },
 
   upgrade: {
@@ -125,8 +127,12 @@ export function getUpgradeCostVena(currentLevel: number): number {
   return Math.floor(baseCostVena * Math.pow(costMultiplier, currentLevel - 1));
 }
 
-export function getSlotUnlockCostVena(slotIndex: number): number {
-  return GAME_CONFIG.slots.unlockCostsVena[slotIndex] ?? 0;
+export function getSlotUnlockCostVena(slotIndex: number): number | null {
+  return GAME_CONFIG.slots.unlockCostsVena[slotIndex] ?? null;
+}
+
+export function isSlotUnlockable(slotIndex: number): boolean {
+  return getSlotUnlockCostVena(slotIndex) !== null;
 }
 
 export function rarityRank(rarity: Rarity): number {
@@ -279,6 +285,6 @@ export function pickaxeFromTokenId(
     rarity,
     hashrate: cfg.hashrate,
     staked: false,
-    image: cfg.image,
+    image: getPickaxeImage(rarity),
   };
 }

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "forge:build": "forge build",
     "forge:deploy:nft": "forge script script/robinhood/DeployNFT.s.sol --rpc-url robinhood --broadcast",
-    "forge:deploy:forge": "forge script script/robinhood/DeployForge.s.sol --rpc-url robinhood --broadcast"
+    "forge:deploy:forge": "forge script script/robinhood/DeployForge.s.sol --rpc-url robinhood --broadcast",
+    "forge:deploy:mining": "forge script script/robinhood/DeployMining.s.sol --rpc-url robinhood --broadcast"
   },
   "dependencies": {
     "@reown/appkit": "^1.8.20",

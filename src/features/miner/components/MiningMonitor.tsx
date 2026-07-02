@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   formatSessionEarned,
-  GAME_CONFIG,
   getEquippedEffectivePower,
   getVenaPerDay,
   getVenaPerSecond,
@@ -144,13 +143,15 @@ export default function MiningMonitor({
       )}
 
       <p className="mt-3 text-xs text-slate-600">
-        {equippedPickaxes.length === 0
+        {!hasMiningContract
+          ? "On-chain staking opens soon. Select pickaxes to preview yields — rewards go live when the buyback-fed pool starts."
+          : equippedPickaxes.length === 0
           ? "Equip a VPICK pickaxe to start mining. The robot chassis does not mine on its own."
           : needsStake
-            ? "Equip triggers stake — confirm wallet txs to activate mining."
-            : !miningActive && hasMiningContract
-              ? "Mining pool not started on-chain yet. Session counter runs in preview mode."
-              : `${equippedPickaxes.length} pickaxe(s) active · +${formatVenaAmount(venaPerSecond, 6)}/sec · ${GAME_CONFIG.mining.emissionPoolVena.toLocaleString("en-US")} pool / ${GAME_CONFIG.mining.emissionDays}d`}
+            ? "Equip triggers stake — confirm wallet txs when the pool is live."
+            : !miningActive
+              ? "Mining pool not started yet. Session counter runs in preview mode."
+              : `${equippedPickaxes.length} pickaxe(s) active · +${formatVenaAmount(venaPerSecond, 6)}/sec`}
       </p>
     </section>
   );

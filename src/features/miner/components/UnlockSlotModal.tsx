@@ -21,7 +21,7 @@ export default function UnlockSlotModal({
   onConfirm,
 }: UnlockSlotModalProps) {
   const cost = getSlotUnlockCostVena(slotIndex);
-  const canAfford = balanceVena >= cost;
+  const canAfford = cost !== null && balanceVena >= cost;
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -69,7 +69,7 @@ export default function UnlockSlotModal({
         <div className="mt-4 rounded-xl border border-[#00f0ff]/20 bg-[#00f0ff]/5 px-4 py-3">
           <p className="text-xs uppercase tracking-wider text-slate-500">Cost</p>
           <p className="miner-panel-title text-xl font-bold text-[#00f0ff]">
-            {formatVena(cost)} VENA
+            {cost === null ? "Coming soon" : `${formatVena(cost)} VENA`}
           </p>
           <p className="mt-1 text-xs text-slate-500">
             Balance: {formatVena(balanceVena)} VENA

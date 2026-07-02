@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutGrid, List, Filter, Cpu, Wallet, Loader2 } from "lucide-react";
 import { useAppKit } from "@reown/appkit/react";
@@ -394,13 +395,12 @@ export default function MiningDashboard() {
                   <p className="text-sm text-slate-500 max-w-sm">
                     You don&apos;t own any Pickaxe NFTs yet. Mint a Silver Pickaxe for 0.01 ETH on /mint.
                   </p>
-                  <a
-                    href="#swap"
-                    onClick={(e) => handleSectionLink(e, "swap")}
+                  <Link
+                    href={PROJECT.routes.mint}
                     className="mt-4 text-sm text-[#00d4ff] hover:underline font-mono"
                   >
-                    Go to Swap →
-                  </a>
+                    Mint Pickaxe →
+                  </Link>
                 </motion.div>
 
               ) : filtered.length === 0 ? (

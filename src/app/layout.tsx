@@ -27,15 +27,18 @@ export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: "VENA — Mint. Upgrade. Stake & Earn.",
   description:
-    "$VENA on Robinhood Chain via Virtuals Protocol. Mint a Silver Pickaxe, upgrade by burning lower tiers, and stake to earn from a 250M VENA mining pool.",
+    "$VENA on Robinhood Chain via Virtuals Protocol. Mint a Silver Pickaxe for 0.01 ETH, upgrade with $VENA, stake to earn from a buyback-fed pool.",
   icons: {
     icon: "/logo.jpg",
     apple: "/logo.jpg",
   },
+  other: {
+    "virtual-protocol-site-verification": "66195a9f973760b36a8ce6d53db2732",
+  },
   openGraph: {
     title: "VENA — Mining Protocol on Robinhood Chain",
     description:
-      "$VENA agent token on Virtuals Protocol (Robinhood Chain). Mint, upgrade, and stake Pickaxes for VENA rewards.",
+      "$VENA agent token on Virtuals Protocol. Mint Pickaxes, upgrade tiers, earn from a buyback-fed staking pool.",
     images: [{ url: "/banner.jpg", width: 1500, height: 500, alt: "VENA" }],
     siteName: "VENA",
   },
@@ -44,7 +47,7 @@ export const metadata: Metadata = {
     title: "VENA — Mining Protocol on Robinhood Chain",
     description: "Mint. Upgrade. Stake & earn. Robinhood Chain · Virtuals Protocol.",
     images: ["/banner.jpg"],
-    creator: "@VenaOnBase",
+    creator: "@VenaHub",
   },
 };
 

@@ -2,9 +2,12 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Star, X } from "lucide-react";
 import type { PickaxeNFT } from "@/lib/types";
 import { RARITY_CONFIG } from "@/lib/types";
+import { PROJECT } from "@/lib/project";
+import { SILVER_MINT_ETH } from "@/lib/tokenomics";
 import ModalPortal from "./ModalPortal";
 
 type PickaxePickerModalProps = {
@@ -73,10 +76,21 @@ export default function PickaxePickerModal({
 
         <div className="max-h-[52vh] overflow-y-auto p-4">
           {pickaxes.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-500">
-              No pickaxe NFTs in your wallet. Mint a Silver Pickaxe with $VENA to
-              get started.
-            </p>
+            <div className="py-8 text-center text-sm text-slate-500 space-y-3">
+              <p>
+                No VPICK pickaxes in this wallet on {PROJECT.network}.
+              </p>
+              <p className="text-xs text-slate-600">
+                Mint with the wallet that holds your NFT, or mint a new Silver
+                Pickaxe for {SILVER_MINT_ETH} ETH.
+              </p>
+              <Link
+                href={PROJECT.routes.mint}
+                className="inline-block text-[#00f0ff] hover:underline font-mono text-xs"
+              >
+                Go to Mint →
+              </Link>
+            </div>
           ) : (
             <ul className="space-y-2">
               {pickaxes.map((pickaxe) => {
