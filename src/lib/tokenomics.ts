@@ -1,19 +1,12 @@
 /**
  * VENA Tokenomics — $VENA via Virtuals Protocol on Robinhood Chain
  *
- * Supply (1B, Virtuals default split — NO dedicated staking allocation):
- *   - 50%  Liquidity Pool (fixed supply)
- *   - 25%  Automated Capital Formation (Limit Order Program, 2m → 160m FDV)
- *   - 25%  Team / Treasury (6-month linear release)
+ * Supply (1B, Virtuals launch — NO dedicated staking allocation):
+ *   - 100% Liquidity Pool (team pre-buy launch on Virtuals)
  *
  * Two flywheels, both market-driven (no pre-minted staking pool):
  *   1. Mint / upgrade revenue  → buy $VENA on market → add to STAKING POOL.
  *   2. Virtuals trade fees      → random-timed buybacks → BURN $VENA.
- *
- * NFTs:
- *   - Mint Silver with 0.01 ETH on Robinhood Chain.
- *   - Upgrade a tier by paying $VENA + burning the lower Pickaxe.
- *   - Stake Pickaxes to earn $VENA from the buyback-fed staking pool.
  */
 
 import type { Rarity } from "./types";
@@ -42,9 +35,7 @@ export const TOKENOMICS = {
   projectFeeSharePct: 70,
   buyback: BUYBACK_POLICY,
   mintRevenue: MINT_REVENUE_POLICY,
-  liquidityPct: 50,
-  acfPct: 25,
-  teamTreasuryPct: 25,
+  liquidityPct: 100,
   /** Stake-duration reward bonus (mining) */
   stakeBonusPerDayPct: 2,
   stakeBonusMaxPct: 30,
@@ -54,9 +45,7 @@ export const TOKENOMICS = {
 
 export const SUPPLY_BREAKDOWN = {
   total: TOKENOMICS.maxTokenSupply,
-  liquidity: 500_000_000,
-  acf: 250_000_000,
-  teamTreasury: 250_000_000,
+  liquidity: 1_000_000_000,
 } as const;
 
 export const SUPPLY_ALLOCATIONS = [
@@ -66,23 +55,7 @@ export const SUPPLY_ALLOCATIONS = [
     amount: SUPPLY_BREAKDOWN.liquidity,
     pct: TOKENOMICS.liquidityPct,
     color: "#5ec9d4",
-    note: "Fixed supply",
-  },
-  {
-    key: "acf",
-    label: "Automated Capital Formation",
-    amount: SUPPLY_BREAKDOWN.acf,
-    pct: TOKENOMICS.acfPct,
-    color: "#e8873a",
-    note: "Follows Limit Order Program from 2m to 160m FDV",
-  },
-  {
-    key: "teamTreasury",
-    label: "Team – Treasury",
-    amount: SUPPLY_BREAKDOWN.teamTreasury,
-    pct: TOKENOMICS.teamTreasuryPct,
-    color: "#b5c334",
-    note: "100% released linearly over 6 months",
+    note: "100% supply · Virtuals LP launch",
   },
 ] as const;
 

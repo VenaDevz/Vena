@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Pickaxe } from "lucide-react";
+import { ExternalLink, Pickaxe } from "lucide-react";
 import { PROJECT } from "@/lib/project";
+import { getBuyVenaHref } from "@/lib/links";
 import { SILVER_MINT_ETH } from "@/lib/tokenomics";
 import HeroParticles from "./HeroParticles";
 import XIcon from "./XIcon";
@@ -107,6 +108,18 @@ export default function HeroSection() {
           >
             <Pickaxe size={16} />
             Mint Pickaxe
+          </motion.a>
+          <motion.a
+            href={getBuyVenaHref()}
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            className="flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm tracking-wider border border-[rgba(0,212,255,0.35)] text-[#00d4ff] hover:bg-[rgba(0,212,255,0.08)] transition-colors"
+            style={{ fontFamily: "var(--font-orbitron)" }}
+          >
+            Trade {PROJECT.tokenDisplay}
+            <ExternalLink size={15} />
           </motion.a>
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
             <Link

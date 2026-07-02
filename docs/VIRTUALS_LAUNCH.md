@@ -53,7 +53,8 @@ Every Silver Pickaxe mint costs **0.01 ETH**. That revenue is swapped into $VENA
 - **Chain:** Robinhood Chain (chainId 4663)
 - **NFT:** VPICK (ERC-721) — max 10,000 Silver, deflationary upgrades
 - **Mint:** 0.01 ETH per Silver via VenaForge
-- **Token:** $VENA via Virtuals Protocol (1B supply, 50/25/25 split)
+- **Token:** $VENA via Virtuals Protocol — [Trade on Virtuals](https://app.virtuals.io/virtuals/95873)
+- **Supply:** 1B total — **100% Liquidity Pool** (Virtuals launch)
 - **Staking pool:** Buyback-fed — no dedicated staking allocation at launch
 - **Contracts:** PickaxeNFT + VenaForge deployed; VenaMining ready to deploy when staking opens
 
@@ -91,4 +92,5 @@ VENA is built by a focused team launching on Robinhood Chain via Virtuals Protoc
 | Chain | Robinhood Chain |
 | Website | https://venaprotocol.com |
 | Twitter | @VenaHub |
-| Supply split | 50% Liquidity / 25% ACF / 25% Team-Treasury |
+| Supply split | **100% Liquidity Pool** (launched) |
+| Trade / agent | https://app.virtuals.io/virtuals/95873 |

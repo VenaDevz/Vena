@@ -19,13 +19,14 @@ export const PROJECT = {
   logoPath: "/logo.jpg",
   bannerPath: "/banner.jpg",
   social: {
-    xHandle: "@VenaOnBase",
-    xUrl: "https://x.com/VenaOnBase",
+    xHandle: "@VenaHub",
+    xUrl: "https://x.com/VenaHub",
   },
   routes: {
     home: "/",
     mint: "/mint",
     miner: "/miner",
+    trade: "https://app.virtuals.io/virtuals/95873",
   },
   /** Virtuals Protocol agent page — set via NEXT_PUBLIC_VIRTUALS_AGENT_URL */
   launchpad: "Virtuals Protocol",

@@ -20,7 +20,7 @@ export default function TokenomicsPieChart() {
           boxShadow: "0 0 40px rgba(0,212,255,0.12)",
         }}
         role="img"
-        aria-label="VENA supply: 50% liquidity, 25% automated capital formation, 25% team-treasury"
+        aria-label="VENA supply: 100% liquidity pool"
       >
         <div
           className="absolute inset-[18%] rounded-full flex flex-col items-center justify-center text-center"

@@ -27,6 +27,21 @@ export default function SiteNavLink({ link, className, onNavigate }: Props) {
     );
   }
 
+  if (link.kind === "external") {
+    return (
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        style={style}
+        onClick={onNavigate}
+      >
+        {content}
+      </a>
+    );
+  }
+
   return (
     <a
       href={link.href}

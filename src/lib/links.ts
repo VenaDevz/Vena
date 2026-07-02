@@ -1,33 +1,26 @@
 import { PROJECT } from "./project";
 import { robinhoodMainnet } from "./chains/robinhood";
 
-const VENA_TOKEN =
-  process.env.NEXT_PUBLIC_VENA_TOKEN ?? "";
+const VENA_TOKEN = process.env.NEXT_PUBLIC_VENA_TOKEN ?? "";
 
-/** Virtuals agent page for $VENA (trade happens here). */
-const VIRTUALS_AGENT_URL = process.env.NEXT_PUBLIC_VIRTUALS_AGENT_URL ?? "";
+/** Live Virtuals agent page — override via NEXT_PUBLIC_VIRTUALS_AGENT_URL */
+export const VIRTUALS_AGENT_URL_DEFAULT =
+  "https://app.virtuals.io/virtuals/95873";
 
-/** Fallback Virtuals base — link to the token by address if no agent URL is set. */
-function virtualsFallbackUrl(): string {
-  if (VENA_TOKEN) {
-    return `https://app.virtuals.io/geneses/${VENA_TOKEN}`;
-  }
-  return "https://app.virtuals.io";
-}
+const VIRTUALS_AGENT_URL =
+  process.env.NEXT_PUBLIC_VIRTUALS_AGENT_URL ?? VIRTUALS_AGENT_URL_DEFAULT;
 
-/** Where the "Buy / Trade VENA" CTA points — always Virtuals now. */
+/** Where the "Buy / Trade VENA" CTA points. */
 export function getBuyVenaHref(): string {
-  return VIRTUALS_AGENT_URL || virtualsFallbackUrl();
+  return VIRTUALS_AGENT_URL;
 }
 
-/** Buy CTAs always open Virtuals (external). */
 export function isBuyVenaExternal(): boolean {
   return true;
 }
 
-/** Trade $VENA on Virtuals Protocol. */
 export function getVirtualsTradeUrl(): string {
-  return VIRTUALS_AGENT_URL || virtualsFallbackUrl();
+  return VIRTUALS_AGENT_URL;
 }
 
 /** Block explorer token page for $VENA. */
@@ -36,7 +29,7 @@ export function getVenaTokenExplorerUrl(): string {
     return PROJECT.chainId === robinhoodMainnet.id ||
       PROJECT.chainId === 46630
       ? "https://robinhoodchain.blockscout.com"
-      : "https://basescan.org";
+      : "https://robinhoodchain.blockscout.com";
   }
   if (
     PROJECT.chainId === robinhoodMainnet.id ||
@@ -48,5 +41,5 @@ export function getVenaTokenExplorerUrl(): string {
         : "https://robinhoodchain.blockscout.com";
     return `${base}/token/${VENA_TOKEN}`;
   }
-  return `https://basescan.org/token/${VENA_TOKEN}`;
+  return `https://robinhoodchain.blockscout.com/token/${VENA_TOKEN}`;
 }
