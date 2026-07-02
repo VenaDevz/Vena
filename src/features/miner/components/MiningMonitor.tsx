@@ -18,7 +18,6 @@ type MiningMonitorProps = {
   equippedAccessories: StoreItem[];
   earnedVena: number;
   isMining: boolean;
-  miningActive: boolean;
   pendingOnChainVena: number;
   isClaimPending: boolean;
   onClaimSession: () => void;
@@ -31,7 +30,6 @@ export default function MiningMonitor({
   equippedAccessories,
   earnedVena,
   isMining,
-  miningActive,
   pendingOnChainVena,
   isClaimPending,
   onClaimSession,
@@ -52,10 +50,6 @@ export default function MiningMonitor({
     setSessionClaimedFlash(true);
     window.setTimeout(() => setSessionClaimedFlash(false), 2000);
   };
-
-  const needsStake =
-    hasMiningContract &&
-    equippedPickaxes.some((p) => p.id >= 0 && !p.staked);
 
   return (
     <section className="miner-glass rounded-2xl p-5" aria-label="Mining monitor">
@@ -144,14 +138,12 @@ export default function MiningMonitor({
 
       <p className="mt-3 text-xs text-slate-600">
         {!hasMiningContract
-          ? "On-chain staking opens soon. Select pickaxes to preview yields — rewards go live when the buyback-fed pool starts."
+          ? "On-chain staking opens soon. Select pickaxes to preview yields — rewards accrue only after you stake when the pool goes live."
           : equippedPickaxes.length === 0
-          ? "Equip a VPICK pickaxe to start mining. The robot chassis does not mine on its own."
-          : needsStake
-            ? "Equip triggers stake — confirm wallet txs when the pool is live."
-            : !miningActive
-              ? "Mining pool not started yet. Session counter runs in preview mode."
-              : `${equippedPickaxes.length} pickaxe(s) active · +${formatVenaAmount(venaPerSecond, 6)}/sec`}
+          ? "Select a VPICK pickaxe to preview yields. Press Stake in the roster when the pool is active."
+          : !isMining
+            ? "Preview mode — session rewards accrue only after on-chain stake when the pool is live."
+            : `${equippedPickaxes.length} pickaxe(s) staked · +${formatVenaAmount(venaPerSecond, 6)}/sec`}
       </p>
     </section>
   );

@@ -35,16 +35,20 @@ export function useMiningLoop(
 export function canMineEquipped(
   equippedPickaxes: PickaxeNFT[],
   stakedIds: Set<number>,
-  miningContractEnabled: boolean
+  miningContractEnabled: boolean,
+  miningActive: boolean
 ): boolean {
   if (equippedPickaxes.length === 0) return false;
 
-  const demoOnly = equippedPickaxes.every((p) => p.id < 0);
-  if (demoOnly) return true;
+  const realPickaxes = equippedPickaxes.filter((p) => p.id >= 0);
+  if (realPickaxes.length === 0) {
+    return (
+      process.env.NEXT_PUBLIC_MINER_DEMO_PICKAXES === "1" &&
+      equippedPickaxes.every((p) => p.id < 0)
+    );
+  }
 
-  if (!miningContractEnabled) return true;
+  if (!miningContractEnabled || !miningActive) return false;
 
-  return equippedPickaxes.every(
-    (p) => p.id < 0 || stakedIds.has(p.id)
-  );
+  return realPickaxes.every((p) => stakedIds.has(p.id));
 }

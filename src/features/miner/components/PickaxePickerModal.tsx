@@ -15,6 +15,7 @@ type PickaxePickerModalProps = {
   equippedIds: Set<number>;
   displayPickaxeId: number | null;
   maxStake: number;
+  walletAddressShort?: string | null;
   onClose: () => void;
   onToggle: (pickaxe: PickaxeNFT) => void;
   onSetDisplay: (id: number) => void;
@@ -25,6 +26,7 @@ export default function PickaxePickerModal({
   equippedIds,
   displayPickaxeId,
   maxStake,
+  walletAddressShort,
   onClose,
   onToggle,
   onSetDisplay,
@@ -51,7 +53,7 @@ export default function PickaxePickerModal({
         <div className="flex items-start justify-between border-b border-white/5 p-5">
           <div>
             <p className="miner-panel-title text-[10px] uppercase tracking-[0.2em] text-[#00f0ff]/70">
-              Select pickaxes to stake
+              Select pickaxes to equip
             </p>
             <h2
               id="pickaxe-picker-title"
@@ -60,8 +62,8 @@ export default function PickaxePickerModal({
               VPICK Pickaxes
             </h2>
             <p className="mt-1 text-xs text-slate-500">
-              {equippedIds.size} selected · tap to add or remove · star sets robot
-              hand
+              {equippedIds.size} selected · tap to add or remove · stake from
+              the roster when the pool opens
             </p>
           </div>
           <button
@@ -78,7 +80,8 @@ export default function PickaxePickerModal({
           {pickaxes.length === 0 ? (
             <div className="py-8 text-center text-sm text-slate-500 space-y-3">
               <p>
-                No VPICK pickaxes in this wallet on {PROJECT.network}.
+                No VPICK pickaxes in this wallet on {PROJECT.network}
+                {walletAddressShort ? ` (${walletAddressShort})` : ""}.
               </p>
               <p className="text-xs text-slate-600">
                 Mint with the wallet that holds your NFT, or mint a new Silver
@@ -145,7 +148,7 @@ export default function PickaxePickerModal({
                           className="shrink-0 text-[10px] uppercase tracking-wider"
                           style={{ color: selected ? "#00f0ff" : cfg.color }}
                         >
-                          {selected ? "Mining" : pickaxe.rarity}
+                          {selected ? "Selected" : pickaxe.rarity}
                         </span>
                       </button>
                       <button

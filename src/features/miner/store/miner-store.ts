@@ -282,7 +282,7 @@ export const useMinerStore = create<MinerStore>()(
     }),
     {
       name: "vena-miner-command-v2",
-      version: 3,
+      version: 4,
       migrate: (persistedState, version) => {
         const state = persistedState as Partial<MinerStoreState>;
 
@@ -290,7 +290,11 @@ export const useMinerStore = create<MinerStore>()(
           state.unlockedSlots = initialUnlockedSlots();
         }
 
-        if (version >= 3) return state as MinerStoreState;
+        if (version < 4) {
+          state.earnedVena = 0;
+        }
+
+        if (version >= 4) return state as MinerStoreState;
         const ids = state.selectedPickaxeIds ?? [];
         if (ids.length === 0 && state.pickaxeIdBySlot) {
           const fromSlots = [

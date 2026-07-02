@@ -21,6 +21,7 @@ import { isDemoPickaxeEnabled } from "../config/demo-pickaxes";
 
 type MinerUnitPanelProps = {
   walletPickaxes: PickaxeNFT[];
+  walletAddressShort?: string | null;
   balanceVena: number;
   unlockedSlots: boolean[];
   equippedPickaxes: PickaxeNFT[];
@@ -29,6 +30,7 @@ type MinerUnitPanelProps = {
   displayMode: DisplayPickaxeMode;
   displayPickaxeId: number | null;
   isMiningLive: boolean;
+  stakedCount: number;
   onUnlockSlot: (slotIndex: number) => boolean;
   onTogglePickaxe: (pickaxe: PickaxeNFT) => void;
   onSetDisplayPickaxe: (id: number) => void;
@@ -46,6 +48,7 @@ function accessorySlotState(
 
 export default function MinerUnitPanel({
   walletPickaxes,
+  walletAddressShort,
   balanceVena,
   unlockedSlots,
   equippedPickaxes,
@@ -54,6 +57,7 @@ export default function MinerUnitPanel({
   displayMode,
   displayPickaxeId,
   isMiningLive,
+  stakedCount,
   onUnlockSlot,
   onTogglePickaxe,
   onSetDisplayPickaxe,
@@ -141,7 +145,7 @@ export default function MinerUnitPanel({
                 isMiningLive ? "animate-pulse bg-[#00ff88]" : hasEquipped ? "bg-amber-400" : "bg-slate-500",
               ].join(" ")}
             />
-            {isMiningLive ? "Mining" : hasEquipped ? "Staked" : "Idle"}
+            {isMiningLive ? "Mining" : hasEquipped ? "Selected" : "Idle"}
           </div>
         </div>
 
@@ -196,14 +200,14 @@ export default function MinerUnitPanel({
             </div>
             <div className="min-w-0 flex-1">
               <p className="miner-panel-title text-xs font-semibold uppercase tracking-wider text-white">
-                Stake Pickaxes
+                Select Pickaxes
               </p>
               <p className="truncate text-[11px] text-slate-500">
                 {equippedPickaxes.length === 0
-                  ? "Select pickaxes to stake for mining"
+                  ? "Choose pickaxes to equip on your miner"
                   : displayPickaxe
-                    ? `${equippedPickaxes.length} staked · ${displayPickaxe.rarity} in hand`
-                    : `${equippedPickaxes.length} pickaxe${equippedPickaxes.length === 1 ? "" : "s"} staked`}
+                    ? `${equippedPickaxes.length} selected · ${displayPickaxe.rarity} in hand`
+                    : `${equippedPickaxes.length} pickaxe${equippedPickaxes.length === 1 ? "" : "s"} selected`}
               </p>
             </div>
             <div className="shrink-0 text-right">
@@ -211,7 +215,7 @@ export default function MinerUnitPanel({
                 {equippedPickaxes.length}
               </p>
               <p className="text-[9px] uppercase tracking-wider text-slate-600">
-                active
+                {stakedCount > 0 ? `${stakedCount} staked` : "selected"}
               </p>
             </div>
           </button>
@@ -243,6 +247,7 @@ export default function MinerUnitPanel({
           equippedIds={equippedPickaxeIds}
           displayPickaxeId={displayPickaxeId}
           maxStake={GAME_CONFIG.pickaxes.maxMiningStake}
+          walletAddressShort={walletAddressShort}
           onClose={() => setPickaxePickerOpen(false)}
           onToggle={(pickaxe) => onTogglePickaxe(pickaxe)}
           onSetDisplay={onSetDisplayPickaxe}

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Star } from "lucide-react";
 import type { PickaxeNFT } from "@/lib/types";
 import { RARITY_CONFIG } from "@/lib/types";
+import { PROJECT } from "@/lib/project";
 import { getPickaxeDailyYield } from "../config/game-config";
 import { formatVenaAmount } from "@/lib/mining";
 
@@ -13,6 +14,9 @@ type PickaxeInventoryProps = {
   displayPickaxeId: number | null;
   isLoading: boolean;
   isConnected: boolean;
+  walletAddressShort?: string | null;
+  isContractReady?: boolean;
+  stakedIds: Set<number>;
   onSetDisplay: (id: number) => void;
   onToggle: (pickaxe: PickaxeNFT) => void;
 };
@@ -23,6 +27,9 @@ export default function PickaxeInventory({
   displayPickaxeId,
   isLoading,
   isConnected,
+  walletAddressShort,
+  isContractReady = true,
+  stakedIds,
   onSetDisplay,
   onToggle,
 }: PickaxeInventoryProps) {
@@ -36,8 +43,8 @@ export default function PickaxeInventory({
           VPICK pickaxes
         </h2>
         <p className="mt-1 text-xs text-slate-500">
-          Select pickaxes to stake for mining. Star any NFT to show it in the
-          robot hand — otherwise the highest-rarity selected pickaxe is shown.
+          Select pickaxes to equip on your miner. Press Stake in the roster when
+          the pool opens — rewards do not accrue until then.
           {process.env.NEXT_PUBLIC_MINER_DEMO_PICKAXES === "1" && (
             <span className="mt-1 block text-[#7000ff]/80">
               Demo mode: preview pickaxes from /public are listed below.
@@ -50,6 +57,12 @@ export default function PickaxeInventory({
         <p className="py-6 text-center text-sm text-slate-500">
           Connect wallet to load your pickaxes.
         </p>
+      ) : !isContractReady ? (
+        <p className="py-6 text-center text-sm text-amber-400/90">
+          VPICK contract not configured. Set{" "}
+          <span className="font-mono">NEXT_PUBLIC_PICKAXE_NFT</span> on the
+          server.
+        </p>
       ) : isLoading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
@@ -60,15 +73,23 @@ export default function PickaxeInventory({
           ))}
         </div>
       ) : pickaxes.length === 0 ? (
-        <p className="py-6 text-center text-sm text-slate-500">
-          No pickaxes found. Mint a Silver Pickaxe with $VENA to start mining.
-        </p>
+        <div className="py-6 text-center text-sm text-slate-500 space-y-2">
+          <p>
+            No VPICK pickaxes in this wallet on {PROJECT.network}
+            {walletAddressShort ? ` (${walletAddressShort})` : ""}.
+          </p>
+          <p className="text-xs text-slate-600">
+            Mint with the wallet that holds your NFT, or mint a new Silver
+            Pickaxe for 0.01 ETH.
+          </p>
+        </div>
       ) : (
         <ul className="max-h-64 space-y-2 overflow-y-auto pr-1">
           {pickaxes.map((pickaxe) => {
             const cfg = RARITY_CONFIG[pickaxe.rarity];
             const equipped = equippedIds.has(pickaxe.id);
             const isDisplay = displayPickaxeId === pickaxe.id;
+            const isStaked = pickaxe.id >= 0 && stakedIds.has(pickaxe.id);
 
             return (
               <li
@@ -99,10 +120,10 @@ export default function PickaxeInventory({
                     {pickaxe.name}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {pickaxe.tokenId} · ~{formatVenaAmount(getPickaxeDailyYield(pickaxe.rarity, pickaxe.hashrate))}/day
-                    {equipped ? " · Staking" : ""}
+                    {pickaxe.tokenId} · ~{formatVenaAmount(getPickaxeDailyYield(pickaxe.rarity, pickaxe.hashrate))}/day preview
+                    {equipped ? " · Selected" : ""}
+                    {isStaked ? " · Staked" : ""}
                     {isDisplay ? " · In hand" : ""}
-                    {pickaxe.staked ? " · On-chain" : ""}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-1">
@@ -133,7 +154,7 @@ export default function PickaxeInventory({
                         : "border-[#00f0ff]/30 text-[#00f0ff] hover:bg-[#00f0ff]/10",
                     ].join(" ")}
                   >
-                    {equipped ? "Unstake" : "Stake"}
+                    {equipped ? "Remove" : "Select"}
                   </button>
                 </div>
               </li>

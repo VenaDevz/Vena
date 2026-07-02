@@ -27,8 +27,12 @@ import type { PickaxeNFT } from "@/lib/types";
 
 export default function MinerLayout() {
   const { balanceVena: walletBalance, isConnected } = useWalletVena();
-  const { pickaxes: walletPickaxesRaw, isLoading: pickaxesLoading } =
-    useWalletPickaxes();
+  const {
+    pickaxes: walletPickaxesRaw,
+    isLoading: pickaxesLoading,
+    walletAddressShort,
+    isContractReady,
+  } = useWalletPickaxes();
   const chain = useOnChainMining();
 
   const walletPickaxes = useMemo(() => {
@@ -101,9 +105,15 @@ export default function MinerLayout() {
       canMineEquipped(
         equippedPickaxes,
         chain.stakedIds,
-        chain.enabled && hasMiningContract
+        chain.enabled && hasMiningContract,
+        chain.miningActive
       ),
-    [equippedPickaxes, chain.stakedIds, chain.enabled]
+    [equippedPickaxes, chain.stakedIds, chain.enabled, chain.miningActive]
+  );
+
+  const stakedPickaxes = useMemo(
+    () => walletPickaxes.filter((p) => p.id >= 0 && chain.stakedIds.has(p.id)),
+    [walletPickaxes, chain.stakedIds]
   );
 
   useMiningLoop(equippedPickaxes, equippedAccessories, isMiningLive);
@@ -114,56 +124,56 @@ export default function MinerLayout() {
   );
 
   const handleTogglePickaxe = useCallback(
-    async (pickaxe: PickaxeNFT) => {
+    (pickaxe: PickaxeNFT) => {
       const wasSelected = equippedPickaxeIds.has(pickaxe.id);
       const ok = togglePickaxeSelection(pickaxe.id);
       if (!ok) {
         notify(
-          `Max ${GAME_CONFIG.pickaxes.maxMiningStake} pickaxes can mine at once. Remove one first.`
+          `Max ${GAME_CONFIG.pickaxes.maxMiningStake} pickaxes can be selected at once. Remove one first.`
         );
         return;
       }
+      notify(wasSelected ? `${pickaxe.name} removed` : `${pickaxe.name} selected`);
+    },
+    [togglePickaxeSelection, equippedPickaxeIds, notify]
+  );
 
-      if (wasSelected) {
-        if (pickaxe.id >= 0 && chain.enabled && chain.stakedIds.has(pickaxe.id)) {
-          try {
-            await chain.unstakeToken(pickaxe.id);
-            notify(`${pickaxe.name} removed and unstaked`);
-            return;
-          } catch {
-            notify(`${pickaxe.name} removed — unstake was rejected or failed`);
-            return;
-          }
-        }
-        notify(`${pickaxe.name} removed`);
+  const handleStakePickaxe = useCallback(
+    async (pickaxe: PickaxeNFT) => {
+      if (pickaxe.id < 0) return;
+      if (!chain.enabled || !hasMiningContract) {
+        notify("On-chain staking opens soon — pool not deployed yet");
         return;
       }
-
-      if (pickaxe.id >= 0 && chain.enabled) {
-        if (!chain.miningActive) {
-          notify(`${pickaxe.name} selected — mining pool not active on-chain yet`);
-          return;
-        }
-        if (!chain.stakedIds.has(pickaxe.id)) {
-          try {
-            await chain.stakeToken(pickaxe.id);
-            notify(`${pickaxe.name} selected and staked`);
-            return;
-          } catch {
-            notify("Selected — stake was rejected or failed");
-            return;
-          }
-        }
+      if (!chain.miningActive) {
+        notify("Mining pool not active yet — staking opens when the pool starts");
+        return;
       }
-
-      notify(`${pickaxe.name} selected`);
+      if (chain.stakedIds.has(pickaxe.id)) {
+        notify(`${pickaxe.name} is already staked`);
+        return;
+      }
+      try {
+        await chain.stakeToken(pickaxe.id);
+        notify(`${pickaxe.name} staked on-chain`);
+      } catch {
+        notify("Stake failed or was rejected");
+      }
     },
-    [
-      togglePickaxeSelection,
-      equippedPickaxeIds,
-      notify,
-      chain,
-    ]
+    [chain, notify]
+  );
+
+  const handleUnstakePickaxe = useCallback(
+    async (pickaxe: PickaxeNFT) => {
+      if (pickaxe.id < 0 || !chain.stakedIds.has(pickaxe.id)) return;
+      try {
+        await chain.unstakeToken(pickaxe.id);
+        notify(`${pickaxe.name} unstaked`);
+      } catch {
+        notify("Unstake failed or was rejected");
+      }
+    },
+    [chain, notify]
   );
 
   const handleStartUpgrade = useCallback((): boolean => {
@@ -238,6 +248,7 @@ export default function MinerLayout() {
           <div className="relative z-10 self-start lg:sticky lg:top-20">
             <MinerUnitPanel
             walletPickaxes={walletPickaxes}
+            walletAddressShort={walletAddressShort}
             balanceVena={availableBalance}
             unlockedSlots={unlockedSlots}
             equippedPickaxes={equippedPickaxes}
@@ -246,10 +257,9 @@ export default function MinerLayout() {
             displayMode={displayMode}
             displayPickaxeId={displayPickaxeId}
             isMiningLive={isMiningLive}
+            stakedCount={stakedPickaxes.length}
             onUnlockSlot={handleUnlockSlot}
-            onTogglePickaxe={(pickaxe) => {
-              void handleTogglePickaxe(pickaxe);
-            }}
+            onTogglePickaxe={handleTogglePickaxe}
             onSetDisplayPickaxe={setDisplayPickaxe}
             onNotify={notify}
           />
@@ -265,9 +275,12 @@ export default function MinerLayout() {
             equippedPickaxeIds={equippedPickaxeIds}
             displayPickaxeId={displayPickaxeId}
             pickaxesLoading={pickaxesLoading}
+            walletAddressShort={walletAddressShort}
+            isContractReady={isContractReady}
             isConnected={isConnected}
             isMiningLive={isMiningLive}
             miningActive={chain.miningActive}
+            stakedIds={chain.stakedIds}
             pendingOnChainVena={chain.pendingVena}
             isClaimPending={chain.isPending}
             ownedAccessoryIds={ownedAccessoryIdSet}
@@ -279,8 +292,12 @@ export default function MinerLayout() {
             onSkipUpgrade={handleSkipUpgrade}
             onUpgradeComplete={handleUpgradeComplete}
             onBuyAccessory={handleBuyAccessory}
-            onTogglePickaxe={(pickaxe) => {
-              void handleTogglePickaxe(pickaxe);
+            onTogglePickaxe={handleTogglePickaxe}
+            onStakePickaxe={(pickaxe) => {
+              void handleStakePickaxe(pickaxe);
+            }}
+            onUnstakePickaxe={(pickaxe) => {
+              void handleUnstakePickaxe(pickaxe);
             }}
             onSetDisplayPickaxe={setDisplayPickaxe}
             onNotify={notify}

@@ -18,9 +18,12 @@ type ControlPanelProps = {
   equippedPickaxeIds: Set<number>;
   displayPickaxeId: number | null;
   pickaxesLoading: boolean;
+  walletAddressShort?: string | null;
+  isContractReady?: boolean;
   isConnected: boolean;
   isMiningLive: boolean;
   miningActive: boolean;
+  stakedIds: Set<number>;
   pendingOnChainVena: number;
   isClaimPending: boolean;
   ownedAccessoryIds: Set<string>;
@@ -31,6 +34,8 @@ type ControlPanelProps = {
   onUpgradeComplete: () => void;
   onBuyAccessory: (item: StoreItem) => boolean;
   onTogglePickaxe: (pickaxe: PickaxeNFT) => void;
+  onStakePickaxe: (pickaxe: PickaxeNFT) => void;
+  onUnstakePickaxe: (pickaxe: PickaxeNFT) => void;
   onSetDisplayPickaxe: (id: number) => void;
   onNotify: (message: string) => void;
 };
@@ -44,7 +49,6 @@ export default function ControlPanel(props: ControlPanelProps) {
         equippedAccessories={props.equippedAccessories}
         earnedVena={props.earnedVena}
         isMining={props.isMiningLive}
-        miningActive={props.miningActive}
         pendingOnChainVena={props.pendingOnChainVena}
         isClaimPending={props.isClaimPending}
         onClaimSession={props.onClaimSession}
@@ -54,7 +58,11 @@ export default function ControlPanel(props: ControlPanelProps) {
         equippedPickaxes={props.equippedPickaxes}
         displayPickaxeId={props.displayPickaxeId}
         isMiningLive={props.isMiningLive}
+        miningActive={props.miningActive}
+        stakedIds={props.stakedIds}
         onToggle={props.onTogglePickaxe}
+        onStake={props.onStakePickaxe}
+        onUnstake={props.onUnstakePickaxe}
       />
       <PickaxeInventory
         pickaxes={props.walletPickaxes}
@@ -62,6 +70,9 @@ export default function ControlPanel(props: ControlPanelProps) {
         displayPickaxeId={props.displayPickaxeId}
         isLoading={props.pickaxesLoading}
         isConnected={props.isConnected}
+        walletAddressShort={props.walletAddressShort}
+        isContractReady={props.isContractReady}
+        stakedIds={props.stakedIds}
         onSetDisplay={props.onSetDisplayPickaxe}
         onToggle={props.onTogglePickaxe}
       />

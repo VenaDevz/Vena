@@ -3,20 +3,37 @@
 import { useMemo } from "react";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import type { PickaxeNFT } from "@/lib/types";
-import { pickaxeNftAbi, RH_CONTRACTS } from "@/lib/contracts/robinhood";
+import {
+  isPickaxeDeployed,
+  pickaxeNftAbi,
+  RH_CONTRACTS,
+} from "@/lib/contracts/robinhood";
+import { targetChainId } from "@/config/wagmi";
 import { pickaxeFromTokenId } from "../config/game-config";
 
-export function useWalletPickaxes() {
-  const { address, isConnected } = useAccount();
-  const nftAddr = RH_CONTRACTS.pickaxeNft;
+function truncateAddress(address: string): string {
+  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+}
 
-  const { data: ownedIds, isLoading, refetch } = useReadContract({
-    address: nftAddr,
+export function useWalletPickaxes() {
+  const { address, isConnected, chain } = useAccount();
+  const nftAddr = RH_CONTRACTS.pickaxeNft;
+  const contractReady = isPickaxeDeployed();
+  const isWrongNetwork = isConnected && chain?.id !== targetChainId;
+
+  const {
+    data: ownedIds,
+    isLoading,
+    isError,
+    refetch,
+  } = useReadContract({
+    address: contractReady ? nftAddr : undefined,
     abi: pickaxeNftAbi,
     functionName: "tokensOfOwner",
     args: address ? [address] : undefined,
+    chainId: targetChainId,
     query: {
-      enabled: isConnected && !!address && !!nftAddr,
+      enabled: isConnected && !!address && contractReady,
       refetchInterval: 15_000,
     },
   });
@@ -30,13 +47,14 @@ export function useWalletPickaxes() {
         abi: pickaxeNftAbi,
         functionName: "tokenTier" as const,
         args: [id] as [bigint],
+        chainId: targetChainId,
       })),
     [tokenIds, nftAddr]
   );
 
   const { data: tierResults, isLoading: tiersLoading } = useReadContracts({
     contracts: tierCalls,
-    query: { enabled: tokenIds.length > 0 && !!nftAddr },
+    query: { enabled: tokenIds.length > 0 && contractReady },
   });
 
   const pickaxes = useMemo((): PickaxeNFT[] => {
@@ -51,8 +69,16 @@ export function useWalletPickaxes() {
 
   return {
     pickaxes,
-    isLoading: isConnected && (isLoading || (tokenIds.length > 0 && tiersLoading)),
+    walletAddress: address,
+    walletAddressShort: address ? truncateAddress(address) : null,
+    isLoading:
+      isConnected &&
+      contractReady &&
+      (isLoading || (tokenIds.length > 0 && tiersLoading)),
     isConnected,
+    isWrongNetwork,
+    isContractReady: contractReady,
+    isError,
     refetch,
   };
 }
