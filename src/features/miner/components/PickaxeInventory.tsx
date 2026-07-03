@@ -43,8 +43,7 @@ export default function PickaxeInventory({
           VPICK pickaxes
         </h2>
         <p className="mt-1 text-xs text-slate-500">
-          Select pickaxes to equip on your miner. Press Stake in the roster when
-          the pool opens — rewards do not accrue until then.
+          Select pickaxes to equip on your miner, then press Stake in the roster.
           {process.env.NEXT_PUBLIC_MINER_DEMO_PICKAXES === "1" && (
             <span className="mt-1 block text-[#7000ff]/80">
               Demo mode: preview pickaxes from /public are listed below.

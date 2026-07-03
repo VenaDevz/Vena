@@ -3,6 +3,7 @@
 import { useCallback, useMemo } from "react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits } from "viem";
+import { targetChainId } from "@/config/wagmi";
 import {
   hasMiningContract,
   isMiningDeployed,
@@ -24,6 +25,7 @@ export function useOnChainMining() {
     abi: venaMiningAbi,
     functionName: "getUserInfo",
     args: address ? [address] : undefined,
+    chainId: targetChainId,
     query: { enabled: readsEnabled, refetchInterval: 5_000 },
   });
 
@@ -31,7 +33,8 @@ export function useOnChainMining() {
     address: VENA_MINING_ADDRESS,
     abi: venaMiningAbi,
     functionName: "isActive",
-    query: { enabled: isMiningDeployed },
+    chainId: targetChainId,
+    query: { enabled: isMiningDeployed, refetchInterval: 15_000 },
   });
 
   const { data: isApproved, refetch: refetchApproval } = useReadContract({
@@ -39,6 +42,7 @@ export function useOnChainMining() {
     abi: pickaxeNftAbi,
     functionName: "isApprovedForAll",
     args: address ? [address, VENA_MINING_ADDRESS] : undefined,
+    chainId: targetChainId,
     query: { enabled: writesEnabled },
   });
 
@@ -54,6 +58,7 @@ export function useOnChainMining() {
   const ensureApproval = useCallback(async (): Promise<boolean> => {
     if (!writesEnabled || isApproved) return true;
     await writeContractAsync({
+      chainId: targetChainId,
       address: PICKAXE_NFT_ADDRESS,
       abi: pickaxeNftAbi,
       functionName: "setApprovalForAll",
@@ -71,6 +76,7 @@ export function useOnChainMining() {
 
       await ensureApproval();
       await writeContractAsync({
+        chainId: targetChainId,
         address: VENA_MINING_ADDRESS,
         abi: venaMiningAbi,
         functionName: "stakeNFT",
@@ -94,6 +100,7 @@ export function useOnChainMining() {
       if (!writesEnabled || tokenId < 0 || !stakedIds.has(tokenId)) return false;
 
       await writeContractAsync({
+        chainId: targetChainId,
         address: VENA_MINING_ADDRESS,
         abi: venaMiningAbi,
         functionName: "unstakeNFT",
@@ -109,6 +116,7 @@ export function useOnChainMining() {
     if (!writesEnabled || pendingWei === BigInt(0)) return false;
 
     await writeContractAsync({
+      chainId: targetChainId,
       address: VENA_MINING_ADDRESS,
       abi: venaMiningAbi,
       functionName: "claimRewards",

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useReadContract } from "wagmi";
 import { formatUnits } from "viem";
+import { targetChainId } from "@/config/wagmi";
 import {
   isMiningDeployed,
   VENA_MINING_ADDRESS,
@@ -41,6 +42,7 @@ export function usePoolStats(userPower: number): PoolStats | null {
     address: VENA_MINING_ADDRESS,
     abi: venaMiningAbi,
     functionName: "poolBalance",
+    chainId: targetChainId,
     query: { enabled, refetchInterval: 15_000 },
   });
 
@@ -48,6 +50,7 @@ export function usePoolStats(userPower: number): PoolStats | null {
     address: VENA_MINING_ADDRESS,
     abi: venaMiningAbi,
     functionName: "rewardPerSecond",
+    chainId: targetChainId,
     query: { enabled, refetchInterval: 15_000 },
   });
 
@@ -55,6 +58,7 @@ export function usePoolStats(userPower: number): PoolStats | null {
     address: VENA_MINING_ADDRESS,
     abi: venaMiningAbi,
     functionName: "totalPower",
+    chainId: targetChainId,
     query: { enabled, refetchInterval: 15_000 },
   });
 
@@ -62,6 +66,7 @@ export function usePoolStats(userPower: number): PoolStats | null {
     address: VENA_MINING_ADDRESS,
     abi: venaMiningAbi,
     functionName: "isActive",
+    chainId: targetChainId,
     query: { enabled, refetchInterval: 15_000 },
   });
 
