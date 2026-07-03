@@ -23,6 +23,10 @@ export default function StorePanel({
 
   const handleBuy = (item: StoreItem) => {
     if (ownedItemIds.has(item.id)) return;
+    if (item.priceVena == null) {
+      onNotify("Accessory pricing coming soon");
+      return;
+    }
     if (balanceVena < item.priceVena) {
       onNotify("Insufficient balance");
       return;

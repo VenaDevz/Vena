@@ -61,7 +61,7 @@ export const RARITY_CONFIG: Record<
     glowClass: "rarity-emerald",
     hashrate: 320,
     bgGradient: "linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(10,15,22,0.9) 100%)",
-    image: "/miner/pickaxes/emerald.png",
+    image: "/emerald.png",
   },
 };
 

@@ -28,6 +28,7 @@ export default function UpgradePanel({
   const upgradeEndsAt = useMinerStore((s) => s.upgradeEndsAt);
   const [now, setNow] = useState(Date.now());
 
+  const pricingEnabled = GAME_CONFIG.upgrade.pricingEnabled;
   const isUpgrading = upgradeEndsAt !== null && upgradeEndsAt > now;
   const remainingMs = isUpgrading ? upgradeEndsAt - now : 0;
   const nextCost = getUpgradeCostVena(level);
@@ -46,6 +47,10 @@ export default function UpgradePanel({
   }, [now, upgradeEndsAt, onUpgradeComplete]);
 
   const handleStart = () => {
+    if (!pricingEnabled) {
+      onNotify("Level upgrade pricing coming soon");
+      return;
+    }
     if (isUpgrading) return;
     if (balanceVena < nextCost) {
       onNotify("Insufficient balance");
@@ -58,6 +63,7 @@ export default function UpgradePanel({
   };
 
   const handleSkip = () => {
+    if (!pricingEnabled) return;
     if (!isUpgrading) return;
     if (balanceVena < skipCost) {
       onNotify("Insufficient balance");
@@ -87,16 +93,24 @@ export default function UpgradePanel({
             {level}
           </span>
         </div>
-        <div className="mt-2 flex items-center justify-between text-sm">
-          <span className="text-slate-500">Next upgrade</span>
-          <span className="font-medium text-[#00f0ff]">
-            {formatVena(nextCost)} VENA
-          </span>
-        </div>
-        <div className="mt-2 flex items-center justify-between text-sm">
-          <span className="text-slate-500">Duration</span>
-          <span className="text-slate-400">4 hours</span>
-        </div>
+        {pricingEnabled ? (
+          <>
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-slate-500">Next upgrade</span>
+              <span className="font-medium text-[#00f0ff]">
+                {formatVena(nextCost)} VENA
+              </span>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-slate-500">Duration</span>
+              <span className="text-slate-400">4 hours</span>
+            </div>
+          </>
+        ) : (
+          <p className="mt-3 text-xs text-slate-500">
+            Upgrade pricing is not set yet — character levels unlock soon.
+          </p>
+        )}
       </div>
 
       {isUpgrading && (
@@ -114,19 +128,21 @@ export default function UpgradePanel({
         <button
           type="button"
           onClick={handleStart}
-          disabled={isUpgrading}
+          disabled={!pricingEnabled || isUpgrading}
           className="miner-panel-title flex-1 rounded-xl border border-[#00f0ff]/40 bg-[#00f0ff]/10 py-3 text-sm font-semibold text-[#00f0ff] transition-colors hover:bg-[#00f0ff]/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Upgrade level
+          {pricingEnabled ? "Upgrade level" : "Coming soon"}
         </button>
-        <button
-          type="button"
-          onClick={handleSkip}
-          disabled={!isUpgrading}
-          className="miner-panel-title flex-1 rounded-xl border border-[#7000ff]/40 bg-[#7000ff]/10 py-3 text-sm font-semibold text-[#7000ff] transition-colors hover:bg-[#7000ff]/20 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Finish now ({formatVena(skipCost)} VENA)
-        </button>
+        {pricingEnabled && (
+          <button
+            type="button"
+            onClick={handleSkip}
+            disabled={!isUpgrading}
+            className="miner-panel-title flex-1 rounded-xl border border-[#7000ff]/40 bg-[#7000ff]/10 py-3 text-sm font-semibold text-[#7000ff] transition-colors hover:bg-[#7000ff]/20 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Finish now ({formatVena(skipCost)} VENA)
+          </button>
+        )}
       </div>
     </section>
   );

@@ -175,10 +175,12 @@ export const useMinerStore = create<MinerStore>()(
       },
 
       buyAccessory: (item, availableBalance, targetSlotIndex) => {
+        const price = item.priceVena;
         const state = get();
         if (
+          price == null ||
           state.ownedAccessoryIds.includes(item.id) ||
-          availableBalance < item.priceVena
+          availableBalance < price
         ) {
           return false;
         }
@@ -194,7 +196,7 @@ export const useMinerStore = create<MinerStore>()(
           return {
             ownedAccessoryIds: nextOwned,
             accessoryIdBySlot: nextAccessorySlots,
-            localSpentVena: prev.localSpentVena + item.priceVena,
+            localSpentVena: prev.localSpentVena + price,
           };
         });
         return true;
@@ -238,6 +240,7 @@ export const useMinerStore = create<MinerStore>()(
 
       startUpgrade: (availableBalance) => {
         const state = get();
+        if (!GAME_CONFIG.upgrade.pricingEnabled) return false;
         if (state.upgradeEndsAt !== null && state.upgradeEndsAt > Date.now()) {
           return false;
         }
@@ -254,6 +257,7 @@ export const useMinerStore = create<MinerStore>()(
 
       skipUpgrade: (availableBalance) => {
         const state = get();
+        if (!GAME_CONFIG.upgrade.pricingEnabled) return false;
         const isUpgrading =
           state.upgradeEndsAt !== null && state.upgradeEndsAt > Date.now();
         if (!isUpgrading) return false;

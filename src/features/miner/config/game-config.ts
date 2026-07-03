@@ -9,7 +9,8 @@ export type StoreItem = {
   name: string;
   description: string;
   type: StoreItemType;
-  priceVena: number;
+  /** null = price not set yet (not purchasable). */
+  priceVena: number | null;
   speedBonusPercent?: number;
 };
 
@@ -63,6 +64,8 @@ export const GAME_CONFIG = {
   },
 
   upgrade: {
+    /** Set true when level-upgrade pricing is finalized. */
+    pricingEnabled: false,
     baseCostVena: 100,
     costMultiplier: 1.5,
     durationMs: 4 * 60 * 60 * 1000,
@@ -76,7 +79,7 @@ export const GAME_CONFIG = {
         name: "Power Ring",
         description: "+10% mining speed",
         type: "accessory" as const,
-        priceVena: 250,
+        priceVena: null,
         speedBonusPercent: 10,
       },
       {
@@ -84,7 +87,7 @@ export const GAME_CONFIG = {
         name: "Flux Band",
         description: "+5% mining speed",
         type: "accessory" as const,
-        priceVena: 120,
+        priceVena: null,
         speedBonusPercent: 5,
       },
     ] satisfies StoreItem[],

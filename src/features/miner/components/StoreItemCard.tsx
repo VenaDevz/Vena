@@ -15,7 +15,9 @@ export default function StoreItemCard({
   balanceVena,
   onBuy,
 }: StoreItemCardProps) {
-  const canAfford = balanceVena >= item.priceVena;
+  const price = item.priceVena;
+  const priceSet = price != null;
+  const canAfford = priceSet && balanceVena >= price;
 
   return (
     <article className="rounded-xl border border-white/5 bg-black/25 p-4 transition-colors hover:border-[#00f0ff]/20">
@@ -39,12 +41,16 @@ export default function StoreItemCard({
       </div>
 
       <div className="mt-3 flex items-center justify-between">
-        <span className="miner-panel-title text-base font-bold text-[#00f0ff]">
-          {formatVena(item.priceVena)} VENA
-        </span>
+        {priceSet ? (
+          <span className="miner-panel-title text-base font-bold text-[#00f0ff]">
+            {formatVena(price)} VENA
+          </span>
+        ) : (
+          <span className="text-xs text-slate-500">Price coming soon</span>
+        )}
         {owned ? (
           <span className="text-xs font-medium text-emerald-400/90">Owned</span>
-        ) : (
+        ) : priceSet ? (
           <button
             type="button"
             onClick={() => onBuy(item)}
@@ -53,6 +59,10 @@ export default function StoreItemCard({
           >
             Buy
           </button>
+        ) : (
+          <span className="text-[10px] uppercase tracking-wider text-slate-600">
+            Soon
+          </span>
         )}
       </div>
     </article>
