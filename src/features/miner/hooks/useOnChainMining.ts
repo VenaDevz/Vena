@@ -7,6 +7,7 @@ import {
   hasMiningContract,
   PICKAXE_NFT_ADDRESS,
   pickaxeNftAbi,
+  STAKING_LIVE,
   VENA_MINING_ADDRESS,
   venaMiningAbi,
 } from "../config/mining-contract";
@@ -15,14 +16,15 @@ export function useOnChainMining() {
   const { address, isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
 
-  const enabled = isConnected && !!address && hasMiningContract;
+  const enabled =
+    isConnected && !!address && STAKING_LIVE && !!VENA_MINING_ADDRESS;
 
   const { data: userInfo, refetch: refetchUserInfo } = useReadContract({
     address: VENA_MINING_ADDRESS,
     abi: venaMiningAbi,
     functionName: "getUserInfo",
     args: address ? [address] : undefined,
-    query: { enabled },
+    query: { enabled, refetchInterval: 5_000 },
   });
 
   const { data: miningActive } = useReadContract({
@@ -47,6 +49,7 @@ export function useOnChainMining() {
 
   const pendingWei = (userInfo?.[2] ?? BigInt(0)) as bigint;
   const pendingVena = Number(formatUnits(pendingWei, 18));
+  const userPower = Number((userInfo?.[0] ?? BigInt(0)) as bigint);
 
   const ensureApproval = useCallback(async (): Promise<boolean> => {
     if (!enabled || isApproved) return true;
@@ -120,6 +123,7 @@ export function useOnChainMining() {
     miningActive: Boolean(miningActive),
     stakedIds,
     pendingVena,
+    userPower,
     isApproved: Boolean(isApproved),
     isPending,
     stakeToken,

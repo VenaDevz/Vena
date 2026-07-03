@@ -7,6 +7,7 @@ import StorePanel from "./StorePanel";
 import PickaxeInventory from "./PickaxeInventory";
 import type { PickaxeNFT } from "@/lib/types";
 import type { StoreItem } from "../config/game-config";
+import type { PoolStats } from "../hooks/usePoolStats";
 
 type ControlPanelProps = {
   level: number;
@@ -23,11 +24,11 @@ type ControlPanelProps = {
   isConnected: boolean;
   isMiningLive: boolean;
   miningActive: boolean;
+  poolStats: PoolStats | null;
   stakedIds: Set<number>;
   pendingOnChainVena: number;
   isClaimPending: boolean;
   ownedAccessoryIds: Set<string>;
-  onClaimSession: () => void;
   onClaimOnChain: () => void;
   onStartUpgrade: () => boolean;
   onSkipUpgrade: () => boolean;
@@ -49,9 +50,10 @@ export default function ControlPanel(props: ControlPanelProps) {
         equippedAccessories={props.equippedAccessories}
         earnedVena={props.earnedVena}
         isMining={props.isMiningLive}
+        miningActive={props.miningActive}
+        poolStats={props.poolStats}
         pendingOnChainVena={props.pendingOnChainVena}
         isClaimPending={props.isClaimPending}
-        onClaimSession={props.onClaimSession}
         onClaimOnChain={props.onClaimOnChain}
       />
       <ActiveStakesPanel

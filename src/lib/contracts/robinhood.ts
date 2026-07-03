@@ -1,10 +1,42 @@
 /** Robinhood Chain contract addresses + ABIs for VPICK mint / forge */
 
+/** Mainnet deployments — used when env vars are unset (e.g. Vercel misconfig). */
+export const RH_MAINNET_CONTRACTS = {
+  pickaxeNft: "0xe250751a2514e0d1267AcBEBF43787aF579b6F4c",
+  forge: "0x99A1ac88eeB9eFFF12Be0607F4089c40F6765823",
+  venaToken: "0xFbD1Bf9d354CD8197Ab54f80778C03cc468ADAaf",
+  staking: "0x1dDA64bd76165400Ad929D4d94E0D8285288D37B",
+} as const;
+
+const RH_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 4663);
+
+function resolveRhAddress(
+  envVal: string | undefined,
+  mainnetFallback: `0x${string}`
+): `0x${string}` {
+  if (envVal && /^0x[a-fA-F0-9]{40}$/.test(envVal)) {
+    return envVal as `0x${string}`;
+  }
+  return RH_CHAIN_ID === 4663 ? mainnetFallback : ("" as `0x${string}`);
+}
+
 export const RH_CONTRACTS = {
-  pickaxeNft: (process.env.NEXT_PUBLIC_PICKAXE_NFT ?? "") as `0x${string}`,
-  forge: (process.env.NEXT_PUBLIC_FORGE ?? "") as `0x${string}`,
-  venaToken: (process.env.NEXT_PUBLIC_VENA_TOKEN ?? "") as `0x${string}`,
-  staking: (process.env.NEXT_PUBLIC_STAKING ?? "") as `0x${string}`,
+  pickaxeNft: resolveRhAddress(
+    process.env.NEXT_PUBLIC_PICKAXE_NFT,
+    RH_MAINNET_CONTRACTS.pickaxeNft
+  ),
+  forge: resolveRhAddress(
+    process.env.NEXT_PUBLIC_FORGE,
+    RH_MAINNET_CONTRACTS.forge
+  ),
+  venaToken: resolveRhAddress(
+    process.env.NEXT_PUBLIC_VENA_TOKEN,
+    RH_MAINNET_CONTRACTS.venaToken
+  ),
+  staking: resolveRhAddress(
+    process.env.NEXT_PUBLIC_STAKING,
+    RH_MAINNET_CONTRACTS.staking
+  ),
 } as const;
 
 export function isPickaxeDeployed(): boolean {

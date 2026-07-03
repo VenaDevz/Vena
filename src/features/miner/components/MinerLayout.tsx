@@ -7,7 +7,6 @@ import ControlPanel from "./ControlPanel";
 import {
   GAME_CONFIG,
   SLOT_DEFINITIONS,
-  formatSessionEarned,
   type StoreItem,
 } from "../config/game-config";
 import { useWalletVena } from "../hooks/useWalletVena";
@@ -17,6 +16,7 @@ import {
   useMiningLoop,
 } from "../hooks/useMiningLoop";
 import { useOnChainMining } from "../hooks/useOnChainMining";
+import { usePoolStats } from "../hooks/usePoolStats";
 import { hasMiningContract } from "../config/mining-contract";
 import { mergeWithDemoPickaxes } from "../config/demo-pickaxes";
 import {
@@ -34,6 +34,7 @@ export default function MinerLayout() {
     isContractReady,
   } = useWalletPickaxes();
   const chain = useOnChainMining();
+  const poolStats = usePoolStats(chain.userPower);
 
   const walletPickaxes = useMemo(() => {
     const merged = mergeWithDemoPickaxes(walletPickaxesRaw);
@@ -60,7 +61,6 @@ export default function MinerLayout() {
   const startUpgrade = useMinerStore((s) => s.startUpgrade);
   const skipUpgrade = useMinerStore((s) => s.skipUpgrade);
   const completeUpgrade = useMinerStore((s) => s.completeUpgrade);
-  const claimSessionRewards = useMinerStore((s) => s.claimSessionRewards);
 
   const [toast, setToast] = useState<string | null>(null);
 
@@ -116,7 +116,12 @@ export default function MinerLayout() {
     [walletPickaxes, chain.stakedIds]
   );
 
-  useMiningLoop(equippedPickaxes, equippedAccessories, isMiningLive);
+  useMiningLoop(
+    equippedPickaxes,
+    equippedAccessories,
+    // Session tick only before on-chain pool is live (preview UI).
+    !hasMiningContract || !chain.miningActive ? isMiningLive : false
+  );
 
   const handleUnlockSlot = useCallback(
     (slotIndex: number): boolean => unlockSlot(slotIndex, availableBalance),
@@ -203,12 +208,6 @@ export default function MinerLayout() {
     [buyAccessory, availableBalance, unlockedSlots, accessoryBySlot]
   );
 
-  const handleClaimSession = useCallback(() => {
-    const amount = claimSessionRewards();
-    if (amount <= 0) return;
-    notify(`Session saved — ${formatSessionEarned(amount)} VENA`);
-  }, [claimSessionRewards, notify]);
-
   const handleClaimOnChain = useCallback(async () => {
     try {
       const ok = await chain.claimOnChain();
@@ -280,11 +279,11 @@ export default function MinerLayout() {
             isConnected={isConnected}
             isMiningLive={isMiningLive}
             miningActive={chain.miningActive}
+            poolStats={poolStats}
             stakedIds={chain.stakedIds}
             pendingOnChainVena={chain.pendingVena}
             isClaimPending={chain.isPending}
             ownedAccessoryIds={ownedAccessoryIdSet}
-            onClaimSession={handleClaimSession}
             onClaimOnChain={() => {
               void handleClaimOnChain();
             }}

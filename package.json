@@ -10,7 +10,14 @@
     "forge:build": "forge build",
     "forge:deploy:nft": "forge script script/robinhood/DeployNFT.s.sol --rpc-url robinhood --broadcast",
     "forge:deploy:forge": "forge script script/robinhood/DeployForge.s.sol --rpc-url robinhood --broadcast",
-    "forge:deploy:mining": "forge script script/robinhood/DeployMining.s.sol --rpc-url robinhood --broadcast"
+    "forge:deploy:mining": "forge script script/robinhood/DeployMining.s.sol --rpc-url robinhood --broadcast",
+    "forge:deploy:mining-v2": "forge script script/robinhood/DeployMiningV2.s.sol --rpc-url robinhood --broadcast",
+    "treasury:keeper": "node scripts/treasury-buyback.mjs",
+    "treasury:keeper:run": "node scripts/treasury-buyback.mjs --execute",
+    "treasury:keeper:watch": "node scripts/treasury-buyback.mjs --execute --watch",
+    "treasury:buyback": "node scripts/treasury-buyback.mjs --buyback-only",
+    "treasury:fund": "node scripts/treasury-buyback.mjs --fund-only",
+    "treasury:fund:run": "node scripts/treasury-buyback.mjs --fund-only --execute"
   },
   "dependencies": {
     "@reown/appkit": "^1.8.20",

@@ -34,7 +34,7 @@ contract DeployMining is Script {
         console.log("VENA:", vena);
         console.log("PickaxeNFT:", nft);
         console.log("");
-        console.log("NEXT: fund with VENA buybacks, then call start() — staking stays OFF until then");
+        console.log("NEXT: fund with VENA buybacks, then call start() - staking stays OFF until then");
         console.log("NEXT_PUBLIC_STAKING=", address(mining));
     }
 }

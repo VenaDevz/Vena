@@ -1,11 +1,14 @@
-export const PICKAXE_NFT_ADDRESS = (process.env.NEXT_PUBLIC_PICKAXE_NFT ??
-  "") as `0x${string}`;
+import { RH_CONTRACTS } from "@/lib/contracts/robinhood";
 
-export const VENA_MINING_ADDRESS = (process.env.NEXT_PUBLIC_VENA_MINING ??
-  "") as `0x${string}`;
+export const PICKAXE_NFT_ADDRESS = RH_CONTRACTS.pickaxeNft;
+
+/** Set NEXT_PUBLIC_STAKING_LIVE=true on Vercel when announcing staking. */
+export const STAKING_LIVE = process.env.NEXT_PUBLIC_STAKING_LIVE === "true";
+
+export const VENA_MINING_ADDRESS = RH_CONTRACTS.staking;
 
 export const hasMiningContract = Boolean(
-  PICKAXE_NFT_ADDRESS && VENA_MINING_ADDRESS
+  STAKING_LIVE && PICKAXE_NFT_ADDRESS && VENA_MINING_ADDRESS
 );
 
 export const pickaxeNftAbi = [
@@ -31,6 +34,7 @@ export const pickaxeNftAbi = [
   },
 ] as const;
 
+/** VenaMining / VenaMiningV2 — Robinhood Chain staking pool. */
 export const venaMiningAbi = [
   {
     name: "getUserInfo",
@@ -42,6 +46,20 @@ export const venaMiningAbi = [
       { name: "stakedIds", type: "uint256[]" },
       { name: "pending", type: "uint256" },
     ],
+  },
+  {
+    name: "pendingRewards",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "user", type: "address" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "stakedTokenIds",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "user", type: "address" }],
+    outputs: [{ type: "uint256[]" }],
   },
   {
     name: "stakeNFT",
@@ -70,5 +88,40 @@ export const venaMiningAbi = [
     stateMutability: "view",
     inputs: [],
     outputs: [{ type: "bool" }],
+  },
+  {
+    name: "started",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "bool" }],
+  },
+  {
+    name: "poolBalance",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "rewardPerSecond",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "totalPower",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "fundRewards",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "amount", type: "uint256" }],
+    outputs: [],
   },
 ] as const;

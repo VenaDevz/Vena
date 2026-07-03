@@ -1,15 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { formatVenaAmount } from "@/lib/mining";
+import { hasMiningContract } from "../config/mining-contract";
+import type { PoolStats } from "../hooks/usePoolStats";
+import type { StoreItem } from "../config/game-config";
 import {
   formatSessionEarned,
   getEquippedEffectivePower,
   getVenaPerDay,
-  getVenaPerSecond,
-  type StoreItem,
 } from "../config/game-config";
-import { formatVenaAmount } from "@/lib/mining";
-import { hasMiningContract } from "../config/mining-contract";
 import type { PickaxeNFT } from "@/lib/types";
 
 type MiningMonitorProps = {
@@ -18,9 +17,10 @@ type MiningMonitorProps = {
   equippedAccessories: StoreItem[];
   earnedVena: number;
   isMining: boolean;
+  miningActive: boolean;
+  poolStats: PoolStats | null;
   pendingOnChainVena: number;
   isClaimPending: boolean;
-  onClaimSession: () => void;
   onClaimOnChain: () => void;
 };
 
@@ -30,26 +30,28 @@ export default function MiningMonitor({
   equippedAccessories,
   earnedVena,
   isMining,
+  miningActive,
+  poolStats,
   pendingOnChainVena,
   isClaimPending,
-  onClaimSession,
   onClaimOnChain,
 }: MiningMonitorProps) {
-  const [sessionClaimedFlash, setSessionClaimedFlash] = useState(false);
+  const previewPower = getEquippedEffectivePower(equippedPickaxes);
+  const previewDaily = getVenaPerDay(level, equippedPickaxes, equippedAccessories);
 
-  const effectivePower = getEquippedEffectivePower(equippedPickaxes);
-  const venaPerDay = getVenaPerDay(level, equippedPickaxes, equippedAccessories);
-  const venaPerSecond = getVenaPerSecond(
-    level,
-    equippedPickaxes,
-    equippedAccessories
+  const onChainLive = Boolean(
+    hasMiningContract && poolStats?.isActive && isMining
   );
+  const showPreview = !onChainLive;
 
-  const handleSessionClaim = () => {
-    onClaimSession();
-    setSessionClaimedFlash(true);
-    window.setTimeout(() => setSessionClaimedFlash(false), 2000);
-  };
+  const displayDaily = onChainLive
+    ? (poolStats?.userDailyVena ?? 0)
+    : previewDaily;
+  const displayPower = onChainLive
+    ? poolStats && poolStats.userSharePct > 0
+      ? `${poolStats.userSharePct.toFixed(2)}% pool share`
+      : "0% pool share"
+    : `${previewPower.toFixed(0)} mining power (preview)`;
 
   return (
     <section className="miner-glass rounded-2xl p-5" aria-label="Mining monitor">
@@ -59,91 +61,128 @@ export default function MiningMonitor({
             Mining monitor
           </p>
           <h2 className="miner-panel-title text-sm font-semibold text-white">
-            Live output
+            {onChainLive ? "Live on-chain output" : "Yield preview"}
           </h2>
         </div>
         <div className="flex items-center gap-2">
           {isMining && (
             <span className="flex items-center gap-1.5 rounded-lg border border-[#00ff88]/25 bg-[#00ff88]/10 px-2 py-1 text-[10px] uppercase tracking-wider text-[#00ff88]">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#00ff88]" />
-              Live
+              Staked
             </span>
           )}
-          <span className="rounded-lg border border-[#00f0ff]/20 bg-[#00f0ff]/5 px-2 py-1 text-[10px] uppercase tracking-wider text-[#00f0ff]">
+          {poolStats?.isActive && (
+            <span className="rounded-lg border border-[#00f0ff]/20 bg-[#00f0ff]/5 px-2 py-1 text-[10px] uppercase tracking-wider text-[#00f0ff]">
+              Pool live
+            </span>
+          )}
+          <span className="rounded-lg border border-white/10 bg-black/20 px-2 py-1 text-[10px] uppercase tracking-wider text-slate-400">
             Lv.{level}
           </span>
         </div>
       </div>
 
+      {poolStats?.isActive && (
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="rounded-lg border border-white/5 bg-black/20 px-3 py-2">
+            <p className="text-[9px] uppercase tracking-wider text-slate-600">
+              Pool balance
+            </p>
+            <p className="miner-panel-title text-sm font-semibold tabular-nums text-white">
+              {formatVenaAmount(poolStats.poolBalanceVena)}
+            </p>
+          </div>
+          <div className="rounded-lg border border-white/5 bg-black/20 px-3 py-2">
+            <p className="text-[9px] uppercase tracking-wider text-slate-600">
+              Network power
+            </p>
+            <p className="miner-panel-title text-sm font-semibold tabular-nums text-white">
+              {poolStats.totalPower.toLocaleString()}
+            </p>
+          </div>
+          <div className="rounded-lg border border-white/5 bg-black/20 px-3 py-2">
+            <p className="text-[9px] uppercase tracking-wider text-slate-600">
+              Pool emission
+            </p>
+            <p className="miner-panel-title text-sm font-semibold tabular-nums text-[#00f0ff]">
+              {formatVenaAmount(poolStats.poolDailyVena)}
+              <span className="text-[10px] font-normal text-slate-500">/day</span>
+            </p>
+          </div>
+          <div className="rounded-lg border border-white/5 bg-black/20 px-3 py-2">
+            <p className="text-[9px] uppercase tracking-wider text-slate-600">
+              Your share
+            </p>
+            <p className="miner-panel-title text-sm font-semibold tabular-nums text-[#00ff88]">
+              {poolStats.userSharePct.toFixed(2)}%
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-xl border border-white/5 bg-black/25 p-4">
           <p className="text-[10px] uppercase tracking-wider text-slate-500">
-            Est. daily yield
+            {onChainLive ? "Your est. daily yield" : "Est. daily yield (preview)"}
           </p>
           <p className="miner-panel-title mt-1 text-2xl font-bold tabular-nums text-[#00f0ff]">
-            {formatVenaAmount(venaPerDay)}
+            {formatVenaAmount(displayDaily)}
             <span className="ml-1 text-xs font-normal text-slate-500">/day</span>
           </p>
-          <p className="mt-1 text-[10px] text-slate-600">
-            {effectivePower.toFixed(0)} mining power
-          </p>
+          <p className="mt-1 text-[10px] text-slate-600">{displayPower}</p>
+          {onChainLive && (
+            <p className="mt-1 text-[10px] text-slate-600">
+              Updates as pool balance, emission, and total staked power change.
+            </p>
+          )}
         </div>
-        <div className="rounded-xl border border-[#7000ff]/20 bg-[#7000ff]/5 p-4">
+        <div className="rounded-xl border border-[#00ff88]/20 bg-[#00ff88]/5 p-4">
           <p className="text-[10px] uppercase tracking-wider text-slate-500">
-            Session earned
+            Claimable rewards
           </p>
-          <p
-            className={[
-              "miner-panel-title mt-1 text-2xl font-bold tabular-nums text-[#7000ff]",
-              isMining ? "transition-[opacity] duration-300" : "",
-            ].join(" ")}
-          >
-            {formatSessionEarned(earnedVena)}
+          <p className="miner-panel-title mt-1 text-2xl font-bold tabular-nums text-[#00ff88]">
+            {hasMiningContract && miningActive
+              ? formatVenaAmount(pendingOnChainVena)
+              : showPreview
+                ? formatSessionEarned(earnedVena)
+                : "0"}
             <span className="ml-1 text-xs font-normal text-slate-500">VENA</span>
+          </p>
+          <p className="mt-1 text-[10px] text-slate-600">
+            {hasMiningContract && miningActive
+              ? "Accrues on-chain after stake — press Claim to receive."
+              : "Preview only until pool is live and you stake."}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-        <button
-          type="button"
-          onClick={handleSessionClaim}
-          disabled={earnedVena <= 0 || isClaimPending}
-          className="miner-panel-title flex-1 rounded-xl border border-[#7000ff]/40 bg-[#7000ff]/10 py-3 text-sm font-semibold text-[#7000ff] transition-colors hover:bg-[#7000ff]/20 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {sessionClaimedFlash
-            ? "Session saved"
-            : "Save session rewards"}
-        </button>
-        {hasMiningContract && (
+      {hasMiningContract && miningActive && (
+        <div className="mt-4">
           <button
             type="button"
             onClick={onClaimOnChain}
             disabled={pendingOnChainVena <= 0 || isClaimPending}
-            className="miner-panel-title flex-1 rounded-xl border border-[#00ff88]/40 bg-[#00ff88]/10 py-3 text-sm font-semibold text-[#00ff88] transition-colors hover:bg-[#00ff88]/20 disabled:cursor-not-allowed disabled:opacity-40"
+            className="miner-panel-title w-full rounded-xl border border-[#00ff88]/40 bg-[#00ff88]/10 py-3 text-sm font-semibold text-[#00ff88] transition-colors hover:bg-[#00ff88]/20 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isClaimPending
               ? "Confirm in wallet…"
-              : `Claim on-chain (${formatVenaAmount(pendingOnChainVena)})`}
+              : pendingOnChainVena > 0
+                ? `Claim ${formatVenaAmount(pendingOnChainVena)} VENA`
+                : "Claim rewards"}
           </button>
-        )}
-      </div>
-
-      {hasMiningContract && pendingOnChainVena > 0 && (
-        <p className="mt-2 text-[10px] text-slate-600">
-          On-chain pending from VenaMining contract — claim sends VENA to your
-          wallet.
-        </p>
+        </div>
       )}
 
       <p className="mt-3 text-xs text-slate-600">
         {!hasMiningContract
-          ? "On-chain staking opens soon. Select pickaxes to preview yields — rewards accrue only after you stake when the pool goes live."
-          : equippedPickaxes.length === 0
-          ? "Select a VPICK pickaxe to preview yields. Press Stake in the roster when the pool is active."
-          : !isMining
-            ? "Preview mode — session rewards accrue only after on-chain stake when the pool is live."
-            : `${equippedPickaxes.length} pickaxe(s) staked · +${formatVenaAmount(venaPerSecond, 6)}/sec`}
+          ? "Staking opens after pool deploy. Select pickaxes, then press Stake — nothing mines until you confirm in your wallet."
+          : !miningActive
+            ? "Pool not started yet. Select pickaxes to preview — Stake unlocks when treasury funds the pool."
+            : equippedPickaxes.length === 0
+              ? "Select a VPICK pickaxe, then press Stake in the roster. Rewards accrue on-chain; claim manually."
+              : !isMining
+                ? "Pickaxes selected but not staked. Press Stake per pickaxe — selection alone does not mine."
+                : "Staked · rate shifts when others stake/unstake or treasury adds buybacks to the pool."}
       </p>
     </section>
   );
