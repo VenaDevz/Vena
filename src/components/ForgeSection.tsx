@@ -52,15 +52,26 @@ export default function ForgeSection() {
               }}
             >
               <div className="aspect-square relative overflow-hidden">
-                <Image
-                  src={getPickaxeImage(tier.id as Rarity)}
-                  alt={`${tier.label} Pickaxe`}
-                  fill
-                  className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 640px) 50vw, 20vw"
-                />
                 <div
-                  className="absolute inset-0"
+                  className={[
+                    "absolute",
+                    tier.id === "Diamond"
+                      ? "inset-5 sm:inset-6"
+                      : tier.id === "Emerald"
+                        ? "inset-4 sm:inset-5"
+                        : "inset-3 sm:inset-4",
+                  ].join(" ")}
+                >
+                  <Image
+                    src={getPickaxeImage(tier.id as Rarity)}
+                    alt={`${tier.label} Pickaxe`}
+                    fill
+                    className="object-contain opacity-90 transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 50vw, 20vw"
+                  />
+                </div>
+                <div
+                  className="pointer-events-none absolute inset-0"
                   style={{
                     background: `linear-gradient(to top, rgba(3,6,9,0.95) 0%, transparent 55%)`,
                   }}
