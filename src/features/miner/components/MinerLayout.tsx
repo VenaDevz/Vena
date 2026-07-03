@@ -16,6 +16,7 @@ import {
   useMiningLoop,
 } from "../hooks/useMiningLoop";
 import { useOnChainMining } from "../hooks/useOnChainMining";
+import { usePickaxesWithStaked } from "../hooks/usePickaxesWithStaked";
 import { usePoolStats } from "../hooks/usePoolStats";
 import { hasMiningContract, isMiningDeployed } from "../config/mining-contract";
 import { mergeWithDemoPickaxes } from "../config/demo-pickaxes";
@@ -36,13 +37,12 @@ export default function MinerLayout() {
   const chain = useOnChainMining();
   const poolStats = usePoolStats(chain.userPower);
 
-  const walletPickaxes = useMemo(() => {
-    const merged = mergeWithDemoPickaxes(walletPickaxesRaw);
-    return merged.map((p) => ({
-      ...p,
-      staked: p.id >= 0 && chain.stakedIds.has(p.id),
-    }));
-  }, [walletPickaxesRaw, chain.stakedIds]);
+  const walletPickaxesRawMerged = usePickaxesWithStaked(
+    mergeWithDemoPickaxes(walletPickaxesRaw),
+    chain.stakedIds
+  );
+
+  const walletPickaxes = walletPickaxesRawMerged;
 
   const level = useMinerStore((s) => s.level);
   const localSpentVena = useMinerStore((s) => s.localSpentVena);
@@ -160,12 +160,15 @@ export default function MinerLayout() {
       }
       try {
         await chain.stakeToken(pickaxe.id);
+        if (displayPickaxeId !== pickaxe.id) {
+          setDisplayPickaxe(pickaxe.id);
+        }
         notify(`${pickaxe.name} staked on-chain`);
       } catch {
         notify("Stake failed or was rejected");
       }
     },
-    [chain, notify]
+    [chain, notify, displayPickaxeId, setDisplayPickaxe]
   );
 
   const handleUnstakePickaxe = useCallback(
