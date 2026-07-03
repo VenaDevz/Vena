@@ -1,13 +1,16 @@
 # VenaMiningV3 + VenaLoadout
 
+> **Production staking uses VenaMiningV2** (`0x1dDA…D37B`, ~9.7M VENA pool).  
+> V3 is deployed but **parked** until loadout/Stratum migration is planned.
+
 ## Deployed (Robinhood mainnet)
 
-| Contract | Address |
-|----------|---------|
-| **VenaMiningV3** | `0xa3B98AE4aE2257bA279E9C7AB84c9EcfF5535f7e` |
-| **VenaLoadout** | `0x29865b0A6a9fA520b9d5DE47434c76936D032bcb` |
-| VenaMiningV3 (broken claim, deprecated) | `0x60825e0C77db1E45318D9A025854B775F94cd046` |
-| VenaMiningV2 (legacy) | `0x1dDA64bd76165400Ad929D4d94E0D8285288D37B` |
+| Contract | Address | Status |
+|----------|---------|--------|
+| **VenaMiningV2 (active)** | `0x1dDA64bd76165400Ad929D4d94E0D8285288D37B` | Use this for staking + keeper |
+| **VenaMiningV3** | `0xa3B98AE4aE2257bA279E9C7AB84c9EcfF5535f7e` | Parked (~10k test pool) |
+| **VenaLoadout** | `0x29865b0A6a9fA520b9d5DE47434c76936D032bcb` | Parked (flags off) |
+| VenaMiningV3 (broken claim) | `0x60825e0C77db1E45318D9A025854B775F94cd046` | Do not use |
 
 ## What V3 adds
 
@@ -42,14 +45,20 @@ Owner can add more: `loadout.addAccessory(id, price, bonusBps)`.
 - +500 bps per level above 1 (+5% per level)
 - Cost: 250k VENA × 1.4^(level−1)
 
-## Env (site + keeper)
+## Env (site + keeper) — V2 active
 
 ```
-NEXT_PUBLIC_STAKING=0xa3B98AE4aE2257bA279E9C7AB84c9EcfF5535f7e
-NEXT_PUBLIC_LOADOUT=0x29865b0A6a9fA520b9d5DE47434c76936D032bcb
-MINING=0xa3B98AE4aE2257bA279E9C7AB84c9EcfF5535f7e
+NEXT_PUBLIC_STAKING=0x1dDA64bd76165400Ad929D4d94E0D8285288D37B
+MINING=0x1dDA64bd76165400Ad929D4d94E0D8285288D37B
 NEXT_PUBLIC_STAKING_LIVE=false   # until announcement
-NEXT_PUBLIC_LOADOUT_LIVE=false   # until accessory/level UI wired
+NEXT_PUBLIC_LOADOUT_LIVE=false   # V3/loadout not in use
+```
+
+V3 addresses (keep for later, do **not** set as STAKING):
+
+```
+NEXT_PUBLIC_STAKING_V3=0xa3B98AE4aE2257bA279E9C7AB84c9EcfF5535f7e
+NEXT_PUBLIC_LOADOUT=0x29865b0A6a9fA520b9d5DE47434c76936D032bcb
 ```
 
 ## Migration from V2
