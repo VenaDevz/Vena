@@ -177,16 +177,23 @@ export function formatSupplyCap(current?: number): string {
 }
 
 /**
- * Base $VENA cost unit for upgrades. On-chain values live in VenaForge;
- * this is the display ladder (Gold = base, scaling by silverEquivalent).
+ * On-chain upgrade ladder (VenaForge) — doubles each tier.
+ * Must match tierUpgradeVena mapping on 0x99A1…5823.
  */
-export const UPGRADE_BASE_VENA = 1_000_000;
+export const TIER_UPGRADE_VENA: Record<Rarity, number> = {
+  Silver: 0,
+  Gold: 1_000_000,
+  Platinum: 2_000_000,
+  Diamond: 4_000_000,
+  Emerald: 8_000_000,
+};
+
+/** @deprecated use TIER_UPGRADE_VENA.Gold */
+export const UPGRADE_BASE_VENA = TIER_UPGRADE_VENA.Gold;
 
 /** $VENA cost to UPGRADE INTO a given tier (Silver has no upgrade cost). */
 export function tierUpgradeVena(tier: Rarity): number {
-  if (tier === "Silver") return 0;
-  const row = RARITY_TIERS.find((t) => t.id === tier);
-  return UPGRADE_BASE_VENA * (row?.silverEquivalent ?? 1);
+  return TIER_UPGRADE_VENA[tier] ?? 0;
 }
 
 /** @deprecated legacy alias — now returns the $VENA upgrade cost. */
