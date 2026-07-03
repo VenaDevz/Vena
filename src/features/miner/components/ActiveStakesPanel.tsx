@@ -42,8 +42,8 @@ export default function ActiveStakesPanel({
               Selected pickaxes
             </h2>
             <p className="mt-1 text-xs text-slate-500">
-              No pickaxes selected. Choose pickaxes below, then press Stake when
-              the mining pool opens.
+              No pickaxes selected. Choose pickaxes below, then press Stake to
+              mine on-chain.
             </p>
           </div>
         </div>
@@ -153,13 +153,6 @@ export default function ActiveStakesPanel({
           );
         })}
       </ul>
-
-      {!canStakeOnChain && (
-        <p className="mt-3 text-xs text-slate-600">
-          Staking opens when the buyback-fed mining pool goes live on-chain.
-          Selection only previews yields for now.
-        </p>
-      )}
     </section>
   );
 }

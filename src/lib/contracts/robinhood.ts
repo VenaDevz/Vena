@@ -5,7 +5,8 @@ export const RH_MAINNET_CONTRACTS = {
   pickaxeNft: "0xe250751a2514e0d1267AcBEBF43787aF579b6F4c",
   forge: "0x99A1ac88eeB9eFFF12Be0607F4089c40F6765823",
   venaToken: "0xFbD1Bf9d354CD8197Ab54f80778C03cc468ADAaf",
-  staking: "0x1dDA64bd76165400Ad929D4d94E0D8285288D37B",
+  staking: "0xa3B98AE4aE2257bA279E9C7AB84c9EcfF5535f7e",
+  loadout: "0x29865b0A6a9fA520b9d5DE47434c76936D032bcb",
 } as const;
 
 const RH_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 4663);
@@ -36,6 +37,10 @@ export const RH_CONTRACTS = {
   staking: resolveRhAddress(
     process.env.NEXT_PUBLIC_STAKING,
     RH_MAINNET_CONTRACTS.staking
+  ),
+  loadout: resolveRhAddress(
+    process.env.NEXT_PUBLIC_LOADOUT,
+    RH_MAINNET_CONTRACTS.loadout
   ),
 } as const;
 

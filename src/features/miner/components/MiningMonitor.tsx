@@ -1,7 +1,7 @@
 "use client";
 
 import { formatVenaAmount } from "@/lib/mining";
-import { hasMiningContract } from "../config/mining-contract";
+import { hasMiningContract, isMiningDeployed } from "../config/mining-contract";
 import type { PoolStats } from "../hooks/usePoolStats";
 import type { StoreItem } from "../config/game-config";
 import {
@@ -40,9 +40,11 @@ export default function MiningMonitor({
   const previewDaily = getVenaPerDay(level, equippedPickaxes, equippedAccessories);
 
   const onChainLive = Boolean(
-    hasMiningContract && poolStats?.isActive && isMining
+    isMiningDeployed && poolStats?.isActive && isMining
   );
   const showPreview = !onChainLive;
+
+  const poolLive = Boolean(isMiningDeployed && poolStats?.isActive);
 
   const displayDaily = onChainLive
     ? (poolStats?.userDailyVena ?? 0)
@@ -71,7 +73,7 @@ export default function MiningMonitor({
               Staked
             </span>
           )}
-          {poolStats?.isActive && (
+          {poolLive && (
             <span className="rounded-lg border border-[#00f0ff]/20 bg-[#00f0ff]/5 px-2 py-1 text-[10px] uppercase tracking-wider text-[#00f0ff]">
               Pool live
             </span>
@@ -151,7 +153,9 @@ export default function MiningMonitor({
           <p className="mt-1 text-[10px] text-slate-600">
             {hasMiningContract && miningActive
               ? "Accrues on-chain after stake — press Claim to receive."
-              : "Preview only until pool is live and you stake."}
+              : poolLive
+                ? "Connect wallet and stake VPICK pickaxes to earn from the live pool."
+                : "Preview only until you stake on-chain."}
           </p>
         </div>
       </div>
@@ -174,10 +178,10 @@ export default function MiningMonitor({
       )}
 
       <p className="mt-3 text-xs text-slate-600">
-        {!hasMiningContract
-          ? "Staking opens after pool deploy. Select pickaxes, then press Stake — nothing mines until you confirm in your wallet."
-          : !miningActive
-            ? "Pool not started yet. Select pickaxes to preview — Stake unlocks when treasury funds the pool."
+        {!isMiningDeployed
+          ? "Select a VPICK pickaxe from your wallet, then press Stake in the roster."
+          : !poolLive
+            ? "Pool is funding — pickaxe selection previews estimated yields."
             : equippedPickaxes.length === 0
               ? "Select a VPICK pickaxe, then press Stake in the roster. Rewards accrue on-chain; claim manually."
               : !isMining

@@ -17,7 +17,7 @@ import {
 } from "../hooks/useMiningLoop";
 import { useOnChainMining } from "../hooks/useOnChainMining";
 import { usePoolStats } from "../hooks/usePoolStats";
-import { hasMiningContract } from "../config/mining-contract";
+import { hasMiningContract, isMiningDeployed } from "../config/mining-contract";
 import { mergeWithDemoPickaxes } from "../config/demo-pickaxes";
 import {
   resolveAccessoryBySlot,
@@ -120,7 +120,7 @@ export default function MinerLayout() {
     equippedPickaxes,
     equippedAccessories,
     // Session tick only before on-chain pool is live (preview UI).
-    !hasMiningContract || !chain.miningActive ? isMiningLive : false
+    !isMiningDeployed || !chain.miningActive ? isMiningLive : false
   );
 
   const handleUnlockSlot = useCallback(
@@ -146,12 +146,12 @@ export default function MinerLayout() {
   const handleStakePickaxe = useCallback(
     async (pickaxe: PickaxeNFT) => {
       if (pickaxe.id < 0) return;
-      if (!chain.enabled || !hasMiningContract) {
-        notify("On-chain staking opens soon — pool not deployed yet");
+      if (!hasMiningContract) {
+        notify("Staking is not open yet — check back at launch.");
         return;
       }
       if (!chain.miningActive) {
-        notify("Mining pool not active yet — staking opens when the pool starts");
+        notify("Mining pool is still funding — try again shortly.");
         return;
       }
       if (chain.stakedIds.has(pickaxe.id)) {

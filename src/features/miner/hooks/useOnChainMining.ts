@@ -5,9 +5,9 @@ import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { formatUnits } from "viem";
 import {
   hasMiningContract,
+  isMiningDeployed,
   PICKAXE_NFT_ADDRESS,
   pickaxeNftAbi,
-  STAKING_LIVE,
   VENA_MINING_ADDRESS,
   venaMiningAbi,
 } from "../config/mining-contract";
@@ -16,22 +16,22 @@ export function useOnChainMining() {
   const { address, isConnected } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
 
-  const enabled =
-    isConnected && !!address && STAKING_LIVE && !!VENA_MINING_ADDRESS;
+  const readsEnabled = isConnected && !!address && isMiningDeployed;
+  const writesEnabled = readsEnabled && hasMiningContract;
 
   const { data: userInfo, refetch: refetchUserInfo } = useReadContract({
     address: VENA_MINING_ADDRESS,
     abi: venaMiningAbi,
     functionName: "getUserInfo",
     args: address ? [address] : undefined,
-    query: { enabled, refetchInterval: 5_000 },
+    query: { enabled: readsEnabled, refetchInterval: 5_000 },
   });
 
   const { data: miningActive } = useReadContract({
     address: VENA_MINING_ADDRESS,
     abi: venaMiningAbi,
     functionName: "isActive",
-    query: { enabled: hasMiningContract },
+    query: { enabled: isMiningDeployed },
   });
 
   const { data: isApproved, refetch: refetchApproval } = useReadContract({
@@ -39,7 +39,7 @@ export function useOnChainMining() {
     abi: pickaxeNftAbi,
     functionName: "isApprovedForAll",
     args: address ? [address, VENA_MINING_ADDRESS] : undefined,
-    query: { enabled },
+    query: { enabled: writesEnabled },
   });
 
   const stakedIds = useMemo(() => {
@@ -52,7 +52,7 @@ export function useOnChainMining() {
   const userPower = Number((userInfo?.[0] ?? BigInt(0)) as bigint);
 
   const ensureApproval = useCallback(async (): Promise<boolean> => {
-    if (!enabled || isApproved) return true;
+    if (!writesEnabled || isApproved) return true;
     await writeContractAsync({
       address: PICKAXE_NFT_ADDRESS,
       abi: pickaxeNftAbi,
@@ -61,11 +61,11 @@ export function useOnChainMining() {
     });
     await refetchApproval();
     return true;
-  }, [enabled, isApproved, writeContractAsync, refetchApproval]);
+  }, [writesEnabled, isApproved, writeContractAsync, refetchApproval]);
 
   const stakeToken = useCallback(
     async (tokenId: number): Promise<boolean> => {
-      if (!enabled || tokenId < 0) return false;
+      if (!writesEnabled || tokenId < 0) return false;
       if (!miningActive) return false;
       if (stakedIds.has(tokenId)) return true;
 
@@ -80,7 +80,7 @@ export function useOnChainMining() {
       return true;
     },
     [
-      enabled,
+      writesEnabled,
       miningActive,
       stakedIds,
       ensureApproval,
@@ -91,7 +91,7 @@ export function useOnChainMining() {
 
   const unstakeToken = useCallback(
     async (tokenId: number): Promise<boolean> => {
-      if (!enabled || tokenId < 0 || !stakedIds.has(tokenId)) return false;
+      if (!writesEnabled || tokenId < 0 || !stakedIds.has(tokenId)) return false;
 
       await writeContractAsync({
         address: VENA_MINING_ADDRESS,
@@ -102,11 +102,11 @@ export function useOnChainMining() {
       await refetchUserInfo();
       return true;
     },
-    [enabled, stakedIds, writeContractAsync, refetchUserInfo]
+    [writesEnabled, stakedIds, writeContractAsync, refetchUserInfo]
   );
 
   const claimOnChain = useCallback(async (): Promise<boolean> => {
-    if (!enabled || pendingWei === BigInt(0)) return false;
+    if (!writesEnabled || pendingWei === BigInt(0)) return false;
 
     await writeContractAsync({
       address: VENA_MINING_ADDRESS,
@@ -116,10 +116,10 @@ export function useOnChainMining() {
     });
     await refetchUserInfo();
     return true;
-  }, [enabled, pendingWei, writeContractAsync, refetchUserInfo]);
+  }, [writesEnabled, pendingWei, writeContractAsync, refetchUserInfo]);
 
   return {
-    enabled,
+    enabled: writesEnabled,
     miningActive: Boolean(miningActive),
     stakedIds,
     pendingVena,

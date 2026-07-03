@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useReadContract } from "wagmi";
 import { formatUnits } from "viem";
 import {
-  hasMiningContract,
+  isMiningDeployed,
   VENA_MINING_ADDRESS,
   venaMiningAbi,
 } from "../config/mining-contract";
@@ -35,7 +35,7 @@ export type PoolStats = {
 };
 
 export function usePoolStats(userPower: number): PoolStats | null {
-  const enabled = hasMiningContract;
+  const enabled = isMiningDeployed;
 
   const { data: poolBalanceWei } = useReadContract({
     address: VENA_MINING_ADDRESS,

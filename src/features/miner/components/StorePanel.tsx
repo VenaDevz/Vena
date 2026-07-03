@@ -45,7 +45,8 @@ export default function StorePanel({
           Accessories
         </h2>
         <p className="mt-1 text-xs text-slate-500">
-          Pickaxes come from your VPICK wallet NFTs — not the shop.
+          Pickaxes come from your VPICK wallet NFTs — not the shop. On-chain
+          accessory boosts affect real staking rewards once the shop opens.
         </p>
       </div>
 

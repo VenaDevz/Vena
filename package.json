@@ -12,6 +12,7 @@
     "forge:deploy:forge": "forge script script/robinhood/DeployForge.s.sol --rpc-url robinhood --broadcast",
     "forge:deploy:mining": "forge script script/robinhood/DeployMining.s.sol --rpc-url robinhood --broadcast",
     "forge:deploy:mining-v2": "forge script script/robinhood/DeployMiningV2.s.sol --rpc-url robinhood --broadcast",
+    "forge:deploy:mining-v3": "forge script script/robinhood/DeployMiningV3.s.sol --rpc-url robinhood --broadcast",
     "treasury:keeper": "node scripts/treasury-buyback.mjs",
     "treasury:keeper:run": "node scripts/treasury-buyback.mjs --execute",
     "treasury:keeper:watch": "node scripts/treasury-buyback.mjs --execute --watch",
