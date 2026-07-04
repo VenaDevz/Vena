@@ -1,35 +1,19 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { useReadContracts } from "wagmi";
-import { formatUnits } from "viem";
+import { useReadContract, useReadContracts } from "wagmi";
+import { formatUnits, zeroAddress } from "viem";
+import { targetChainId } from "@/config/wagmi";
+import { RH_CONTRACTS, pickaxeNftAbi } from "@/lib/contracts/robinhood";
+import {
+  isMiningDeployed,
+  VENA_MINING_ADDRESS,
+  venaMiningAbi,
+} from "@/features/miner/config/mining-contract";
 import { PROJECT } from "@/lib/project";
 import { TOKENOMICS } from "@/lib/tokenomics";
 import { getVirtualsTradeUrl } from "@/lib/links";
-
-const PICKAXE_ADDR = (process.env.NEXT_PUBLIC_PICKAXE_NFT ?? "") as `0x${string}`;
-const STAKING_ADDR = (process.env.NEXT_PUBLIC_STAKING ?? "") as `0x${string}`;
-const VENA_ADDR = (process.env.NEXT_PUBLIC_VENA_TOKEN ?? "") as `0x${string}`;
-
-const pickaxeABI = [
-  {
-    name: "totalMinted",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ type: "uint256" }],
-  },
-] as const;
-
-const stakingABI = [
-  {
-    name: "totalStaked",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ type: "uint256" }],
-  },
-] as const;
 
 const erc20ABI = [
   {
@@ -46,47 +30,70 @@ function fmtNum(n: number, maxFrac = 0): string {
 }
 
 export default function ProtocolMetrics() {
-  const { data } = useReadContracts({
-    contracts: [
-      {
-        address: PICKAXE_ADDR,
-        abi: pickaxeABI,
-        functionName: "totalMinted",
-      },
-      {
-        address: STAKING_ADDR,
-        abi: stakingABI,
-        functionName: "totalStaked",
-      },
-      {
-        address: VENA_ADDR,
-        abi: erc20ABI,
-        functionName: "totalSupply",
-      },
-    ],
+  const pickaxeReady = Boolean(RH_CONTRACTS.pickaxeNft);
+
+  const { data: totalMintedWei } = useReadContract({
+    address: RH_CONTRACTS.pickaxeNft,
+    abi: pickaxeNftAbi,
+    functionName: "totalMinted",
+    chainId: targetChainId,
+    query: { enabled: pickaxeReady, refetchInterval: 30_000 },
+  });
+
+  const mintedCount =
+    totalMintedWei !== undefined ? Number(totalMintedWei) : undefined;
+
+  const stakedContracts = useMemo(() => {
+    if (!isMiningDeployed || mintedCount === undefined || mintedCount <= 0) {
+      return [];
+    }
+    return Array.from({ length: mintedCount }, (_, i) => ({
+      address: VENA_MINING_ADDRESS,
+      abi: venaMiningAbi,
+      functionName: "stakedBy" as const,
+      args: [BigInt(i)] as const,
+      chainId: targetChainId,
+    }));
+  }, [mintedCount]);
+
+  const { data: stakedByResults } = useReadContracts({
+    contracts: stakedContracts,
     query: {
-      enabled: Boolean(PICKAXE_ADDR),
+      enabled: stakedContracts.length > 0,
       refetchInterval: 30_000,
     },
   });
 
-  const minted = data?.[0]?.result as bigint | undefined;
-  const staked = data?.[1]?.result as bigint | undefined;
-  const totalSupply = data?.[2]?.result as bigint | undefined;
+  const { data: totalSupplyWei } = useReadContract({
+    address: RH_CONTRACTS.venaToken,
+    abi: erc20ABI,
+    functionName: "totalSupply",
+    chainId: targetChainId,
+    query: {
+      enabled: Boolean(RH_CONTRACTS.venaToken),
+      refetchInterval: 30_000,
+    },
+  });
 
-  const livePickaxes = minted !== undefined ? Number(minted) : undefined;
-  const stakedCount = staked !== undefined ? Number(staked) : undefined;
+  const stakedCount = useMemo(() => {
+    if (!isMiningDeployed) return undefined;
+    if (mintedCount === undefined) return undefined;
+    if (mintedCount === 0) return 0;
+    if (!stakedByResults) return undefined;
+    return stakedByResults.filter(
+      (r) =>
+        r.status === "success" &&
+        r.result &&
+        r.result !== zeroAddress
+    ).length;
+  }, [mintedCount, stakedByResults]);
+
   const supplyWhole =
-    totalSupply !== undefined
-      ? Number(formatUnits(totalSupply, 18))
+    totalSupplyWei !== undefined
+      ? Number(formatUnits(totalSupplyWei, 18))
       : undefined;
 
   const metrics = [
-    {
-      label: "Live Pickaxes",
-      value: livePickaxes !== undefined ? fmtNum(livePickaxes) : "—",
-      hint: "Minted on-chain",
-    },
     {
       label: "Staked Pickaxes",
       value: stakedCount !== undefined ? fmtNum(stakedCount) : "—",
