@@ -3,7 +3,7 @@
 /** Mainnet deployments — used when env vars are unset (e.g. Vercel misconfig). */
 export const RH_MAINNET_CONTRACTS = {
   pickaxeNft: "0xe250751a2514e0d1267AcBEBF43787aF579b6F4c",
-  forge: "0x99A1ac88eeB9eFFF12Be0607F4089c40F6765823",
+  forge: "0xF61C1a1959FDAf77F1A3FaE3F62a6163b2e1248C",
   venaToken: "0xFbD1Bf9d354CD8197Ab54f80778C03cc468ADAaf",
   staking: "0x1dDA64bd76165400Ad929D4d94E0D8285288D37B",
   loadout: "0x29865b0A6a9fA520b9d5DE47434c76936D032bcb",
@@ -109,6 +109,16 @@ export const pickaxeNftAbi = [
     ],
     outputs: [],
   },
+  {
+    name: "isApprovedForAll",
+    type: "function",
+    stateMutability: "view",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "operator", type: "address" },
+    ],
+    outputs: [{ type: "bool" }],
+  },
 ] as const;
 
 export const forgeAbi = [
@@ -120,11 +130,24 @@ export const forgeAbi = [
     outputs: [],
   },
   {
-    name: "upgrade",
+    name: "forge",
     type: "function",
     stateMutability: "nonpayable",
-    inputs: [{ name: "tokenId", type: "uint256" }],
+    inputs: [
+      { name: "inputTier", type: "uint8" },
+      { name: "tokenIds", type: "uint256[]" },
+    ],
     outputs: [],
+  },
+  {
+    name: "getRecipe",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "tier", type: "uint8" }],
+    outputs: [
+      { name: "inputCount", type: "uint256" },
+      { name: "outputTier", type: "uint8" },
+    ],
   },
   {
     name: "silverPriceWei",

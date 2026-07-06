@@ -109,6 +109,6 @@ or answer from system prompt + manual refresh.
 |--|---------|
 | $VENA | `0xFbD1Bf9d354CD8197Ab54f80778C03cc468ADAaf` |
 | VPICK NFT | `0xe250751a2514e0d1267AcBEBF43787aF579b6F4c` |
-| VenaForge | `0x99A1ac88eeB9eFFF12Be0607F4089c40F6765823` |
+| VenaForge | `0xF61C1a1959FDAf77F1A3FaE3F62a6163b2e1248C` |
 | VenaMiningV2 | `0x1dDA64bd76165400Ad929D4d94E0D8285288D37B` |
 | Virtuals agent | https://app.virtuals.io/virtuals/95873 |

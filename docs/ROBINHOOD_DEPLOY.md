@@ -58,18 +58,18 @@ forge script script/robinhood/DeployForge.s.sol \
 | Tier | Mint / Upgrade |
 |---|---|
 | Silver | 0.01 ETH (mint) |
-| Gold | 1,000,000 $VENA |
-| Platinum | 2,000,000 $VENA |
-| Diamond | 4,000,000 $VENA |
-| Emerald | 8,000,000 $VENA |
+| Gold | 1,000,000 $VENA + burn 4 Silver |
+| Platinum | 2,000,000 $VENA + burn 2 Gold |
+| Diamond | 4,000,000 $VENA + burn 2 Platinum |
+| Emerald | 8,000,000 $VENA + burn 2 Diamond |
 
 Owner `setSilverPriceWei` / `setTierUpgradeVena` ile güncelleyebilir.
 
 ### Kullanıcı akışı
 
 - `mintSilver()` — `msg.value == 0.01 ETH`
-- Upgrade: önce `vena.approve(forge, cost)`, sonra `upgrade(tokenId)`
-  (alt tier pickaxe yakılır, üst tier mint edilir)
+- Upgrade: önce `vena.approve(forge, cost)` + VPICK `setApprovalForAll(forge, true)`, sonra `forge(inputTier, tokenIds[])`
+  (ör. Gold için 4 Silver yakılır + 1M $VENA; üst tier mint edilir)
 
 ### Revenue akışı
 

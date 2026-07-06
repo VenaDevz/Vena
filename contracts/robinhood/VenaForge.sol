@@ -10,14 +10,17 @@ import "./PickaxeNFT.sol";
 
 /**
  * @title VenaForge (Robinhood Chain)
- * @notice Mint Silver with ETH. Upgrade tiers with $VENA + burn the lower Pickaxe.
+ * @notice Mint Silver with ETH. Forge higher tiers by burning lower Pickaxes + paying $VENA.
+ *
+ * Forge recipes (silver-equivalent math):
+ *   4 × Silver   → 1 Gold        + 1M  $VENA
+ *   2 × Gold     → 1 Platinum    + 2M  $VENA
+ *   2 × Platinum → 1 Diamond     + 4M  $VENA
+ *   2 × Diamond  → 1 Emerald     + 8M  $VENA
  *
  * Revenue flow (handled by protocol ops off-chain):
  *   - ETH mint fees  → treasury → market-buy $VENA → staking pool.
  *   - $VENA upgrade  → treasury (already $VENA) → staking pool.
- *
- * Default Silver mint: 0.01 ETH.
- * Default upgrade $VENA ladder (18 decimals): 1M / 2M / 4M / 8M into Gold/Plat/Dia/Emerald.
  */
 contract VenaForge is Ownable, ReentrancyGuard, IERC721Receiver {
     using SafeERC20 for IERC20;
@@ -25,22 +28,29 @@ contract VenaForge is Ownable, ReentrancyGuard, IERC721Receiver {
     IERC20 public vena;
     PickaxeNFT public immutable pickaxe;
 
-    /// @dev Collects mint (ETH) + upgrade ($VENA) revenue for buybacks → staking pool
     address public treasury;
 
     uint256 public silverPriceWei;
-    /// @notice $VENA cost to upgrade INTO a tier (Silver index unused)
+    /// @notice $VENA cost to forge INTO a tier (Silver index unused)
     mapping(PickaxeNFT.Tier => uint256) public tierUpgradeVena;
+
+    struct ForgeRecipe {
+        uint256 inputCount;
+        PickaxeNFT.Tier outputTier;
+    }
+
+    /// @dev inputTier → recipe (how many to burn + what you receive)
+    mapping(PickaxeNFT.Tier => ForgeRecipe) public recipes;
 
     bool public paused;
 
     event SilverMinted(address indexed user, uint256 indexed tokenId, uint256 ethPaid);
-    event Upgraded(
+    event Forged(
         address indexed user,
-        uint256 indexed burnedId,
+        PickaxeNFT.Tier inputTier,
+        uint256[] burnedIds,
         uint256 indexed mintedId,
-        PickaxeNFT.Tier fromTier,
-        PickaxeNFT.Tier toTier,
+        PickaxeNFT.Tier outputTier,
         uint256 venaPaid
     );
     event TreasurySet(address indexed treasury);
@@ -57,7 +67,7 @@ contract VenaForge is Ownable, ReentrancyGuard, IERC721Receiver {
     ) Ownable(initialOwner) {
         require(_pickaxe != address(0) && _treasury != address(0), "Zero address");
         pickaxe = PickaxeNFT(_pickaxe);
-        vena = IERC20(_vena); // may be zero at launch; set later via setVena() to enable upgrades
+        vena = IERC20(_vena);
         treasury = _treasury;
 
         silverPriceWei = 0.01 ether;
@@ -66,6 +76,11 @@ contract VenaForge is Ownable, ReentrancyGuard, IERC721Receiver {
         tierUpgradeVena[PickaxeNFT.Tier.Platinum] = 2_000_000 * 1e18;
         tierUpgradeVena[PickaxeNFT.Tier.Diamond]  = 4_000_000 * 1e18;
         tierUpgradeVena[PickaxeNFT.Tier.Emerald]  = 8_000_000 * 1e18;
+
+        recipes[PickaxeNFT.Tier.Silver]   = ForgeRecipe(4, PickaxeNFT.Tier.Gold);
+        recipes[PickaxeNFT.Tier.Gold]     = ForgeRecipe(2, PickaxeNFT.Tier.Platinum);
+        recipes[PickaxeNFT.Tier.Platinum] = ForgeRecipe(2, PickaxeNFT.Tier.Diamond);
+        recipes[PickaxeNFT.Tier.Diamond]  = ForgeRecipe(2, PickaxeNFT.Tier.Emerald);
     }
 
     function setPaused(bool _paused) external onlyOwner {
@@ -79,7 +94,6 @@ contract VenaForge is Ownable, ReentrancyGuard, IERC721Receiver {
         emit TreasurySet(_treasury);
     }
 
-    /// @notice Set $VENA after Virtuals launch to enable upgrades.
     function setVena(address _vena) external onlyOwner {
         require(_vena != address(0), "Zero address");
         vena = IERC20(_vena);
@@ -96,6 +110,14 @@ contract VenaForge is Ownable, ReentrancyGuard, IERC721Receiver {
         emit UpgradePriceSet(tier, venaAmount);
     }
 
+    function setRecipe(
+        PickaxeNFT.Tier inputTier,
+        uint256 inputCount,
+        PickaxeNFT.Tier outputTier
+    ) external onlyOwner {
+        recipes[inputTier] = ForgeRecipe(inputCount, outputTier);
+    }
+
     /// @notice Mint a Silver Pickaxe with ETH.
     function mintSilver() external payable nonReentrant {
         require(!paused, "Paused");
@@ -106,28 +128,49 @@ contract VenaForge is Ownable, ReentrancyGuard, IERC721Receiver {
         emit SilverMinted(msg.sender, mintedId, msg.value);
     }
 
-    /// @notice Burn a Pickaxe and mint the next tier, paying $VENA. Caller must own tokenId.
-    function upgrade(uint256 tokenId) external nonReentrant {
+    /**
+     * @notice Burn lower-tier Pickaxes and mint the next tier, paying $VENA.
+     * @param inputTier  Tier of NFTs being burned (e.g. Silver for Gold).
+     * @param tokenIds   Must match recipe.inputCount; caller must own all.
+     */
+    function forge(PickaxeNFT.Tier inputTier, uint256[] calldata tokenIds)
+        external
+        nonReentrant
+    {
         require(!paused, "Paused");
-        require(pickaxe.ownerOf(tokenId) == msg.sender, "Not owner");
-
-        PickaxeNFT.Tier current = pickaxe.getTier(tokenId);
-        require(current != PickaxeNFT.Tier.Emerald, "Max tier");
-
+        require(inputTier != PickaxeNFT.Tier.Emerald, "Max tier");
         require(address(vena) != address(0), "Upgrades not live");
 
-        PickaxeNFT.Tier next = PickaxeNFT.Tier(uint8(current) + 1);
-        uint256 cost = tierUpgradeVena[next];
+        ForgeRecipe memory recipe = recipes[inputTier];
+        require(recipe.inputCount > 0, "No recipe");
+        require(tokenIds.length == recipe.inputCount, "Wrong token count");
+
+        uint256 cost = tierUpgradeVena[recipe.outputTier];
         require(cost > 0, "Upgrade disabled");
 
         vena.safeTransferFrom(msg.sender, treasury, cost);
 
-        pickaxe.safeTransferFrom(msg.sender, address(this), tokenId);
-        pickaxe.burnByForge(tokenId);
-        pickaxe.mintByForge(msg.sender, next);
+        for (uint256 i; i < tokenIds.length; ++i) {
+            uint256 id = tokenIds[i];
+            require(pickaxe.ownerOf(id) == msg.sender, "Not owner");
+            require(pickaxe.getTier(id) == inputTier, "Wrong tier");
+            pickaxe.safeTransferFrom(msg.sender, address(this), id);
+            pickaxe.burnByForge(id);
+        }
+
+        pickaxe.mintByForge(msg.sender, recipe.outputTier);
         uint256 mintedId = pickaxe.totalMinted() - 1;
 
-        emit Upgraded(msg.sender, tokenId, mintedId, current, next, cost);
+        emit Forged(msg.sender, inputTier, tokenIds, mintedId, recipe.outputTier, cost);
+    }
+
+    function getRecipe(PickaxeNFT.Tier tier)
+        external
+        view
+        returns (uint256 inputCount, PickaxeNFT.Tier outputTier)
+    {
+        ForgeRecipe memory r = recipes[tier];
+        return (r.inputCount, r.outputTier);
     }
 
     function onERC721Received(address, address, uint256, bytes calldata)

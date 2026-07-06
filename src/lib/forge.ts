@@ -81,7 +81,7 @@ export function primaryTierUpgrade(target: Exclude<Rarity, "Silver">): ForgePath
   return paths.find((p) => p.ingredients[prevTier] === 2) ?? null;
 }
 
-/** On-chain Forge recipes (must match Forge.sol) */
+/** On-chain VenaForge recipes — must match VenaForge.sol + silverEquivalent math. */
 export type ForgeRecipe = {
   inputTier: Exclude<Rarity, "Emerald">;
   inputCount: number;
@@ -90,8 +90,8 @@ export type ForgeRecipe = {
 };
 
 export const FORGE_RECIPES: ForgeRecipe[] = [
-  { inputTier: "Silver", inputCount: 4, outputTier: "Gold", label: "4 Silver" },
-  { inputTier: "Gold", inputCount: 2, outputTier: "Platinum", label: "2 Gold" },
-  { inputTier: "Platinum", inputCount: 2, outputTier: "Diamond", label: "2 Platinum" },
-  { inputTier: "Diamond", inputCount: 2, outputTier: "Emerald", label: "2 Diamond" },
+  { inputTier: "Silver", inputCount: 4, outputTier: "Gold", label: "4 Silver + $VENA" },
+  { inputTier: "Gold", inputCount: 2, outputTier: "Platinum", label: "2 Gold + $VENA" },
+  { inputTier: "Platinum", inputCount: 2, outputTier: "Diamond", label: "2 Platinum + $VENA" },
+  { inputTier: "Diamond", inputCount: 2, outputTier: "Emerald", label: "2 Diamond + $VENA" },
 ];

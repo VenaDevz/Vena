@@ -154,7 +154,7 @@ export const HOW_IT_WORKS = [
     step: "02",
     title: "Upgrade",
     description:
-      "Burn your current Pickaxe and pay $VENA to mint the next tier. That $VENA is bought back into the pool too.",
+      "Burn 4 Silver (or 2 of the tier below) plus $VENA to forge the next tier. That $VENA feeds the staking pool too.",
   },
   {
     step: "03",
@@ -177,8 +177,8 @@ export function formatSupplyCap(current?: number): string {
 }
 
 /**
- * On-chain upgrade ladder (VenaForge) — doubles each tier.
- * Must match tierUpgradeVena mapping on 0x99A1…5823.
+ * On-chain forge ladder (VenaForge) — silverEquivalent × burn count + $VENA.
+ * Must match recipes + tierUpgradeVena on the deployed forge.
  */
 export const TIER_UPGRADE_VENA: Record<Rarity, number> = {
   Silver: 0,

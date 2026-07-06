@@ -19,7 +19,7 @@ export default function ForgeSection() {
       id="forge"
       eyebrow="Rarity"
       title="Upgrade your Pickaxe."
-      subtitle="Everyone mints Silver with 0.01 ETH. To climb a tier, pay $VENA and burn your current Pickaxe — that $VENA feeds the staking pool."
+      subtitle="Everyone mints Silver with 0.01 ETH. To climb a tier, burn the required lower Pickaxes (4 Silver → Gold) and pay $VENA — that $VENA feeds the staking pool."
     >
       <div className="mb-10 p-5 sm:p-6 rounded-2xl border border-[rgba(0,212,255,0.12)] bg-[rgba(10,15,22,0.7)]">
         <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">
@@ -114,8 +114,10 @@ export default function ForgeSection() {
                       Upgrade from
                     </p>
                     <p className="text-[10px] font-mono text-[#00d4ff]/90">
-                      Burn {prevTierLabel(tier.id)} +{" "}
-                      {formatVena(tierUpgradeVena(tier.id))} $VENA
+                      {tier.id === "Gold"
+                        ? "Burn 4 Silver"
+                        : `Burn 2 ${prevTierLabel(tier.id)}`}{" "}
+                      + {formatVena(tierUpgradeVena(tier.id))} $VENA
                     </p>
                   </div>
                 )}
