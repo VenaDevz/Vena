@@ -163,7 +163,7 @@ export default function ForgeUpgradePanel({ nfts, onForged, compact }: Props) {
         await refetchNftApproval();
       }
 
-      const allowance = venaAllowance ?? 0n;
+      const allowance = venaAllowance ?? BigInt(0);
       if (allowance < costWei) {
         setStatus(`Approving ${formatVena(venaCost)} $VENA…`);
         await writeContractAsync({
