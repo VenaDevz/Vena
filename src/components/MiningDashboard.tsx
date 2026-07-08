@@ -17,7 +17,6 @@ import {
   formatVenaAmount,
   venaPerDayFromPower,
 } from "@/lib/mining";
-import { handleSectionLink } from "@/lib/scroll";
 
 // ─── Contract addresses ───────────────────────────────────────────────────────
 

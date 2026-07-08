@@ -15,7 +15,6 @@ export default function HeroSection() {
   return (
     <section
       className="relative min-h-screen flex flex-col overflow-hidden cyber-grid scanlines"
-      id="protocol"
     >
       <div className="absolute inset-x-0 top-24 sm:top-28 flex justify-center pointer-events-none opacity-25 sm:opacity-35">
         <div className="relative w-full max-w-4xl px-6">

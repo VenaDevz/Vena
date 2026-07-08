@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Orbitron } from "next/font/google";
 import { headers } from "next/headers";
 import Web3Provider from "@/context/Web3Provider";
+import HashRedirect from "@/components/HashRedirect";
 import "./globals.css";
 
 const appUrl =
@@ -65,7 +66,10 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#030609] text-slate-200">
-        <Web3Provider cookies={cookies}>{children}</Web3Provider>
+        <Web3Provider cookies={cookies}>
+          <HashRedirect />
+          {children}
+        </Web3Provider>
       </body>
     </html>
   );

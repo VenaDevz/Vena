@@ -2,42 +2,14 @@
 
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import HowItWorks from "@/components/HowItWorks";
-import FeeDistribution from "@/components/FeeDistribution";
-import ForgeSection from "@/components/ForgeSection";
-import TokenomicsSection from "@/components/TokenomicsSection";
-import StratumTimeline from "@/components/StratumTimeline";
 import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
     <>
       <Header />
-
       <main>
         <HeroSection />
-
-        <div className="relative h-px mx-8 sm:mx-16 max-w-7xl lg:mx-auto">
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.25) 50%, transparent 100%)",
-            }}
-          />
-        </div>
-
-        <div className="section-alt">
-          <HowItWorks />
-          <FeeDistribution />
-        </div>
-
-        <div className="section-alt">
-          <ForgeSection />
-          <TokenomicsSection />
-          <StratumTimeline />
-        </div>
-
         <Footer />
       </main>
     </>

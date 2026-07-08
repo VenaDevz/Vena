@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import type { SiteNavLink as SiteNavLinkType } from "@/lib/site-nav";
-import { handleSectionLink } from "@/lib/scroll";
 
 type Props = {
   link: SiteNavLinkType;
@@ -18,14 +17,6 @@ export default function SiteNavLink({ link, className, onNavigate }: Props) {
     </>
   );
   const style = { fontFamily: "var(--font-orbitron)" };
-
-  if (link.kind === "route") {
-    return (
-      <Link href={link.href} className={className} style={style} onClick={onNavigate}>
-        {content}
-      </Link>
-    );
-  }
 
   if (link.kind === "external") {
     return (
@@ -43,16 +34,8 @@ export default function SiteNavLink({ link, className, onNavigate }: Props) {
   }
 
   return (
-    <a
-      href={link.href}
-      className={className}
-      style={style}
-      onClick={(e) => {
-        handleSectionLink(e, link.href.slice(1));
-        onNavigate?.();
-      }}
-    >
+    <Link href={link.href} className={className} style={style} onClick={onNavigate}>
       {content}
-    </a>
+    </Link>
   );
 }

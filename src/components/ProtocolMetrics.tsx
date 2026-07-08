@@ -1,16 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { useReadContract, useReadContracts } from "wagmi";
-import { formatUnits, zeroAddress } from "viem";
+import { useReadContract } from "wagmi";
+import { formatUnits } from "viem";
 import { targetChainId } from "@/config/wagmi";
-import { RH_CONTRACTS, pickaxeNftAbi } from "@/lib/contracts/robinhood";
-import {
-  isMiningDeployed,
-  VENA_MINING_ADDRESS,
-  venaMiningAbi,
-} from "@/features/miner/config/mining-contract";
+import { RH_CONTRACTS } from "@/lib/contracts/robinhood";
 import { PROJECT } from "@/lib/project";
 import { TOKENOMICS } from "@/lib/tokenomics";
 import { getVirtualsTradeUrl } from "@/lib/links";
@@ -30,40 +24,6 @@ function fmtNum(n: number, maxFrac = 0): string {
 }
 
 export default function ProtocolMetrics() {
-  const pickaxeReady = Boolean(RH_CONTRACTS.pickaxeNft);
-
-  const { data: totalMintedWei } = useReadContract({
-    address: RH_CONTRACTS.pickaxeNft,
-    abi: pickaxeNftAbi,
-    functionName: "totalMinted",
-    chainId: targetChainId,
-    query: { enabled: pickaxeReady, refetchInterval: 30_000 },
-  });
-
-  const mintedCount =
-    totalMintedWei !== undefined ? Number(totalMintedWei) : undefined;
-
-  const stakedContracts = useMemo(() => {
-    if (!isMiningDeployed || mintedCount === undefined || mintedCount <= 0) {
-      return [];
-    }
-    return Array.from({ length: mintedCount }, (_, i) => ({
-      address: VENA_MINING_ADDRESS,
-      abi: venaMiningAbi,
-      functionName: "stakedBy" as const,
-      args: [BigInt(i)] as const,
-      chainId: targetChainId,
-    }));
-  }, [mintedCount]);
-
-  const { data: stakedByResults } = useReadContracts({
-    contracts: stakedContracts,
-    query: {
-      enabled: stakedContracts.length > 0,
-      refetchInterval: 30_000,
-    },
-  });
-
   const { data: totalSupplyWei } = useReadContract({
     address: RH_CONTRACTS.venaToken,
     abi: erc20ABI,
@@ -75,30 +35,12 @@ export default function ProtocolMetrics() {
     },
   });
 
-  const stakedCount = useMemo(() => {
-    if (!isMiningDeployed) return undefined;
-    if (mintedCount === undefined) return undefined;
-    if (mintedCount === 0) return 0;
-    if (!stakedByResults) return undefined;
-    return stakedByResults.filter(
-      (r) =>
-        r.status === "success" &&
-        r.result &&
-        r.result !== zeroAddress
-    ).length;
-  }, [mintedCount, stakedByResults]);
-
   const supplyWhole =
     totalSupplyWei !== undefined
       ? Number(formatUnits(totalSupplyWei, 18))
       : undefined;
 
   const metrics = [
-    {
-      label: "Staked Pickaxes",
-      value: stakedCount !== undefined ? fmtNum(stakedCount) : "—",
-      hint: "Earning $VENA",
-    },
     {
       label: "Max Pickaxes",
       value: fmtNum(TOKENOMICS.maxNftSupply),
@@ -125,7 +67,7 @@ export default function ProtocolMetrics() {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4">
       {metrics.map((m, i) => (
         <motion.div
           key={m.label}
@@ -156,8 +98,8 @@ export default function ProtocolMetrics() {
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ delay: 0.36, duration: 0.45 }}
-        className="col-span-2 lg:col-span-3 p-4 rounded-xl border border-[rgba(0,255,136,0.15)] bg-[rgba(0,255,136,0.04)]"
+        transition={{ delay: 0.24, duration: 0.45 }}
+        className="col-span-2 p-4 rounded-xl border border-[rgba(0,255,136,0.15)] bg-[rgba(0,255,136,0.04)]"
       >
         <p className="text-xs sm:text-sm text-slate-400 font-mono text-center">
           <span className="text-[#00ff88]">Live</span> on {PROJECT.network} · {PROJECT.launchpad} agent token · Max{" "}
