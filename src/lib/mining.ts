@@ -125,6 +125,15 @@ export function formatVenaAmount(value: number, maxDecimals = 4): string {
   return value.toFixed(maxDecimals);
 }
 
+/** Locale-aware yield display (e.g. 10,263.7 VENA). */
+export function formatYieldAmount(value: number, maxFractionDigits = 3): string {
+  if (!Number.isFinite(value) || value <= 0) return "0";
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxFractionDigits,
+  });
+}
+
 /** @deprecated alias */
 export function formatVenaRate(value: number): string {
   return formatVenaAmount(value);

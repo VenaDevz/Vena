@@ -84,9 +84,8 @@ export default function HeroSection() {
           className="max-w-xl mx-auto text-center text-slate-400 text-base sm:text-lg mt-6 mb-10 leading-relaxed"
         >
           Mint a Silver Pickaxe for {SILVER_MINT_ETH} ETH on {PROJECT.network}. Every
-          mint buys {PROJECT.tokenDisplay} into the staking pool then{" "}
-          <span className="text-[#00d4ff]">stake</span> to earn from a pool that
-          grows with real mint &amp; upgrade volume.
+          mint buys {PROJECT.tokenDisplay} into the staking pool then stake to earn from
+          a pool that grows with real mint &amp; upgrade volume.
         </motion.p>
 
         <motion.div

@@ -6,6 +6,7 @@ import {
   RARITY_MINING_YIELDS,
   MINING_EMISSION,
   MINING_SCENARIOS,
+  formatYieldAmount,
 } from "@/lib/mining";
 import { UPGRADE_MINING_ADVANTAGE } from "@/lib/economy";
 import { PROJECT } from "@/lib/project";
@@ -150,9 +151,11 @@ export default function TokenomicsSection() {
                   {row.miningPower.toFixed(0)}
                 </td>
                 <td className="py-3 pr-3 font-mono text-[#00ff88]">
-                  ~{row.daily.toFixed(3)} {PROJECT.tokenSymbol}
+                  ~{formatYieldAmount(row.daily, 3)} {PROJECT.tokenSymbol}
                 </td>
-                <td className="py-3 font-mono">~{row.monthly.toFixed(1)} {PROJECT.tokenSymbol}</td>
+                <td className="py-3 font-mono">
+                  ~{formatYieldAmount(row.monthly, 1)} {PROJECT.tokenSymbol}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -170,14 +173,14 @@ export default function TokenomicsSection() {
               <p className="text-xs text-slate-400">
                 Same-cost Silver stack:{" "}
                 <span className="text-slate-300 font-mono">
-                  ~{row.silverStackDaily.toFixed(3)}
+                  ~{formatYieldAmount(row.silverStackDaily, 3)}
                 </span>
                 /day
               </p>
               <p className="text-xs text-slate-400 mt-1">
                 1× {row.tier}:{" "}
                 <span className="text-[#00ff88] font-mono">
-                  ~{row.upgradedDaily.toFixed(3)}
+                  ~{formatYieldAmount(row.upgradedDaily, 3)}
                 </span>
                 /day{" "}
                 <span className="text-[#00d4ff]">(+{row.miningAdvantagePct}% mining power)</span>
