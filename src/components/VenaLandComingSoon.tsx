@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { Pickaxe, Sparkles } from "lucide-react";
-import { PROJECT } from "@/lib/project";
+import { Sparkles } from "lucide-react";
 
 export default function VenaLandComingSoon() {
   return (
@@ -27,12 +25,8 @@ export default function VenaLandComingSoon() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 max-w-lg text-center"
+        className="relative z-10 text-center"
       >
-        <p className="text-[10px] sm:text-xs font-mono tracking-[0.35em] text-[#7000ff]/90 uppercase mb-4">
-          {PROJECT.name} · Idle Command Grid
-        </p>
-
         <h1
           className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight"
           style={{ fontFamily: "var(--font-orbitron)" }}
@@ -48,32 +42,6 @@ export default function VenaLandComingSoon() {
           >
             Coming Soon
           </span>
-        </div>
-
-        <p className="mt-8 text-slate-400 text-base sm:text-lg leading-relaxed">
-          Build your mine grid, trade resources, and grow your command base on Robinhood Chain.
-          Hold {PROJECT.tokenDisplay} to play — VPICK holders get bonus Crystal and production boosts.
-        </p>
-
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link
-            href={PROJECT.routes.mint}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm tracking-wider text-[#030609]"
-            style={{
-              fontFamily: "var(--font-orbitron)",
-              backgroundImage: "linear-gradient(135deg, #32cd32 0%, #00ff88 50%, #00d4ff 100%)",
-            }}
-          >
-            <Pickaxe size={16} />
-            Mint Pickaxe
-          </Link>
-          <Link
-            href={PROJECT.routes.miner}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm tracking-wider border border-[rgba(167,139,250,0.35)] text-[#a78bfa] hover:bg-[rgba(167,139,250,0.08)] transition-colors"
-            style={{ fontFamily: "var(--font-orbitron)" }}
-          >
-            Miner Command
-          </Link>
         </div>
       </motion.div>
     </section>

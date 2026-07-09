@@ -5,8 +5,7 @@ import { PROJECT } from "@/lib/project";
 
 export const metadata: Metadata = {
   title: `VenaLand — Coming Soon | ${PROJECT.name}`,
-  description:
-    "VenaLand idle command grid is coming soon. Hold $VENA, build your base, and earn Crystal on Robinhood Chain.",
+  description: "VenaLand — Coming Soon.",
 };
 
 export default function VenaLandPage() {
