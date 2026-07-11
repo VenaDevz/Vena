@@ -42,7 +42,24 @@ import {
   tierUpgradeVena,
 } from "@/lib/tokenomics";
 import { formatVena } from "@/lib/mint-pricing";
+import { FORGE_RECIPES } from "@/lib/forge";
 import { getPickaxeImage, type Rarity } from "@/lib/types";
+
+function upgradeLadderCopy(tier: Rarity): string {
+  if (tier === "Silver") return `${SILVER_MINT_ETH} ETH mint`;
+
+  const recipe = FORGE_RECIPES.find((row) => row.outputTier === tier);
+  const vena = formatVena(tierUpgradeVena(tier));
+  if (!recipe) return `${vena} $VENA`;
+
+  return `Burn ${recipe.inputCount} ${recipe.inputTier} · ${vena} $VENA`;
+}
+
+function pickaxeImageInset(tier: Rarity): string {
+  if (tier === "Diamond") return "inset-5 sm:inset-6";
+  if (tier === "Emerald") return "inset-4 sm:inset-5";
+  return "inset-3 sm:inset-4";
+}
 
 export default function MintPageContent() {
   const { address, isConnected, chain } = useAccount();
@@ -405,27 +422,35 @@ export default function MintPageContent() {
                 <div
                   key={tier.id}
                   className="rounded-2xl overflow-hidden border border-white/8 bg-[rgba(10,15,22,0.9)]"
+                  style={{ borderColor: `${tier.color}22` }}
                 >
-                  <div className="aspect-square relative">
-                    <Image
-                      src={getPickaxeImage(tier.id as Rarity)}
-                      alt={tier.label}
-                      fill
-                      className="object-cover"
-                      sizes="20vw"
+                  <div className="aspect-square relative overflow-hidden">
+                    <div className={`absolute ${pickaxeImageInset(tier.id as Rarity)}`}>
+                      <Image
+                        src={getPickaxeImage(tier.id as Rarity)}
+                        alt={tier.label}
+                        fill
+                        className="pickaxe-blend object-contain"
+                        sizes="20vw"
+                      />
+                    </div>
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        background:
+                          "linear-gradient(to top, rgba(3,6,9,0.95) 0%, transparent 55%)",
+                      }}
                     />
                   </div>
-                  <div className="p-4">
+                  <div className="p-4 -mt-2 relative z-10">
                     <h3
                       className="font-bold"
                       style={{ color: tier.color, fontFamily: "var(--font-orbitron)" }}
                     >
                       {tier.label}
                     </h3>
-                    <p className="text-xs font-mono text-slate-500 mt-2">
-                      {tier.id === "Silver"
-                        ? `${SILVER_MINT_ETH} ETH mint`
-                        : `${formatVena(tierUpgradeVena(tier.id as Rarity))} $VENA`}
+                    <p className="text-xs font-mono text-slate-500 mt-2 leading-relaxed">
+                      {upgradeLadderCopy(tier.id as Rarity)}
                     </p>
                   </div>
                 </div>
