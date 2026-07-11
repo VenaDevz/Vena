@@ -56,6 +56,7 @@ type MinerStoreActions = {
     availableBalance: number,
     targetSlotIndex: number | undefined
   ) => boolean;
+  pruneUnavailablePickaxes: (validPickaxeIds: number[]) => void;
   togglePickaxeSelection: (pickaxeId: number) => boolean;
   setDisplayPickaxe: (id: number) => void;
   startUpgrade: (availableBalance: number) => boolean;
@@ -200,6 +201,41 @@ export const useMinerStore = create<MinerStore>()(
           };
         });
         return true;
+      },
+
+      pruneUnavailablePickaxes: (validPickaxeIds) => {
+        const validIds = new Set(validPickaxeIds.filter((id) => id >= 0));
+        const state = get();
+        const nextSelected = state.selectedPickaxeIds.filter((id) =>
+          validIds.has(id)
+        );
+        const nextSlots = { ...state.pickaxeIdBySlot };
+        let slotsChanged = false;
+
+        for (const [slotKey, pickaxeId] of Object.entries(nextSlots)) {
+          if (pickaxeId != null && !validIds.has(pickaxeId)) {
+            nextSlots[Number(slotKey)] = null;
+            slotsChanged = true;
+          }
+        }
+
+        const displayPickaxeMissing =
+          state.displayPickaxeId != null && !validIds.has(state.displayPickaxeId);
+        const selectionChanged =
+          nextSelected.length !== state.selectedPickaxeIds.length;
+
+        if (!selectionChanged && !slotsChanged && !displayPickaxeMissing) {
+          return;
+        }
+
+        set({
+          selectedPickaxeIds: nextSelected,
+          pickaxeIdBySlot: nextSlots,
+          displayMode: displayPickaxeMissing
+            ? GAME_CONFIG.pickaxes.defaultDisplayMode
+            : state.displayMode,
+          displayPickaxeId: displayPickaxeMissing ? null : state.displayPickaxeId,
+        });
       },
 
       togglePickaxeSelection: (pickaxeId) => {

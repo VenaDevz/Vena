@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import MinerHeader from "./MinerHeader";
 import MinerUnitPanel from "./MinerUnitPanel";
 import ControlPanel from "./ControlPanel";
@@ -57,6 +57,9 @@ export default function MinerLayout() {
   const unlockSlot = useMinerStore((s) => s.unlockSlot);
   const togglePickaxeSelection = useMinerStore((s) => s.togglePickaxeSelection);
   const buyAccessory = useMinerStore((s) => s.buyAccessory);
+  const pruneUnavailablePickaxes = useMinerStore(
+    (s) => s.pruneUnavailablePickaxes
+  );
   const setDisplayPickaxe = useMinerStore((s) => s.setDisplayPickaxe);
   const startUpgrade = useMinerStore((s) => s.startUpgrade);
   const skipUpgrade = useMinerStore((s) => s.skipUpgrade);
@@ -115,6 +118,28 @@ export default function MinerLayout() {
     () => walletPickaxes.filter((p) => p.id >= 0 && chain.stakedIds.has(p.id)),
     [walletPickaxes, chain.stakedIds]
   );
+
+  const validPickaxeIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const pickaxe of walletPickaxes) {
+      if (pickaxe.id >= 0) ids.add(pickaxe.id);
+    }
+    for (const id of chain.stakedIds) {
+      if (id >= 0) ids.add(id);
+    }
+    return [...ids];
+  }, [walletPickaxes, chain.stakedIds]);
+
+  useEffect(() => {
+    if (!isConnected || pickaxesLoading || !isContractReady) return;
+    pruneUnavailablePickaxes(validPickaxeIds);
+  }, [
+    isConnected,
+    pickaxesLoading,
+    isContractReady,
+    pruneUnavailablePickaxes,
+    validPickaxeIds,
+  ]);
 
   useMiningLoop(
     equippedPickaxes,
