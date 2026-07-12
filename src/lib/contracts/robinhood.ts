@@ -3,7 +3,7 @@
 /** Mainnet deployments — used when env vars are unset (e.g. Vercel misconfig). */
 export const RH_MAINNET_CONTRACTS = {
   pickaxeNft: "0xe250751a2514e0d1267AcBEBF43787aF579b6F4c",
-  forge: "0xF61C1a1959FDAf77F1A3FaE3F62a6163b2e1248C",
+  forge: "0x99A1ac88eeB9eFFF12Be0607F4089c40F6765823",
   venaToken: "0xFbD1Bf9d354CD8197Ab54f80778C03cc468ADAaf",
   staking: "0x1dDA64bd76165400Ad929D4d94E0D8285288D37B",
   loadout: "0x29865b0A6a9fA520b9d5DE47434c76936D032bcb",
