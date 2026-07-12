@@ -182,10 +182,10 @@ export function formatSupplyCap(current?: number): string {
  */
 export const TIER_UPGRADE_VENA: Record<Rarity, number> = {
   Silver: 0,
-  Gold: 1_000_000,
-  Platinum: 2_000_000,
-  Diamond: 4_000_000,
-  Emerald: 8_000_000,
+  Gold: 150_000,
+  Platinum: 300_000,
+  Diamond: 600_000,
+  Emerald: 1_200_000,
 };
 
 /** @deprecated use TIER_UPGRADE_VENA.Gold */

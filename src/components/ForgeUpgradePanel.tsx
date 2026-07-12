@@ -209,8 +209,11 @@ export default function ForgeUpgradePanel({ nfts, onForged, compact }: Props) {
       </div>
       <p className="text-xs text-slate-500 mb-4">
         Burn the required lower-tier Pickaxes <strong className="text-slate-400">and</strong> pay
-        $VENA — e.g. <strong className="text-slate-400">4 Silver + 1M $VENA → Gold</strong>.
-        All must be unstaked.
+        $VENA — e.g.{" "}
+        <strong className="text-slate-400">
+          4 Silver + {formatVena(tierUpgradeVena("Gold"))} $VENA → Gold
+        </strong>
+        . All must be unstaked.
       </p>
 
       {!isConnected ? (

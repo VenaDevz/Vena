@@ -69,7 +69,7 @@ Owner `setSilverPriceWei` / `setTierUpgradeVena` ile güncelleyebilir.
 
 - `mintSilver()` — `msg.value == 0.01 ETH`
 - Upgrade: önce `vena.approve(forge, cost)` + VPICK `setApprovalForAll(forge, true)`, sonra `forge(inputTier, tokenIds[])`
-  (ör. Gold için 4 Silver yakılır + 1M $VENA; üst tier mint edilir)
+  (ör. Gold için 4 Silver yakılır + 150K $VENA; üst tier mint edilir)
 
 ### Revenue akışı
 
