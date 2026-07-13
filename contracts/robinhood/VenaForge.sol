@@ -13,10 +13,10 @@ import "./PickaxeNFT.sol";
  * @notice Mint Silver with ETH. Forge higher tiers by burning lower Pickaxes + paying $VENA.
  *
  * Forge recipes (silver-equivalent math):
- *   4 × Silver   → 1 Gold        + 150K  $VENA
- *   2 × Gold     → 1 Platinum    + 300K  $VENA
- *   2 × Platinum → 1 Diamond     + 600K  $VENA
- *   2 × Diamond  → 1 Emerald     + 1.2M  $VENA
+ *   4 × Silver   → 1 Gold        + 1M  $VENA
+ *   2 × Gold     → 1 Platinum    + 2M  $VENA
+ *   2 × Platinum → 1 Diamond     + 4M  $VENA
+ *   2 × Diamond  → 1 Emerald     + 8M  $VENA
  *
  * Revenue flow (handled by protocol ops off-chain):
  *   - ETH mint fees  → treasury → market-buy $VENA → staking pool.
@@ -72,10 +72,10 @@ contract VenaForge is Ownable, ReentrancyGuard, IERC721Receiver {
 
         silverPriceWei = 0.01 ether;
 
-        tierUpgradeVena[PickaxeNFT.Tier.Gold]     = 150_000 * 1e18;
-        tierUpgradeVena[PickaxeNFT.Tier.Platinum] = 300_000 * 1e18;
-        tierUpgradeVena[PickaxeNFT.Tier.Diamond]  = 600_000 * 1e18;
-        tierUpgradeVena[PickaxeNFT.Tier.Emerald]  = 1_200_000 * 1e18;
+        tierUpgradeVena[PickaxeNFT.Tier.Gold]     = 1_000_000 * 1e18;
+        tierUpgradeVena[PickaxeNFT.Tier.Platinum] = 2_000_000 * 1e18;
+        tierUpgradeVena[PickaxeNFT.Tier.Diamond]  = 4_000_000 * 1e18;
+        tierUpgradeVena[PickaxeNFT.Tier.Emerald]  = 8_000_000 * 1e18;
 
         recipes[PickaxeNFT.Tier.Silver]   = ForgeRecipe(4, PickaxeNFT.Tier.Gold);
         recipes[PickaxeNFT.Tier.Gold]     = ForgeRecipe(2, PickaxeNFT.Tier.Platinum);

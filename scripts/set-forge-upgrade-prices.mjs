@@ -2,8 +2,8 @@
 /**
  * Update VenaForge tier upgrade $VENA costs (owner-only).
  *
- * Default ladder (2× from 150K Gold):
- *   Gold 150K · Platinum 300K · Diamond 600K · Emerald 1.2M
+ * Default ladder (2× from 1M Gold):
+ *   Gold 1M · Platinum 2M · Diamond 4M · Emerald 8M
  *
  * Usage:
  *   node scripts/set-forge-upgrade-prices.mjs           # dry-run
@@ -73,10 +73,10 @@ if (!PRIVATE_KEY) {
 
 /** PickaxeNFT.Tier enum — output tier for upgrade cost. */
 const UPGRADES = [
-  { tier: 1, label: "Gold", vena: "150000" },
-  { tier: 2, label: "Platinum", vena: "300000" },
-  { tier: 3, label: "Diamond", vena: "600000" },
-  { tier: 4, label: "Emerald", vena: "1200000" },
+  { tier: 1, label: "Gold", vena: "1000000" },
+  { tier: 2, label: "Platinum", vena: "2000000" },
+  { tier: 3, label: "Diamond", vena: "4000000" },
+  { tier: 4, label: "Emerald", vena: "8000000" },
 ];
 
 const forgeAbi = [
