@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Target, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useWriteContract } from "wagmi";
+import { useWriteContract, useConfig, useAccount } from "wagmi";
+import { waitForTransactionReceipt } from "@wagmi/core";
 import { parseUnits } from "viem";
 import { FARM_TREASURY } from "../config/farm-config";
 
 type Props = {
   onClose: () => void;
-  onReward: (reward: { type: string; amount: number; name: string }) => void;
+  onReward: (reward: { type: string; amount: number; name: string; txHash?: string; isPaid?: boolean }) => void;
   hasFreeSpin: boolean;
   crystal: number;
 };
@@ -53,63 +54,82 @@ export default function FarmDecryptorModal({ onClose, onReward, hasFreeSpin, cry
   const [result, setResult] = useState<typeof LOOT_TABLE[0] | null>(null);
   const [track, setTrack] = useState(() => generateTrack());
   
+  const { address } = useAccount();
+  const config = useConfig();
   const { writeContractAsync } = useWriteContract();
 
   const handleSpin = async (isPaid: boolean) => {
     if (isSpinning || isPaying) return;
     
+    let payTxHash: string | undefined = undefined;
+
     if (isPaid) {
       try {
         setIsPaying(true);
         // Charge 5,000 VENA to the treasury
-        await writeContractAsync({
+        const hash = await writeContractAsync({
           address: VENA_CONTRACT_ADDRESS,
           abi: venaTokenAbi,
           functionName: "transfer",
           args: [FARM_TREASURY, parseUnits("5000", 18)],
         });
+        
+        // Wait for absolute finality on the blockchain!
+        const receipt = await waitForTransactionReceipt(config, { hash });
+        if (receipt.status !== "success") throw new Error("Transaction reverted on chain.");
+        
+        payTxHash = hash;
       } catch (err) {
         console.error("Payment failed or rejected", err);
         setIsPaying(false);
         return; // Stop spin if they didn't pay
       }
-      setIsPaying(false);
     }
     
-    // First, instantly reset the track back to start
-    setResult(null);
-    setTrack(generateTrack());
-    
-    // Wait a tiny tick for React to render the reset state (translateX(160px))
-    setTimeout(() => {
-      setIsSpinning(true);
-
-      // Roll the actual reward
-      const roll = Math.random() * 100;
-      let cum = 0;
-      let won = LOOT_TABLE[0];
-      for (const loot of LOOT_TABLE) {
-        cum += loot.chance;
-        if (roll <= cum) {
-          won = loot;
-          break;
-        }
+    try {
+      setIsPaying(true); // Re-use isPaying as a loading state for the secure API call
+      const res = await fetch("/api/farm/decryptor-reward", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address, isPaid, payTxHash })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || "Failed to generate reward");
       }
 
-      // Insert the winning item near the end of the track
-      setTrack(prevTrack => {
-        const newTrack = [...prevTrack];
-        newTrack[35] = won;
-        return newTrack;
-      });
-
-      // After CSS animation ends (4 seconds)
+      const won = data.reward;
+      
+      // First, instantly reset the track back to start
+      setResult(null);
+      setTrack(generateTrack());
+      setIsPaying(false);
+      
+      // Wait a tiny tick for React to render the reset state
       setTimeout(() => {
-        setResult(won);
-        setIsSpinning(false);
-        onReward({ type: won.type, amount: won.amount, name: won.name });
-      }, 4000);
-    }, 50); // 50ms delay is enough for the DOM to reset without transition
+        setIsSpinning(true);
+
+        // Insert the SECURE winning item near the end of the track
+        setTrack(prevTrack => {
+          const newTrack = [...prevTrack];
+          newTrack[35] = won;
+          return newTrack;
+        });
+
+        // After CSS animation ends (4 seconds)
+        setTimeout(() => {
+          setResult(won);
+          setIsSpinning(false);
+          // Pass reward info, including the securely paid-out VENA txHash if won
+          onReward({ type: won.type, amount: won.amount, name: won.name, txHash: data.txHash, isPaid });
+        }, 4000);
+      }, 50);
+
+    } catch (err: any) {
+      console.error("API error", err);
+      alert("Reward API Error: " + err.message);
+      setIsPaying(false);
+    }
   };
 
   return (
@@ -213,7 +233,7 @@ export default function FarmDecryptorModal({ onClose, onReward, hasFreeSpin, cry
               disabled={isSpinning || isPaying}
               className={`flex-1 py-3 px-4 rounded-xl font-black text-sm tracking-widest transition-all border flex items-center justify-center gap-2 ${isPaying || isSpinning ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed' : 'bg-[#00d4ff]/20 border-[#00d4ff]/50 text-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.3)] hover:bg-[#00d4ff]/30 hover:scale-105'}`}
             >
-              {isPaying ? <><Loader2 size={16} className="animate-spin" /> PAYING...</> : "SPIN (5,000 $VENA)"}
+              {isPaying ? <><Loader2 size={16} className="animate-spin" /> PROCESSING...</> : "SPIN (5,000 $VENA)"}
             </button>
           </div>
           

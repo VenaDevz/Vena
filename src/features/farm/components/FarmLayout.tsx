@@ -482,30 +482,17 @@ export default function FarmLayout() {
           onClose={() => setShowDecryptor(false)}
           crystal={state.crystal}
           hasFreeSpin={hasFreeSpin}
-          onReward={async (reward) => {
-            if (hasFreeSpin) {
+          onReward={(reward: any) => {
+            // hasFreeSpin tracking is now duplicated securely on backend, but we keep local state for UI
+            if (hasFreeSpin && !reward.isPaid) {
               setHasFreeSpin(false);
               setNextFreeSpinAt(Date.now() + 24 * 60 * 60 * 1000);
             }
+            
             if (reward.type === "vena") {
-              setIsPayoutPending(true);
-              setPayoutError(null);
-              setPayoutTx(null);
-              try {
-                const res = await fetch("/api/farm/decryptor-reward", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ address, amount: reward.amount })
-                });
-                const data = await res.json();
-                if (!data.success) throw new Error(data.error);
-                setPayoutTx(data.txHash);
-              } catch (err: any) {
-                console.error("Payout failed", err);
-                setPayoutError(err.message || "Failed to process VENA payout");
-              } finally {
-                setIsPayoutPending(false);
-              }
+              // The secure backend API already handled the payout during the spin generation!
+              // We just show the success receipt to the user.
+              setPayoutTx(reward.txHash || "secured");
             } else {
               claimDecryptorReward(reward);
             }
