@@ -7,6 +7,7 @@ import ConnectWalletButton from "@/components/ConnectWalletButton";
 import { PROJECT } from "@/lib/project";
 import { formatCrystal, formatPrimeCrystal } from "../config/farm-config";
 import type { ResourceStockpile } from "../lib/farm-storage";
+import { getHalvingInfo } from "@/lib/mining";
 
 type FarmHeaderProps = {
   crystal: number;
@@ -55,7 +56,26 @@ export default function FarmHeader({
   resources,
 }: FarmHeaderProps) {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const [halvingText, setHalvingText] = useState("...");
+
+  useEffect(() => {
+    setMounted(true);
+    const updateHalving = () => {
+      const info = getHalvingInfo();
+      const diff = info.nextHalvingMs - Date.now();
+      if (diff <= 0) {
+        setHalvingText("Halving Now!");
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / 1000 / 60) % 60);
+      setHalvingText(`${days}d ${hours}h ${mins}m`);
+    };
+    updateHalving();
+    const int = setInterval(updateHalving, 60000);
+    return () => clearInterval(int);
+  }, []);
 
   const venaLabel = !mounted ? "—" : isConnected ? formatVenaBalance(balanceVena) : "—";
 
@@ -79,6 +99,11 @@ export default function FarmHeader({
             >
               VenaLand
             </h1>
+          </div>
+          <div className="hidden h-4 w-px bg-white/10 sm:block" />
+          <div className="hidden lg:flex flex-col items-start justify-center">
+             <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Next Halving</span>
+             <span className="text-[11px] font-mono font-black text-red-400">{halvingText}</span>
           </div>
         </div>
 

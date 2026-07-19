@@ -20,10 +20,33 @@ export const MINING_EMISSION = {
   emissionDays: 730,
   launchReferencePower: 50_000,
   uiTickMs: 1_000,
+  halvingDays: 30,
+  // 30 days ago to trigger the first halving today
+  launchDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
 } as const;
 
-export const DAILY_GLOBAL_CAP =
+export const BASE_DAILY_GLOBAL_CAP =
   MINING_EMISSION.poolVena / MINING_EMISSION.emissionDays;
+
+export function getHalvingInfo() {
+  const launchTime = new Date(MINING_EMISSION.launchDate).getTime();
+  const now = Date.now();
+  const elapsedMs = Math.max(0, now - launchTime);
+  const msPerHalving = MINING_EMISSION.halvingDays * 24 * 60 * 60 * 1000;
+  
+  const epoch = Math.floor(elapsedMs / msPerHalving);
+  const nextHalvingMs = launchTime + (epoch + 1) * msPerHalving;
+  
+  return {
+    epoch,
+    nextHalvingMs,
+    currentCap: BASE_DAILY_GLOBAL_CAP / Math.pow(2, epoch),
+  };
+}
+
+export function getCurrentGlobalCap() {
+  return getHalvingInfo().currentCap;
+}
 
 export const FULL_NETWORK_EFFECTIVE_POWER =
   TOKENOMICS.maxNftSupply *
@@ -68,7 +91,7 @@ export function venaPerDayFromPower(
 ): number {
   if (effectivePower <= 0) return 0;
   const total = networkPower + effectivePower;
-  return (effectivePower / total) * DAILY_GLOBAL_CAP;
+  return (effectivePower / total) * getCurrentGlobalCap();
 }
 
 export function venaPerDayForPickaxe(
@@ -230,7 +253,7 @@ export const FORGE_MINING_CHECKS = RARITY_TIERS.filter(
 export const MINING_POOL_SCHEDULE = {
   totalVena: MINING_EMISSION.poolVena,
   days: MINING_EMISSION.emissionDays,
-  dailyCap: DAILY_GLOBAL_CAP,
+  dailyCap: getCurrentGlobalCap(),
   endsOnDay: MINING_EMISSION.emissionDays,
   note: "Buyback-fed — pool grows with mint & upgrade volume",
 } as const;

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { formatNumber } from "@/lib/format";
 import {
-  DAILY_GLOBAL_CAP,
+  getCurrentGlobalCap,
   formatVenaAmount,
   MINING_EMISSION,
   venaPerDayFromPower,
@@ -136,7 +136,7 @@ export default function RewardCounter({
             {isActive ? (
               <>
                 ≈ {formatVenaAmount(dailyEst)} {PROJECT.tokenSymbol}/day · cap{" "}
-                {DAILY_GLOBAL_CAP.toFixed(2)}/day global
+                {getCurrentGlobalCap().toFixed(2)}/day global
               </>
             ) : !walletConnected ? (
               "Connect wallet to start mining"

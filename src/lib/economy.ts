@@ -11,7 +11,7 @@ import {
   tierMintOrUpgradeCost,
 } from "./tokenomics";
 import {
-  DAILY_GLOBAL_CAP,
+  getCurrentGlobalCap,
   MINING_EMISSION,
   effectiveMiningPower,
   venaPerDayForPickaxe,
@@ -80,4 +80,4 @@ export const UPGRADE_MINING_ADVANTAGE = RARITY_TIERS.filter(
   };
 });
 
-export const DAILY_EMISSION_CAP = DAILY_GLOBAL_CAP;
+export const DAILY_EMISSION_CAP = getCurrentGlobalCap();
