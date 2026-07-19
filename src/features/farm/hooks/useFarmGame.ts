@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useAccount, useReadContract, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseUnits } from "viem";
 import { targetChainId } from "@/config/wagmi";
@@ -204,6 +204,9 @@ export function useFarmGame() {
   const { address, isConnected } = useAccount();
   const { balanceVena, isLoading: venaLoading, refetch: refetchVena } = useWalletVena();
   const [state, setState] = useState<SavedFarmState | null>(null);
+  const [hasLoadedFromCloud, setHasLoadedFromCloud] = useState(false);
+  const lastSyncRef = useRef<number>(0);
+  const syncTimeoutRef = useRef<number | null>(null);
 
   const effectiveAddress =
     address ?? (FARM_DEMO_MODE ? "0xDEMO000000000000000000000000000000000000" : undefined);
@@ -307,7 +310,30 @@ export function useFarmGame() {
   const persist = useCallback(
     (next: SavedFarmState) => {
       setState(next);
-      if (effectiveAddress) saveFarmState(effectiveAddress, next);
+      if (effectiveAddress) {
+        saveFarmState(effectiveAddress, next); // Sync locally immediately
+        
+        // Debounce network save (every 5 seconds max)
+        const syncToCloud = () => {
+          lastSyncRef.current = Date.now();
+          fetch("/api/farm/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ address: effectiveAddress, state: next }),
+          }).catch(console.error);
+        };
+
+        if (syncTimeoutRef.current) {
+          window.clearTimeout(syncTimeoutRef.current);
+        }
+
+        const now = Date.now();
+        if (now - lastSyncRef.current > 5000) {
+          syncToCloud();
+        } else {
+          syncTimeoutRef.current = window.setTimeout(syncToCloud, 5000 - (now - lastSyncRef.current));
+        }
+      }
     },
     [effectiveAddress]
   );
@@ -328,11 +354,35 @@ export function useFarmGame() {
 
   // Load / migrate on wallet connect
   useEffect(() => {
-    if (!effectiveAddress) { setState(null); return; }
-    const raw = loadFarmState(effectiveAddress) ?? emptyFarmState();
+    if (!effectiveAddress) { 
+      setState(null); 
+      setHasLoadedFromCloud(false);
+      return; 
+    }
+    
+    let active = true;
+    
+    const init = async () => {
+      let raw = null;
+      if (!hasLoadedFromCloud) {
+        try {
+          const res = await fetch(`/api/farm/load?address=${effectiveAddress}`);
+          const data = await res.json();
+          raw = data.state;
+          if (active) setHasLoadedFromCloud(true);
+        } catch (err) {
+          console.error("Failed to load state from backend:", err);
+        }
+      }
 
-    // Refresh streak + daily quests before touching anything else
-    let withStreak = refreshStreakAndQuests(raw);
+      if (!active) return;
+      
+      if (!raw) {
+        raw = loadFarmState(effectiveAddress) ?? emptyFarmState();
+      }
+
+      // Refresh streak + daily quests before touching anything else
+      let withStreak = refreshStreakAndQuests(raw);
     withStreak = { ...withStreak, exchange: normalizeExchange(withStreak.exchange) };
 
     if (
@@ -407,12 +457,16 @@ export function useFarmGame() {
       gainedResources.crystal
     );
     setState(next);
-    saveFarmState(effectiveAddress, next);
+    saveFarmState(effectiveAddress, next); // Ensure the migrated/loaded state is persisted locally
     if (crystalGained > 1) {
       const hoursAway = elapsedSec / 3600;
       setOfflineBanner({ gained: crystalGained, hoursAway });
     }
-  }, [effectiveAddress, vpickCount, vpickTier, vpickMultiplier]);
+    
+  };
+  init();
+  return () => { active = false; };
+  }, [effectiveAddress, vpickCount, vpickTier, vpickMultiplier, hasLoadedFromCloud]);
 
   // Live tick every second
   useEffect(() => {

@@ -23,6 +23,7 @@ import FarmBazaarModal from "./FarmBazaarModal";
 import FarmCommandCenterModal from "./FarmCommandCenterModal";
 import FarmObeliskModal from "./FarmObeliskModal";
 import FarmDecryptorModal from "./FarmDecryptorModal";
+import FarmGuideModal from "./FarmGuideModal";
 
 export default function FarmLayout() {
   const { address } = useAccount();
@@ -34,6 +35,7 @@ export default function FarmLayout() {
   const [showCommandCenter, setShowCommandCenter] = useState(false);
   const [showObelisk, setShowObelisk] = useState(false);
   const [showDecryptor, setShowDecryptor] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [isPayoutPending, setIsPayoutPending] = useState(false);
   const [payoutTx, setPayoutTx] = useState<string | null>(null);
   const [payoutError, setPayoutError] = useState<string | null>(null);
