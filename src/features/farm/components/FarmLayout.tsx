@@ -485,6 +485,7 @@ export default function FarmLayout() {
           onClose={() => setShowDecryptor(false)}
           crystal={state.crystal}
           hasFreeSpin={hasFreeSpin}
+          countdownText={countdownText}
           onReward={(reward: any) => {
             if (hasFreeSpin && !reward.isPaid) {
               setHasFreeSpin(false);

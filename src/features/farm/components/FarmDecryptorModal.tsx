@@ -13,6 +13,7 @@ type Props = {
   onReward: (reward: { type: string; amount: number; name: string; txHash?: string; isPaid?: boolean }) => void;
   hasFreeSpin: boolean;
   crystal: number;
+  countdownText: string;
 };
 
 const LOOT_TABLE = [
@@ -48,7 +49,7 @@ const venaTokenAbi = [
   }
 ] as const;
 
-export default function FarmDecryptorModal({ onClose, onReward, hasFreeSpin, crystal }: Props) {
+export default function FarmDecryptorModal({ onClose, onReward, hasFreeSpin, crystal, countdownText }: Props) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const [result, setResult] = useState<typeof LOOT_TABLE[0] | null>(null);
@@ -226,7 +227,7 @@ export default function FarmDecryptorModal({ onClose, onReward, hasFreeSpin, cry
               disabled={isSpinning || isPaying || !hasFreeSpin}
               className={`flex-1 py-3 px-4 rounded-xl font-black text-sm tracking-widest transition-all border ${hasFreeSpin ? 'bg-[#00ff88]/20 border-[#00ff88]/50 text-[#00ff88] shadow-[0_0_15px_rgba(0,255,136,0.3)] hover:bg-[#00ff88]/30 hover:scale-105' : 'bg-white/5 border-white/10 text-slate-400 cursor-not-allowed'}`}
             >
-              {hasFreeSpin ? "FREE SPIN" : "NEXT IN 12H"}
+              {hasFreeSpin ? "FREE SPIN" : `NEXT IN ${countdownText}`}
             </button>
             <button
               onClick={() => handleSpin(true)}
