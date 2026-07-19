@@ -126,6 +126,20 @@ export function useOnChainMining() {
     return true;
   }, [writesEnabled, pendingWei, writeContractAsync, refetchUserInfo]);
 
+  const syncPower = useCallback(async (): Promise<boolean> => {
+    if (!writesEnabled || stakedIds.size === 0) return false;
+
+    await writeContractAsync({
+      chainId: targetChainId,
+      address: VENA_MINING_ADDRESS,
+      abi: venaMiningAbi,
+      functionName: "syncPower",
+      args: [],
+    });
+    await refetchUserInfo();
+    return true;
+  }, [writesEnabled, stakedIds.size, writeContractAsync, refetchUserInfo]);
+
   return {
     enabled: writesEnabled,
     miningActive: Boolean(miningActive),
@@ -137,6 +151,7 @@ export function useOnChainMining() {
     stakeToken,
     unstakeToken,
     claimOnChain,
+    syncPower,
     refetchUserInfo,
   };
 }

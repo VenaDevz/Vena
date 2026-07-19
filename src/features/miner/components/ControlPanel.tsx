@@ -37,6 +37,7 @@ type ControlPanelProps = {
   onTogglePickaxe: (pickaxe: PickaxeNFT) => void;
   onStakePickaxe: (pickaxe: PickaxeNFT) => void;
   onUnstakePickaxe: (pickaxe: PickaxeNFT) => void;
+  onSyncPower: () => void;
   onSetDisplayPickaxe: (id: number) => void;
   onNotify: (message: string) => void;
 };
@@ -65,6 +66,7 @@ export default function ControlPanel(props: ControlPanelProps) {
         onToggle={props.onTogglePickaxe}
         onStake={props.onStakePickaxe}
         onUnstake={props.onUnstakePickaxe}
+        onSyncPower={props.onSyncPower}
       />
       <PickaxeInventory
         pickaxes={props.walletPickaxes}

@@ -17,6 +17,7 @@ type ActiveStakesPanelProps = {
   onToggle: (pickaxe: PickaxeNFT) => void;
   onStake: (pickaxe: PickaxeNFT) => void;
   onUnstake: (pickaxe: PickaxeNFT) => void;
+  onSyncPower?: () => void;
 };
 
 export default function ActiveStakesPanel({
@@ -28,6 +29,7 @@ export default function ActiveStakesPanel({
   onToggle,
   onStake,
   onUnstake,
+  onSyncPower,
 }: ActiveStakesPanelProps) {
   if (equippedPickaxes.length === 0) {
     return (
@@ -153,6 +155,22 @@ export default function ActiveStakesPanel({
           );
         })}
       </ul>
+      {stakedIds.size > 0 && onSyncPower && (
+        <div className="mt-4 rounded-xl border border-white/5 bg-black/20 p-4 text-center">
+          <h3 className="miner-panel-title text-xs font-bold text-[#00f0ff]">STRATUM MULTIPLIER</h3>
+          <p className="mt-1 text-[11px] text-slate-400 mb-3">
+            Stake duration raises your reward multiplier. Click below to lock in your latest Stratum power level on-chain!
+          </p>
+          <button
+            type="button"
+            onClick={() => onSyncPower()}
+            disabled={!canStakeOnChain}
+            className="miner-panel-title w-full rounded-lg border border-[#00f0ff]/40 bg-[#00f0ff]/10 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-[#00f0ff] hover:bg-[#00f0ff]/20 disabled:opacity-40"
+          >
+            ⚡ Sync Power (Update Stratum)
+          </button>
+        </div>
+      )}
     </section>
   );
 }

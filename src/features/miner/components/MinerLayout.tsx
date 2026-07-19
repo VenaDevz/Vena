@@ -323,9 +323,8 @@ export default function MinerLayout() {
             onStakePickaxe={(pickaxe) => {
               void handleStakePickaxe(pickaxe);
             }}
-            onUnstakePickaxe={(pickaxe) => {
-              void handleUnstakePickaxe(pickaxe);
-            }}
+            onUnstakePickaxe={(p) => chain.unstakeToken(p.id)}
+            onSyncPower={() => chain.syncPower()}
             onSetDisplayPickaxe={setDisplayPickaxe}
             onNotify={notify}
           />
