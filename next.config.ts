@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const emptyModule = "./src/lib/wagmi/empty-module.js";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   images: {
     qualities: [75, 95],
   },

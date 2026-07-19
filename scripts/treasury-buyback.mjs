@@ -17,6 +17,7 @@
  *   --execute       live txs
  *   --fund-only     skip ETH buyback
  *   --buyback-only  skip fundRewards
+ *   --amount N      fund exactly N VENA (default: full treasury balance)
  *   --watch         loop (requires --execute)
  */
 
@@ -213,6 +214,17 @@ const fundOnly = args.has("--fund-only");
 const buybackOnly = args.has("--buyback-only");
 const watch = args.has("--watch");
 
+function parseAmountArg() {
+  const idx = process.argv.indexOf("--amount");
+  if (idx === -1 || idx + 1 >= process.argv.length) return null;
+  const raw = process.argv[idx + 1].replace(/,/g, "");
+  if (!/^\d+(\.\d+)?$/.test(raw)) {
+    console.error("Invalid --amount:", process.argv[idx + 1]);
+    process.exit(1);
+  }
+  return parseEther(raw);
+}
+
 function applySlippage(amount, bps) {
   return (amount * BigInt(10_000 - bps)) / 10_000n;
 }
@@ -288,27 +300,42 @@ async function readPoolStatus(publicClient, mining) {
   return { poolBal, started, rps };
 }
 
-async function runFund(publicClient, walletClient, treasury, mining) {
+async function runFund(publicClient, walletClient, treasury, mining, amountOverride) {
   const venaBal = await readTreasuryVena(publicClient, treasury);
-  if (venaBal < MIN_FUND) {
+  const fundAmount = amountOverride ?? venaBal;
+
+  if (fundAmount <= 0n) {
+    console.log("Skip fund — amount is zero");
+    return false;
+  }
+  if (fundAmount > venaBal) {
+    console.error(
+      "Cannot fund",
+      formatUnits(fundAmount, 18),
+      "VENA — treasury only has",
+      formatUnits(venaBal, 18)
+    );
+    process.exit(1);
+  }
+  if (fundAmount < MIN_FUND) {
     console.log(
-      "Skip fund — treasury VENA",
-      formatUnits(venaBal, 18),
+      "Skip fund — amount",
+      formatUnits(fundAmount, 18),
       `< min`,
       formatUnits(MIN_FUND, 18)
     );
     return false;
   }
 
-  console.log("→ Fund pool:", formatUnits(venaBal, 18), "VENA");
+  console.log("→ Fund pool:", formatUnits(fundAmount, 18), "VENA");
   if (dryRun) return true;
 
-  await ensureAllowance(publicClient, walletClient, VENA, treasury, mining, venaBal);
+  await ensureAllowance(publicClient, walletClient, VENA, treasury, mining, fundAmount);
   const hash = await walletClient.writeContract({
     address: mining,
     abi: miningAbi,
     functionName: "fundRewards",
-    args: [venaBal],
+    args: [fundAmount],
   });
   console.log("fundRewards tx:", hash);
   await publicClient.waitForTransactionReceipt({ hash });
@@ -495,7 +522,14 @@ async function runCycle() {
   }
 
   if (!buybackOnly && mining) {
-    const funded = await runFund(publicClient, walletClient, treasury, mining);
+    const fundAmount = parseAmountArg();
+    const funded = await runFund(
+      publicClient,
+      walletClient,
+      treasury,
+      mining,
+      fundAmount
+    );
     didSomething = funded || didSomething;
   }
 

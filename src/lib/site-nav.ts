@@ -6,7 +6,7 @@ export type SiteNavLink =
 
 export const MAIN_NAV_LINKS: SiteNavLink[] = [
   { label: "Mint", href: "/mint", kind: "route" },
-  { label: "VenaLand", href: "/venaland", kind: "route" },
+  { label: "VenaLand", href: "https://app.venaprotocol.com", kind: "external" },
   { label: "Trade", href: "https://app.virtuals.io/virtuals/95873", kind: "external" },
   { label: "Protocol", href: "/", kind: "route" },
   { label: "Forge", href: "/forge", kind: "route" },
@@ -18,6 +18,6 @@ export const FOOTER_NAV_LINKS: SiteNavLink[] = [
   { label: "How it works", href: "/how-it-works", kind: "route" },
   { label: "Mint", href: "/mint", kind: "route" },
   { label: "Tokenomics", href: "/tokenomics", kind: "route" },
-  { label: "VenaLand", href: "/venaland", kind: "route" },
+  { label: "VenaLand", href: "https://app.venaprotocol.com", kind: "external" },
   { label: "Miner Command", href: "/miner", kind: "route" },
 ];

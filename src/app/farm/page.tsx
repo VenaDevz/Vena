@@ -1,6 +1,12 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import FarmLayout from "@/features/farm/components/FarmLayout";
+import { PROJECT } from "@/lib/project";
 
-/** Legacy /farm URL → public VenaLand landing. */
-export default function FarmRedirectPage() {
-  redirect("/venaland");
+export const metadata: Metadata = {
+  title: `Command Base | ${PROJECT.name}`,
+  description: "Manage your Vena Command Base and extract crystals.",
+};
+
+export default function FarmPage() {
+  return <FarmLayout />;
 }

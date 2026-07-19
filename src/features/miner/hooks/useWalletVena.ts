@@ -2,6 +2,7 @@
 
 import { useAccount, useReadContract } from "wagmi";
 import { formatUnits } from "viem";
+import { targetChainId } from "@/config/wagmi";
 
 const VENA_TOKEN = (process.env.NEXT_PUBLIC_VENA_TOKEN ?? "") as `0x${string}`;
 
@@ -23,6 +24,7 @@ export function useWalletVena() {
     abi: erc20Abi,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
+    chainId: targetChainId,
     query: { enabled: isConnected && !!address && !!VENA_TOKEN },
   });
 

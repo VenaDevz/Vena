@@ -66,6 +66,12 @@ contracts/initcode.txt
 scripts/match-*.mjs
 scripts/find-venatoken-bytecode.mjs
 
+# ── NFT Marketplace (local dev only — do NOT commit until launch-ready) ──
+/marketplace-app/
+/contracts/marketplace-local/
+/script/marketplace-local/
+/docs/MARKETPLACE*.md
+
 # internal deploy playbooks (keep local only)
 contracts/DEPLOY.md
 contracts/HOOK_V2_DEPLOY.md
@@ -81,3 +87,6 @@ contracts/metadata/
 contracts/V4_LIVE_SNAPSHOT.md
 contracts/PRISM_MIGRATION_PLAN.md
 contracts/PRISM_DEPLOY.md
+
+# python
+venv/

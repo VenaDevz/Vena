@@ -1,0 +1,3253 @@
+/* ═══════════════════════════════════════════════
+   VENA Command Base — complete stylesheet
+   ═══════════════════════════════════════════════ */
+
+/* ── Root ── */
+.farm-root {
+  min-height: 100vh;
+  background: #060b16;
+  color: #e2eaf4;
+}
+
+/* ── Header ── */
+.farm-header {
+  background: linear-gradient(180deg, rgba(6,11,22,0.97), rgba(6,11,22,0.84));
+  border-bottom: 1px solid rgba(0,255,136,0.18);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+}
+
+.farm-panel {
+  background: linear-gradient(165deg, #6f7379 0%, #4a4d52 38%, #35383d 100%);
+  border: 2px solid #0a0a0a;
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.24),
+    0 4px 12px rgba(0, 0, 0, 0.42);
+}
+
+/* ── Full-screen layout ── */
+.farm-main-split {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+  position: relative;
+}
+
+.farm-world-section {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* ── World / background ── */
+.farm-world {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #0e3035 0%, #041012 100%);
+}
+
+.farm-world-bg {
+  object-fit: cover;
+  object-position: center 25%;
+  z-index: 0;
+}
+
+.farm-world-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.35) 0%, transparent 18%, transparent 82%, rgba(0,0,0,0.5) 100%),
+    radial-gradient(ellipse 80% 50% at 50% 70%, transparent 40%, rgba(0,0,0,0.4) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 20%);
+}
+
+.farm-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* ── Isometric board ── */
+.farm-iso-board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  /* Board is a wide diamond (1.35:1). To fill the play area vertically
+     the width must be ~1.35× the available height. Cap by both the
+     section width and a height-derived value so it stays centered and huge. */
+  width: min(calc(100% - 24px), 122vh);
+  aspect-ratio: 1.35 / 1;
+}
+
+.farm-iso-neon::after {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0,255,136,0.14), transparent 65%);
+  animation: farm-neon-pulse 2.6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Founder's Frame — exclusive gold aura (VENA premium cosmetic) */
+.farm-iso-founder::before {
+  content: "";
+  position: absolute;
+  inset: -6%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255,196,74,0.16), transparent 62%);
+  box-shadow: inset 0 0 60px rgba(255,196,74,0.18);
+  animation: farm-neon-pulse 3.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes farm-neon-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* ── Individual tile ── */
+.farm-tile {
+  position: absolute;
+  width: 46%;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+/* Clip empty tiles to their diamond so their rectangular hit-box does not
+   cover (and intercept clicks meant for) built buildings on tiles behind. */
+.farm-tile-empty {
+  clip-path: polygon(50% 4%, 100% 50%, 50% 96%, 0% 50%);
+}
+
+.farm-tile-empty:hover {
+  transform: translate(-50%, calc(-50% - 6px));
+  filter: brightness(1.12) drop-shadow(0 0 14px rgba(0,255,136,0.45));
+}
+
+.farm-tile-built {
+  cursor: pointer;
+}
+
+.farm-tile-built:hover {
+  transform: translate(-50%, calc(-50% - 4px));
+  filter: brightness(1.08) drop-shadow(0 0 14px rgba(0,212,255,0.5));
+}
+
+.farm-tile-pending { cursor: wait; }
+
+.farm-tile-ground {
+  width: 100%;
+  height: auto;
+  display: block;
+  /* Simplify the old look: blend into background slightly, lower contrast */
+  opacity: 0.6;
+  filter: saturate(0.6) contrast(0.9) drop-shadow(0 14px 20px rgba(0,0,0,0.55));
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.farm-tile:hover .farm-tile-ground {
+  opacity: 0.85;
+}
+
+.farm-tile-building {
+  position: absolute;
+  left: 50%;
+  bottom: 28%;
+  width: 86%;
+  height: auto;
+  transform-origin: bottom center;
+  pointer-events: none;
+  filter: drop-shadow(0 12px 16px rgba(0,0,0,0.6));
+  animation: farm-building-drop 0.4s ease-out;
+}
+
+@keyframes farm-building-drop {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-18px) scale(0.82); }
+  100% { opacity: 1; }
+}
+
+/* Empty plot marker */
+.farm-tile-plus {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.farm-tile-plus-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(0,255,136,0.1);
+  border: 2px dashed rgba(0,255,136,0.65);
+  color: rgba(0,255,136,0.95);
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+  box-shadow: 0 0 18px rgba(0,255,136,0.28);
+  animation: farm-plot-pulse 2s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes farm-plot-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50%       { transform: scale(1.1); opacity: 1; }
+}
+
+/* Tile labels — see "Tile resource label" section below */
+
+.farm-tile-label-rate {
+  font-family: "Futura", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #00ff88;
+}
+
+.farm-tile-status {
+  position: absolute;
+  left: 50%; top: 40%;
+  transform: translate(-50%, -50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(6,11,22,0.92);
+  border: 1px solid rgba(0,212,255,0.55);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #00d4ff;
+  z-index: 6;
+}
+
+/* Sparks */
+.farm-spark {
+  position: absolute;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #00ff88;
+  box-shadow: 0 0 6px #00ff88;
+  animation: farm-spark 1.2s ease-out infinite;
+  opacity: 0;
+  z-index: 10;
+}
+
+@keyframes farm-spark {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  30%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-28px) scale(1); }
+}
+
+/* ── Commander robot — stands in the central plaza ── */
+.farm-commander-center {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.farm-commander-pad {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 108px; height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0,255,136,0.6), rgba(0,212,255,0.2) 55%, transparent 72%);
+  filter: blur(1px);
+  animation: farm-pad-pulse 2.4s ease-in-out infinite;
+}
+
+.farm-commander-pad-active {
+  background: radial-gradient(ellipse at center, rgba(255,200,0,0.7), rgba(255,120,0,0.3) 55%, transparent 72%);
+}
+
+@keyframes farm-pad-pulse {
+  0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+  50%       { opacity: 1;   transform: translateX(-50%) scale(1.12); }
+}
+
+.farm-commander-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.2s;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.farm-commander-btn:not(:disabled):hover {
+  transform: translateY(-5px) scale(1.06);
+}
+
+.farm-commander-btn:disabled { cursor: default; }
+
+.farm-commander-rallying .farm-robot-img {
+  filter:
+    drop-shadow(0 10px 20px rgba(0,0,0,0.75))
+    drop-shadow(0 0 32px rgba(255,200,0,1))
+    drop-shadow(0 0 8px rgba(255,255,255,0.5));
+}
+
+.farm-robot-img {
+  max-height: 148px;
+  width: auto;
+  filter:
+    drop-shadow(0 10px 18px rgba(0,0,0,0.85))
+    drop-shadow(0 0 16px rgba(0,255,136,0.65))
+    drop-shadow(0 0 6px rgba(255,255,255,0.25));
+  animation: farm-robot-idle 3s ease-in-out infinite;
+}
+
+@keyframes farm-robot-idle {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* Commander medallion — a pinned gold rank insignia on the robot's chest */
+.farm-commander-badge {
+  position: absolute;
+  top: 25%; right: 24%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  color: #4a3400;
+  background:
+    radial-gradient(circle at 35% 30%, #fff2c0 0%, #ffd24a 38%, #d99516 100%);
+  border: 1.5px solid rgba(255,255,255,0.65);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.55),
+    0 0 12px rgba(255,190,60,0.6),
+    inset 0 -2px 3px rgba(140,90,0,0.5);
+  z-index: 4;
+}
+.farm-commander-badge svg {
+  color: #6b4a00;
+  filter: drop-shadow(0 0.5px 0 rgba(255,255,255,0.4));
+}
+
+.farm-commander-caption {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 26;
+}
+
+/* ── Central command plaza (reserved open tile) ── */
+.farm-plaza-tile {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.farm-plaza-ground {
+  filter: drop-shadow(0 14px 20px rgba(0,0,0,0.55)) brightness(0.82) saturate(1.15);
+}
+
+.farm-plaza-ring {
+  position: absolute;
+  left: 50%; top: 46%;
+  width: 60%; height: 32%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(0,255,136,0.55);
+  box-shadow: 0 0 20px rgba(0,255,136,0.4), inset 0 0 16px rgba(0,212,255,0.28);
+  background: radial-gradient(ellipse at center, rgba(0,255,136,0.14), transparent 70%);
+  animation: farm-plaza-pulse 3s ease-in-out infinite;
+}
+
+@keyframes farm-plaza-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+
+/* ── Roaming trooper units (pixel-art walk-cycle sprite) ── */
+.farm-worker {
+  position: absolute;
+  pointer-events: none;
+  will-change: left, top, transform;
+}
+
+/* Ground contact shadow */
+.farm-worker::after {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: -1px;
+  transform: translateX(-50%);
+  width: 58%; height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.5), transparent 72%);
+  z-index: 0;
+}
+
+/* Viewport window: shows exactly one frame of the strip */
+.farm-trooper {
+  position: relative;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  transition: opacity 0.32s ease, transform 0.32s ease;
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,0.5));
+}
+
+/* The 4-frame film strip that scrolls behind the window */
+.farm-trooper-film {
+  position: absolute;
+  left: 0; top: 0;
+  width: calc(var(--fw) * 4);
+  height: 100%;
+  background: url("/farm/trooper-walk-sheet.png") left center / 100% 100% no-repeat;
+  transform: translateX(0);
+}
+
+/* Walk cycle — steps through 4 frames only while moving */
+.farm-worker-walking .farm-trooper-film {
+  animation: trooper-walk calc(0.62s / var(--walk, 1)) steps(4) infinite;
+}
+@keyframes trooper-walk {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(var(--fw) * -4)); }
+}
+
+/* Entering a building — fade + shrink into the structure */
+.farm-worker-inside .farm-trooper {
+  opacity: 0;
+  transform: scale(0.55) translateY(-16%);
+}
+
+/* ── Mining effect — swap to a dedicated pickaxe-swing sprite while digging ── */
+.farm-trooper-spark {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/*
+ * Mining sprite: a 3-frame swing sheet (raise → swing → impact). Its window is
+ * wider than the walk sprite (129%) because the pickaxe reaches out to the
+ * right; the body stays left-aligned so it sits where the walking trooper was.
+ */
+.farm-trooper-mine {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 129%;
+  height: 100%;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,0.5));
+  z-index: 3;
+}
+.farm-trooper-mine-film {
+  position: absolute;
+  left: 0; top: 0;
+  width: 300%;
+  height: 100%;
+  background: url("/farm/trooper-mine-sheet.png") left center / 100% 100% no-repeat;
+  transform: translateX(0);
+}
+
+/* While digging: hide the walk sprite, show + animate the mining sprite */
+.farm-worker-mining .farm-trooper { opacity: 0; }
+.farm-worker-mining .farm-trooper-mine { opacity: 1; }
+.farm-worker-mining .farm-trooper-mine-film {
+  animation: trooper-mine 0.66s steps(3) infinite;
+}
+@keyframes trooper-mine {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+/* Impact sparks + dust — fire on the strike (last third of the cycle) */
+.farm-trooper-spark {
+  right: 6%;
+  bottom: 5%;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: #ffe08a;
+  box-shadow: 0 0 4px #ffca4a, 0 0 7px #ff9a2a;
+  z-index: 6;
+}
+.farm-trooper-dust {
+  position: absolute;
+  right: 4%;
+  bottom: 2%;
+  width: 11px; height: 5px;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(ellipse at center, rgba(205,184,154,0.95), transparent 70%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.farm-worker-mining .farm-trooper-spark-1 { animation: spark-a 0.66s ease-out infinite; }
+.farm-worker-mining .farm-trooper-spark-2 { animation: spark-b 0.66s ease-out infinite; }
+.farm-worker-mining .farm-trooper-spark-3 { animation: spark-c 0.66s ease-out infinite; }
+.farm-worker-mining .farm-trooper-dust { animation: dust-puff 0.66s ease-out infinite; }
+
+/* Dust + sparks trigger at the impact frame (~66% into the 3-step cycle) */
+@keyframes dust-puff {
+  0%, 62% { opacity: 0; transform: scale(0.3) translateY(0); }
+  72%     { opacity: 0.8; transform: scale(1) translateY(0); }
+  100%    { opacity: 0; transform: scale(2) translateY(-35%); }
+}
+@keyframes spark-a {
+  0%, 62% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  70%     { opacity: 1; transform: translate(0, 0) scale(1); }
+  86%     { opacity: 0.9; transform: translate(150%, -110%) scale(0.7); }
+  100%    { opacity: 0; transform: translate(220%, -60%) scale(0.3); }
+}
+@keyframes spark-b {
+  0%, 62% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  70%     { opacity: 1; transform: translate(0, 0) scale(1); }
+  86%     { opacity: 0.9; transform: translate(-90%, -120%) scale(0.7); }
+  100%    { opacity: 0; transform: translate(-150%, -70%) scale(0.3); }
+}
+@keyframes spark-c {
+  0%, 62% { opacity: 0; transform: translate(0, 0) scale(0.35); }
+  70%     { opacity: 1; transform: translate(0, 0) scale(0.9); }
+  86%     { opacity: 0.85; transform: translate(40%, -150%) scale(0.6); }
+  100%    { opacity: 0; transform: translate(70%, -100%) scale(0.25); }
+}
+
+/* Rally surge — crew glows gold */
+.farm-worker-rally .farm-trooper {
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)) drop-shadow(0 0 9px rgba(255,200,0,0.9));
+}
+
+/* ── Commander mascot (our VENA robot) in the side panel ── */
+.farm-commander-stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 230px;
+  margin: 6px 0 12px;
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 92%, rgba(0,255,136,0.18), transparent 70%),
+    linear-gradient(180deg, rgba(0,212,255,0.05), rgba(10,16,26,0.35));
+  overflow: hidden;
+}
+/* Contact platform under the robot */
+.farm-commander-stage::after {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: 8px;
+  transform: translateX(-50%);
+  width: 74%; height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.5), transparent 72%);
+}
+.farm-commander-robot {
+  position: relative;
+  z-index: 1;
+  display: block;
+  filter: drop-shadow(0 4px 5px rgba(0,0,0,0.55)) drop-shadow(0 0 8px rgba(0,255,136,0.35));
+}
+.farm-commander-stage-on {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 92%, rgba(255,200,60,0.28), transparent 70%),
+    linear-gradient(180deg, rgba(255,200,60,0.08), rgba(10,16,26,0.35));
+}
+.farm-commander-stage-on .farm-commander-robot {
+  filter: drop-shadow(0 4px 5px rgba(0,0,0,0.55)) drop-shadow(0 0 12px rgba(255,200,0,0.75));
+}
+/* Power Core 3+: purple tint */
+.farm-commander-stage-mid {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 92%, rgba(192,132,252,0.22), transparent 70%),
+    linear-gradient(180deg, rgba(124,58,237,0.08), rgba(10,16,26,0.35));
+}
+.farm-commander-stage-mid .farm-commander-robot {
+  filter: drop-shadow(0 4px 5px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(192,132,252,0.7));
+}
+/* Power Core 6 (max): blazing violet-gold */
+.farm-commander-stage-max {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 90%, rgba(192,132,252,0.35), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 50% 95%, rgba(255,200,60,0.25), transparent 60%),
+    linear-gradient(180deg, rgba(124,58,237,0.12), rgba(10,16,26,0.35));
+  animation: core-max-pulse 2s ease-in-out infinite;
+}
+.farm-commander-stage-max .farm-commander-robot {
+  filter:
+    drop-shadow(0 4px 5px rgba(0,0,0,0.55))
+    drop-shadow(0 0 20px rgba(192,132,252,0.9))
+    drop-shadow(0 0 8px rgba(255,200,60,0.6));
+}
+@keyframes core-max-pulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.08); }
+}
+@keyframes commander-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+.farm-rally-badge {
+  display: inline-block;
+  padding: 5px 16px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+}
+
+.farm-rally-badge-ready {
+  color: #00ff88;
+  background: rgba(0,255,136,0.12);
+  border: 1px solid rgba(0,255,136,0.55);
+  animation: farm-ready-blink 1.8s ease-in-out infinite;
+}
+
+.farm-rally-badge-on {
+  color: #ffd24a;
+  background: rgba(255,200,0,0.15);
+  border: 1px solid rgba(255,200,0,0.65);
+}
+
+.farm-rally-badge-cd {
+  color: #7c93ad;
+  background: rgba(6,11,22,0.7);
+  border: 1px solid rgba(124,147,173,0.3);
+}
+
+@keyframes farm-ready-blink {
+  0%, 100% { opacity: 0.75; }
+  50%       { opacity: 1; box-shadow: 0 0 14px rgba(0,255,136,0.4); }
+}
+
+/* ── Floating HUD ── */
+.farm-hud-float {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.farm-hud-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: rgba(6,11,22,0.85);
+  border: 1px solid rgba(0,212,255,0.35);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+}
+
+.farm-hud-chip-sm    { padding: 6px 12px; }
+.farm-hud-chip-boost { border-color: rgba(112,0,255,0.5); }
+.farm-hud-chip-icon  {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  line-height: 1;
+}
+.farm-hud-chip-icon-crystal {
+  color: #00ff88;
+  background: rgba(0,255,136,0.14);
+  box-shadow: inset 0 0 0 1px rgba(0,255,136,0.3);
+}
+.farm-hud-chip-icon-rate {
+  color: #00d4ff;
+  background: rgba(0,212,255,0.14);
+  box-shadow: inset 0 0 0 1px rgba(0,212,255,0.3);
+}
+
+.farm-hud-chip-label {
+  font-size: 8px; text-transform: uppercase;
+  letter-spacing: 0.14em; color: rgba(255,255,255,0.5); margin: 0;
+}
+
+.farm-hud-chip-value {
+  font-size: 15px; font-weight: 700; margin: 0; line-height: 1.2;
+}
+
+.farm-hud-crystal { color: #00ff88; }
+.farm-hud-rate    { color: #00d4ff; }
+.farm-hud-boost   { color: #b98bff; }
+.farm-hud-stat    { font-family: var(--font-orbitron), sans-serif; }
+
+/* ── Overlays ── */
+.farm-overlay-top {
+  position: absolute;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex; flex-direction: column; gap: 8px;
+  width: min(92%, 480px);
+}
+
+.farm-offline-toast {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 14px; border-radius: 12px;
+  border: 1px solid rgba(0,255,136,0.35);
+  background: rgba(6,11,22,0.92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.farm-overlay-actions {
+  position: absolute;
+  bottom: 16px; left: 16px;
+  z-index: 40;
+  display: flex; gap: 10px;
+}
+
+.farm-error-toast {
+  position: absolute;
+  bottom: 72px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(40,10,10,0.9);
+  border: 1px solid rgba(239,68,68,0.5);
+  color: #fca5a5;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* ── Right sidebar ── */
+.farm-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 14px 14px 10px;
+  background: linear-gradient(180deg, rgba(6,11,22,0.97) 0%, rgba(8,16,32,0.99) 100%);
+  border-left: 1px solid rgba(0,212,255,0.14);
+  overflow-y: auto;
+  height: 100%;
+}
+
+.farm-side-tabs {
+  display: none;
+}
+
+.farm-side-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.farm-side-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.farm-side-card {
+  background: linear-gradient(145deg, rgba(12,24,44,0.95), rgba(7,14,26,0.98));
+  border: 1px solid rgba(0,212,255,0.18);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+}
+
+.farm-side-card-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 8px;
+}
+
+.farm-side-card-title-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.farm-side-card-title-icon svg { color: #00d4ff; }
+
+.farm-rally-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.05);
+}
+.farm-rally-info-on .farm-rally-info-icon {
+  background: rgba(255,200,0,0.14);
+  animation: farm-icon-pulse 1s ease-in-out infinite;
+}
+
+@keyframes farm-icon-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.12); }
+}
+
+.farm-rally-info {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.farm-rally-info-ready {
+  border-color: rgba(0,255,136,0.3);
+  background: rgba(0,255,136,0.05);
+  animation: farm-ready-blink 2s ease-in-out infinite;
+}
+
+.farm-rally-info-on {
+  border-color: rgba(255,200,0,0.4);
+  background: rgba(255,200,0,0.07);
+}
+
+.farm-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+/* Expand Base button in side panel */
+.farm-expand-panel-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(0,212,255,0.5);
+  background: rgba(0,212,255,0.06);
+  color: rgba(0,212,255,0.9);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  animation: farm-ring-pulse 2.8s ease-in-out infinite;
+}
+
+.farm-expand-panel-btn:hover {
+  background: rgba(0,212,255,0.14);
+  border-color: rgba(0,212,255,0.8);
+  animation: none;
+}
+
+.farm-expand-panel-icon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.farm-expand-panel-arrow {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* ── Expand ring — subtle badge, revealed on board hover ── */
+.farm-expand-ring {
+  /* Lower-center transparent zone of the diamond, clear of the HUD */
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  height: auto;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 20;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+/* Reveal when hovering anywhere on the board */
+.farm-iso-board:hover .farm-expand-ring {
+  opacity: 1;
+}
+
+.farm-expand-ring:hover .farm-expand-ring-label {
+  border-color: rgba(0, 212, 255, 0.85);
+  background: rgba(0, 212, 255, 0.12);
+  color: #00d4ff;
+}
+
+@keyframes farm-ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(0,212,255,0); }
+  50%       { box-shadow: 0 0 12px rgba(0,212,255,0.35); }
+}
+
+.farm-expand-ring-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(6, 11, 22, 0.88);
+  border: 1px solid rgba(0, 212, 255, 0.45);
+  color: rgba(0, 212, 255, 0.85);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  animation: farm-ring-pulse 2.8s ease-in-out infinite;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.farm-expand-ring-plus {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1;
+  color: #00d4ff;
+}
+
+/* Tile resource label — small corner chip */
+.farm-tile-label {
+  position: absolute;
+  left: 50%;
+  /* Moved from bottom:4% to the safe "back zone" just below the level badge.
+     At all grid tiers the top-18% area sits above the next forward row's tile,
+     so it cannot be clipped by a higher-z tile. */
+  top: 19%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(4, 8, 18, 0.88);
+  border: 1px solid currentColor;
+  pointer-events: none;
+  z-index: 8;
+  white-space: nowrap;
+  /* Always slightly visible; full opacity on hover for easy reading */
+  opacity: 0.6;
+  transition: opacity 0.18s;
+}
+
+.farm-tile:hover .farm-tile-label {
+  opacity: 1;
+}
+
+/* Level badge on built tiles */
+.farm-tile-level {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  transform: translateX(-50%);
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #04121f;
+  z-index: 9;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.farm-tile-level-t1 { background: linear-gradient(180deg, #7fdfff, #00d4ff); }
+.farm-tile-level-t2 { background: linear-gradient(180deg, #baffd6, #00ff88); }
+.farm-tile-level-t3 {
+  background: linear-gradient(180deg, #ffe58a, #ffb200);
+  color: #2a1800;
+  box-shadow: 0 0 10px rgba(255,190,0,0.6);
+}
+
+.farm-tile-label-icon { font-size: 10px; line-height: 1; }
+.farm-tile-label-rate {
+  font-family: "Futura", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+.farm-tile-label-res {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ── Gate screen ── */
+.farm-gate-bg {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(0,255,136,0.12), transparent 50%),
+    linear-gradient(180deg, #1a0a3e 0%, #060b16 100%);
+  border: 1px solid rgba(0,255,136,0.22);
+}
+
+.farm-robot-stage {
+  position: relative; height: 200px;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+
+/* ── Demo banner ── */
+.farm-demo-banner {
+  background: linear-gradient(90deg, rgba(112,0,255,0.28), rgba(0,212,255,0.16));
+  border: 1px solid rgba(112,0,255,0.45);
+  border-radius: 12px;
+  color: #d6c9ff;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ── Buttons ── */
+.farm-btn-primary {
+  background: linear-gradient(180deg, #3d8f63, #2a6b45);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 2px solid #050505;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 0 rgba(0, 0, 0, 0.35);
+  transition: transform 0.14s ease, filter 0.14s ease, box-shadow 0.14s ease;
+  touch-action: manipulation;
+}
+
+.farm-btn-primary:hover:not(:disabled) { 
+  background: linear-gradient(180deg, #4a9f72, #357a52);
+}
+.farm-btn-primary:active:not(:disabled) {
+  transform: translateY(2px) scale(0.96);
+  filter: brightness(0.88);
+}
+.farm-btn-primary:disabled { 
+  opacity: 0.45; 
+  cursor: not-allowed; 
+}
+
+.farm-btn-demo {
+  background: linear-gradient(180deg, #62439c, #3f2a68);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 2px solid #050505;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 0 rgba(0, 0, 0, 0.35);
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+.farm-btn-demo:hover:not(:disabled) { 
+  background: linear-gradient(180deg, #7451b5, #4d337d);
+}
+.farm-btn-demo:active:not(:disabled) {
+  transform: translateY(2px) scale(0.96);
+}
+
+.farm-btn-ghost {
+  background: linear-gradient(180deg, #5c6066, #3f4247);
+  color: #e6e9ef;
+  font-family: inherit;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 2px solid #050505;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 0 rgba(0, 0, 0, 0.35);
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+.farm-btn-ghost:hover { 
+  background: linear-gradient(180deg, #6a6e75, #4a4e54);
+}
+.farm-btn-ghost:active {
+  transform: translateY(2px) scale(0.96);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .farm-main-split {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+  .farm-side-panel {
+    border-left: none;
+    border-top: 1px solid rgba(0,212,255,0.14);
+    flex-direction: column;
+    height: auto;
+    max-height: min(52vh, 420px);
+    padding: 10px 10px 12px;
+    overflow: hidden;
+  }
+  .farm-side-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    flex-shrink: 0;
+    padding-bottom: 2px;
+  }
+  .farm-side-tab {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 4px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+  }
+  .farm-side-tab-on {
+    color: #00d4ff;
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.35);
+  }
+  .farm-side-sections {
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 2px;
+  }
+  .farm-side-section { display: none; }
+  .farm-side-panel[data-tab="base"] .farm-side-section[data-section="base"],
+  .farm-side-panel[data-tab="missions"] .farm-side-section[data-section="missions"],
+  .farm-side-panel[data-tab="market"] .farm-side-section[data-section="market"],
+  .farm-side-panel[data-tab="season"] .farm-side-section[data-section="season"] {
+    display: flex;
+  }
+  .farm-side-card  { flex: none; width: 100%; }
+  .farm-bazaar      { flex: none; width: 100%; }
+  .farm-quest-panel  { width: 100%; }
+  .farm-lb-panel     { width: 100%; }
+  .farm-season-panel { width: 100%; }
+  .farm-vault-panel  { width: 100%; }
+  .farm-bazaar-tab   { font-size: 9px; padding: 5px 2px; }
+  .farm-store-shelf,
+  .farm-trade-list   { max-height: 200px; }
+  .farm-iso-board  { width: min(calc(100% - 20px), 80vh); left: 50%; top: 48%; }
+  .farm-robot-img  { max-height: 160px; }
+  .farm-commander-platform { right: 12px; bottom: 70px; }
+}
+
+/* ══════════════════════════════════════════════
+   Power Core (Prestige)
+══════════════════════════════════════════════ */
+
+.farm-power-core-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: rgba(192,132,252,0.06);
+  border: 1px solid rgba(192,132,252,0.18);
+  border-radius: 8px;
+}
+
+/* Six pip indicators */
+.farm-power-core-pips {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.farm-power-core-pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.farm-power-core-pip-lit {
+  background: #c084fc;
+  border-color: #a855f7;
+  box-shadow: 0 0 6px rgba(192,132,252,0.8);
+}
+
+/* Forge button */
+.farm-power-core-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #7c3aed, #c084fc);
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.farm-power-core-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.04); }
+.farm-power-core-btn:active:not(:disabled) { transform: scale(0.97); }
+.farm-power-core-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.farm-power-core-cost {
+  font-size: 9px;
+  opacity: 0.85;
+  margin-left: 1px;
+}
+
+.farm-power-core-maxed {
+  font-size: 10px;
+  font-weight: 700;
+  color: #c084fc;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 8px rgba(192,132,252,0.6);
+}
+
+.farm-power-core-bonus {
+  font-size: 9px;
+  color: #a78bfa;
+  text-align: center;
+  padding-top: 3px;
+  letter-spacing: 0.03em;
+}
+
+/* ══════════════════════════════════════════════
+   Quest Panel
+══════════════════════════════════════════════ */
+
+.farm-quest-panel { gap: 6px; }
+
+.farm-quest-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+/* Streak badge */
+.farm-streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  color: #64748b;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  letter-spacing: 0.02em;
+}
+.farm-streak-badge-active {
+  color: #c2410c;
+  background: rgba(194, 65, 12, 0.12);
+  border-color: rgba(194, 65, 12, 0.35);
+  text-shadow: none;
+}
+
+/* Streak bonus row */
+.farm-streak-bonus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  background: rgba(249,115,22,0.08);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+}
+.farm-streak-bonus-label { color: #94a3b8; }
+.farm-streak-bonus-value { color: #c2410c; font-weight: 700; }
+
+/* Quest list */
+.farm-quest-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
+  max-height: 240px; 
+  overflow-y: auto; 
+}
+
+.farm-quest-item {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s, background 0.2s;
+}
+.farm-quest-item:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.farm-quest-item-done {
+  border-color: rgba(180, 83, 9, 0.3);
+  background: rgba(180, 83, 9, 0.05);
+}
+.farm-quest-item-claimed {
+  border-color: rgba(0,255,136,0.2);
+  background: rgba(0,255,136,0.04);
+  opacity: 0.75;
+}
+
+.farm-quest-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 5px;
+}
+.farm-quest-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+.farm-quest-name {
+  font-family: "Futura", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.farm-quest-reward {
+  font-family: "Futura", sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #67e8f9;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Progress bar */
+.farm-quest-bar-wrap {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.farm-quest-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0ea5e9 0%, #2dd4bf 100%);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.farm-quest-item-done .farm-quest-bar-fill { background: #b45309; }
+.farm-quest-item-claimed .farm-quest-bar-fill { background: #22c55e; }
+
+.farm-quest-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.farm-quest-progress-text {
+  font-size: 11px;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Claim button */
+.farm-quest-claim-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 16px;
+  border-radius: 6px;
+  background: #b45309;
+  color: #fff;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+  flex-shrink: 0;
+}
+.farm-quest-claim-btn:hover { opacity: 0.9; transform: scale(1.03); }
+.farm-quest-claim-btn:active { transform: scale(0.97); }
+
+.farm-quest-claimed-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #22c55e;
+  letter-spacing: 0.03em;
+}
+
+/* Reset note */
+.farm-quest-reset-note {
+  font-size: 9px;
+  color: #334155;
+  text-align: center;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: 2px;
+}
+
+.farm-quest-streak-inline {
+  color: #c2410c;
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════
+   Leaderboard Panel
+══════════════════════════════════════════════ */
+
+.farm-lb-panel { gap: 6px; }
+
+.farm-lb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.farm-lb-season-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 1px 6px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #7c3aed, #c084fc);
+  color: #fff;
+}
+
+.farm-lb-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(192,132,252,0.12);
+  margin-bottom: 4px;
+}
+
+.farm-lb-list { 
+  display: flex; 
+  flex-direction: column;
+  gap: 4px; 
+  max-height: 280px; 
+  overflow-y: auto; 
+  padding: 4px;
+}
+
+.farm-lb-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.farm-lb-row:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.farm-lb-row:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Podium Styles */
+.farm-lb-row:nth-child(1) {
+  background: linear-gradient(90deg, rgba(250, 204, 21, 0.1), transparent);
+  border-left: 3px solid #facc15;
+}
+.farm-lb-row:nth-child(2) {
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.1), transparent);
+  border-left: 3px solid #94a3b8;
+}
+.farm-lb-row:nth-child(3) {
+  background: linear-gradient(90deg, rgba(217, 119, 6, 0.1), transparent);
+  border-left: 3px solid #d97706;
+}
+
+.farm-lb-row-you {
+  background: rgba(0, 212, 255, 0.1) !important;
+  border: 1px solid rgba(0, 212, 255, 0.3) !important;
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.15);
+}
+
+.farm-lb-rank {
+  font-family: "Futura", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #94a3b8;
+  width: 40px;
+  text-align: left;
+}
+
+.farm-lb-row:nth-child(1) .farm-lb-rank { color: #facc15; text-shadow: 0 0 8px rgba(250, 204, 21, 0.4); }
+.farm-lb-row:nth-child(2) .farm-lb-rank { color: #cbd5e1; }
+.farm-lb-row:nth-child(3) .farm-lb-rank { color: #d97706; }
+.farm-lb-row-you .farm-lb-rank { color: #00d4ff; }
+
+.farm-lb-addr {
+  flex: 1;
+  font-family: "Bourgeois", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #cbd5e1;
+  letter-spacing: 0.05em;
+  text-align: left;
+}
+.farm-lb-row-you .farm-lb-addr { color: #fff; font-weight: 600; }
+
+.farm-lb-score {
+  font-family: "Futura", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f8fafc;
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+.farm-lb-row:nth-child(1) .farm-lb-score { color: #facc15; }
+.farm-lb-row:nth-child(2) .farm-lb-score { color: #e2e8f0; }
+.farm-lb-row:nth-child(3) .farm-lb-score { color: #fcd34d; }
+.farm-lb-row-you .farm-lb-score { color: #00d4ff; }
+
+.farm-lb-gap {
+  text-align: center;
+  color: #475569;
+  font-size: 18px;
+  letter-spacing: 0.3em;
+  padding: 4px 0;
+}
+
+.farm-lb-footer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: 2px;
+}
+
+.farm-lb-hint {
+  font-size: 9px;
+  color: #475569;
+  text-align: center;
+  padding: 4px 6px;
+  background: rgba(192,132,252,0.05);
+  border: 1px solid rgba(192,132,252,0.1);
+  border-radius: 6px;
+  line-height: 1.4;
+}
+
+/* ══════════════════════════════════════════════
+   Prime Vault Panel
+══════════════════════════════════════════════ */
+
+.farm-vault-panel { gap: 6px; }
+
+.farm-vault-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.farm-vault-season {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 1px 6px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #15803d, #22c55e);
+  color: #fff;
+}
+
+.farm-vault-sub {
+  font-size: 9px;
+  color: #64748b;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.farm-vault-pool {
+  padding: 8px;
+  background: rgba(34,197,94,0.06);
+  border: 1px solid rgba(34,197,94,0.18);
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.farm-vault-pool-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.farm-vault-pool-label { font-size: 10px; color: #94a3b8; }
+.farm-vault-pool-value { font-size: 11px; font-weight: 700; color: #22c55e; }
+
+.farm-vault-pool-bar {
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.farm-vault-pool-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #15803d, #4ade80);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.farm-vault-pool-note { font-size: 8px; color: #475569; text-align: center; }
+
+.farm-vault-earned {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #86efac;
+  padding: 5px 8px;
+  background: rgba(34,197,94,0.08);
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.farm-vault-tiers { display: flex; flex-direction: column; gap: 5px; }
+
+.farm-vault-tier {
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.farm-vault-tier-ready {
+  border-color: rgba(34,197,94,0.35);
+  background: rgba(34,197,94,0.05);
+}
+
+.farm-vault-tier-done {
+  border-color: rgba(34,197,94,0.15);
+  opacity: 0.7;
+}
+
+.farm-vault-tier-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.farm-vault-tier-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.farm-vault-tier-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.farm-vault-tier-usdc {
+  font-size: 12px;
+  font-weight: 800;
+  color: #4ade80;
+}
+
+.farm-vault-tier-desc {
+  font-size: 9px;
+  color: #475569;
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+
+.farm-vault-tier-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.farm-vault-tier-cost {
+  font-size: 9px;
+  color: #c084fc;
+  font-weight: 600;
+}
+
+.farm-vault-redeem-btn {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #15803d, #22c55e);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.farm-vault-redeem-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.04); }
+.farm-vault-redeem-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.farm-vault-tier-claimed {
+  font-size: 9px;
+  font-weight: 700;
+  color: #22c55e;
+}
+
+.farm-vault-footer {
+  font-size: 8px;
+  color: #334155;
+  text-align: center;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+/* Crystal exchange form (reuses vault pool styles) */
+.farm-exchange-form { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+
+.farm-exchange-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 9px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.farm-exchange-input {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(34,197,94,0.25);
+  background: rgba(0,0,0,0.35);
+  color: #00ff88;
+  font-variant-numeric: tabular-nums;
+}
+
+.farm-exchange-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.farm-exchange-preset {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.farm-exchange-preset:hover { border-color: rgba(34,197,94,0.35); color: #4ade80; }
+
+.farm-exchange-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #64748b;
+  padding: 6px 8px;
+  background: rgba(34,197,94,0.06);
+  border-radius: 6px;
+}
+
+.farm-exchange-btn {
+  width: 100%;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #15803d, #22c55e);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.farm-exchange-btn:hover:not(:disabled) { opacity: 0.9; }
+.farm-exchange-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.farm-exchange-hint {
+  font-size: 8px;
+  color: #475569;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ── Shared bazaar shell (Trade Post + Command Store) ───────────── */
+.farm-bazaar {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0c0d10, #14161c);
+  border: 2px solid #050505;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+
+.farm-bazaar--trade {
+  border: 1px solid rgba(100, 116, 139, 0.15);
+}
+
+.farm-bazaar--store {
+  border: 1px solid rgba(112, 0, 255, 0.22);
+}
+
+.farm-bazaar--cache {
+  border: 1px solid rgba(251, 191, 36, 0.22);
+}
+
+.farm-bazaar--cache.farm-cache-ready {
+  box-shadow: inset 0 0 24px rgba(251, 191, 36, 0.06);
+}
+
+.farm-bazaar-awning {
+  height: 2px;
+  opacity: 0.88;
+}
+
+.farm-bazaar-awning--trade {
+  background: #64748b;
+}
+
+.farm-bazaar-awning--store {
+  background: #8b5cf6;
+}
+
+.farm-bazaar-awning--cache {
+  background: #d97706;
+}
+
+/* ── Quest panel (amber) ── */
+.farm-bazaar--quest {
+  border: 1px solid rgba(194, 65, 12, 0.15);
+}
+
+.farm-bazaar-awning--quest {
+  background: #c2410c;
+}
+
+.farm-bazaar-badge--quest {
+  color: #fb923c;
+  background: rgba(249, 115, 22, 0.12);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+/* ── Leaderboard panel (purple) ── */
+.farm-bazaar--leaderboard {
+  border: 1px solid rgba(126, 34, 206, 0.15);
+}
+
+.farm-main-split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.farm-commander-hud-float {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 50;
+  pointer-events: auto;
+}
+
+.farm-world-section {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.farm-bazaar-awning--leaderboard {
+  background: #7e22ce;
+}
+
+.farm-bazaar-badge--leaderboard {
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+/* ── Exchange panel (green) ── */
+.farm-bazaar--exchange {
+  border: 1px solid rgba(5, 150, 105, 0.15);
+}
+
+.farm-bazaar-awning--exchange {
+  background: #059669;
+}
+
+.farm-bazaar-badge--exchange {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+/* ── Season Intel panel (cyan) ── */
+.farm-bazaar--season {
+  border: 1px solid rgba(2, 132, 199, 0.15);
+}
+
+.farm-bazaar-awning--season {
+  background: #0284c7;
+}
+
+.farm-bazaar-badge--season {
+  color: #38bdf8;
+  background: rgba(0, 212, 255, 0.12);
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+.farm-bazaar-inner {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.farm-bazaar-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.farm-bazaar-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Bourgeois", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 2px;
+}
+
+.farm-bazaar-title {
+  font-family: "Futura", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22), 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+
+.farm-bazaar-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 6px;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+
+.farm-bazaar-badge--store {
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.12);
+  border-color: rgba(192, 132, 252, 0.3);
+}
+
+.farm-bazaar-badge--cache {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #fcd34d;
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.3);
+  animation: farm-cache-glow 2s ease-in-out infinite;
+}
+
+.farm-bazaar-sub {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+.farm-bazaar-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.farm-bazaar-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #94a3b8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.farm-bazaar-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.farm-bazaar-tabs--store {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.farm-bazaar-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.farm-bazaar-tab:hover { color: #cbd5e1; }
+
+.farm-bazaar-tab-count {
+  font-size: 8px;
+  opacity: 0.65;
+  font-weight: 600;
+}
+
+.farm-bazaar-tab-sell.farm-bazaar-tab-on {
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+  border-color: rgba(0, 255, 136, 0.35);
+}
+
+.farm-bazaar-tab-buy.farm-bazaar-tab-on {
+  color: #00d4ff;
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.35);
+}
+
+.farm-bazaar-tab-store.farm-bazaar-tab-on {
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.1);
+  border-color: rgba(192, 132, 252, 0.35);
+}
+
+.farm-bazaar-footer {
+  font-size: 10px;
+  color: #475569;
+  text-align: center;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+/* ── Command Store shelf ──────────────────────────────────────── */
+.farm-store-resources {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.farm-store-resource {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.farm-store-resource-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.farm-store-resource-val {
+  font-size: 11px;
+  font-weight: 800;
+  font-family: var(--font-orbitron), sans-serif;
+}
+
+.farm-store-resource-label {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+}
+
+.farm-store-shelf {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.farm-store-item {
+  position: relative;
+  padding: 10px 10px 8px;
+  border-radius: 10px;
+  background: rgba(3, 6, 9, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.farm-store-item-ready {
+  border-color: rgba(192, 132, 252, 0.22);
+  box-shadow: inset 0 0 20px rgba(192, 132, 252, 0.04);
+}
+
+.farm-store-item-owned {
+  border-color: rgba(0, 255, 136, 0.22);
+  background: rgba(0, 255, 136, 0.04);
+}
+
+.farm-store-item-vena.farm-store-item-ready {
+  border-color: rgba(251, 191, 36, 0.25);
+  box-shadow: inset 0 0 20px rgba(251, 191, 36, 0.05);
+}
+
+.farm-store-item-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.farm-store-item-badge-crystal {
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.12);
+}
+
+.farm-store-item-badge-vena {
+  color: #fcd34d;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.farm-store-item-badge-owned {
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.15);
+}
+
+.farm-store-item-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-right: 48px;
+}
+
+.farm-store-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  color: #00d4ff;
+  background: linear-gradient(145deg, rgba(0, 212, 255, 0.14), rgba(112, 0, 255, 0.1));
+  box-shadow: inset 0 0 0 1px rgba(0, 212, 255, 0.2);
+}
+
+.farm-store-item-icon-vena {
+  color: #fcd34d;
+  background: linear-gradient(145deg, rgba(251, 191, 36, 0.16), rgba(112, 0, 255, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.25);
+}
+
+.farm-store-item-owned .farm-store-item-icon {
+  color: #00ff88;
+  background: linear-gradient(145deg, rgba(0, 255, 136, 0.16), rgba(0, 255, 136, 0.06));
+  box-shadow: inset 0 0 0 1px rgba(0, 255, 136, 0.28);
+}
+
+.farm-store-item-info { min-width: 0; }
+
+.farm-store-item-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+
+.farm-store-item-desc {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 3px 0 0;
+}
+
+.farm-store-item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.farm-store-price-label {
+  display: block;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.farm-store-price-crystal {
+  color: #00ff88;
+  font-weight: 800;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.farm-store-price-vena {
+  color: #fcd34d;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.farm-store-price-unit {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+.farm-store-buy-btn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #030609;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.farm-store-buy-btn-crystal {
+  background: linear-gradient(135deg, #15803d, #22c55e);
+}
+
+.farm-store-buy-btn-vena {
+  background: linear-gradient(135deg, #b45309, #fbbf24);
+}
+
+.farm-store-buy-btn:hover:not(:disabled) { opacity: 0.9; }
+
+.farm-store-buy-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.08);
+  color: #64748b;
+}
+
+.farm-store-owned-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #00ff88;
+  margin-left: auto;
+}
+
+.farm-store-item-blocked {
+  font-size: 9px;
+  color: #f59e0b;
+  margin: 6px 0 0;
+}
+
+.farm-store-item-pulse {
+  animation: farm-store-pulse 0.5s ease;
+}
+
+@keyframes farm-store-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(192, 132, 252, 0.28); }
+  100% { transform: scale(1); }
+}
+
+/* ── Trade Post orders (bazaar child) ─────────────────────────── */
+.farm-trade-order-badge {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.05));
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  color: #00d4ff;
+}
+
+.farm-trade-order-body {
+  position: relative;
+  padding-top: 4px;
+}
+
+.farm-trade-order-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.farm-trade-order-price-label {
+  display: block;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.farm-trade-price-sell { color: #00ff88; font-weight: 800; font-size: 13px; }
+.farm-trade-price-buy  { color: #00d4ff; font-weight: 800; font-size: 13px; }
+
+.farm-trade-order-unit {
+  font-size: 9px;
+  color: #64748b;
+  font-family: var(--font-geist-mono, monospace);
+}
+
+.farm-trade-order-blocked {
+  font-size: 9px;
+  color: #f59e0b;
+  margin-top: 6px;
+}
+
+.farm-trade-order-ready {
+  border-color: rgba(0, 255, 136, 0.2);
+  box-shadow: inset 0 0 20px rgba(0, 255, 136, 0.04);
+}
+
+.farm-trade-order-pulse {
+  animation: farm-trade-pulse 0.5s ease;
+}
+
+@keyframes farm-trade-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 255, 136, 0.25); }
+  100% { transform: scale(1); }
+}
+
+.farm-trade-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.farm-trade-empty {
+  font-size: 11px;
+  color: #475569;
+  text-align: center;
+  padding: 14px 0;
+}
+
+.farm-trade-order {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px 12px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(12, 16, 24, 0.8), rgba(6, 10, 16, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.farm-trade-order-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.farm-trade-order-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #cbd5e1, #f8fafc);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.farm-trade-item-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: contrast(1.1) saturate(1.1);
+}
+
+.farm-trade-order-info { min-width: 0; }
+
+.farm-trade-order-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.farm-trade-order-amt {
+  font-size: 14px;
+  font-weight: 800;
+  text-shadow: 0 0 5px rgba(255,255,255,0.2);
+}
+
+.farm-trade-order-trader {
+  font-size: 10px;
+  font-family: var(--font-geist-mono, monospace);
+  color: #64748b;
+}
+
+.farm-trade-order-price {
+  font-size: 13px;
+  color: #e2e8f0;
+  font-weight: 600;
+  margin-top: 1px;
+}
+
+.farm-trade-order-fee {
+  font-size: 9px;
+  color: #475569;
+}
+
+.farm-trade-fill-btn {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #020617;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s;
+}
+.farm-trade-fill-sell { 
+  background: linear-gradient(135deg, #10b981, #34d399); 
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+.farm-trade-fill-buy  { 
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8); 
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+.farm-trade-fill-btn:hover:not(:disabled) { 
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+.farm-trade-fill-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.08);
+  color: #64748b;
+}
+
+/* ── Daily cache ──────────────────────────────────────────────── */
+.farm-cache-panel { gap: 8px; }
+.farm-cache-ready {
+  border-color: rgba(251, 191, 36, 0.25);
+  box-shadow: inset 0 0 24px rgba(251, 191, 36, 0.06);
+}
+
+.farm-cache-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.farm-cache-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  color: #fcd34d;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  animation: farm-cache-glow 2s ease-in-out infinite;
+}
+
+@keyframes farm-cache-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.farm-cache-sub {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.farm-cache-vpick { color: #c084fc; }
+
+.farm-cache-reveal {
+  text-align: center;
+  padding: 12px 10px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(0, 255, 136, 0.06));
+  border: 1px dashed rgba(251, 191, 36, 0.35);
+}
+
+.farm-cache-reveal-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+}
+
+.farm-cache-reveal-prize {
+  font-family: "Futura", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fcd34d;
+  margin: 6px 0 10px;
+}
+
+.farm-cache-claim-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #030609;
+  cursor: pointer;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  transition: opacity 0.15s;
+}
+.farm-cache-claim-btn:hover { opacity: 0.9; }
+
+.farm-cache-cooldown {
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.farm-cache-cooldown-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.farm-cache-cooldown-time {
+  font-size: 16px;
+  font-weight: 800;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* ── Season intel ─────────────────────────────────────────────── */
+.farm-season-panel { gap: 8px; }
+
+.farm-season-sub {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: -4px;
+}
+
+.farm-season-stat { margin-bottom: 4px; }
+
+.farm-season-stat-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.farm-season-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.farm-season-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+.farm-season-bar-fill::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+}
+
+.farm-season-bar-usdc { 
+  background: linear-gradient(90deg, #16a34a, #4ade80); 
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
+}
+.farm-season-bar-crystal { 
+  background: linear-gradient(90deg, #0284c7, #38bdf8); 
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.farm-season-you {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.farm-season-you-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.farm-season-you-row span:last-child {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+/* ── Leaderboard tabs ─────────────────────────────────────────── */
+.farm-lb-tabs {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 6px;
+}
+
+.farm-lb-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -7px;
+}
+
+.farm-lb-tab:hover {
+  color: #cbd5e1;
+}
+
+.farm-lb-tab-on {
+  color: #f8fafc;
+  border-bottom-color: #f8fafc;
+}
+
+/* ── Tutorial overlay ─────────────────────────────────────────── */
+.farm-tutorial-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(2, 6, 12, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+.farm-tutorial-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px 22px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  background: linear-gradient(160deg, rgba(10, 18, 28, 0.98), rgba(4, 8, 14, 0.99));
+  box-shadow: 0 0 60px rgba(0, 212, 255, 0.12);
+}
+
+.farm-tutorial-progress {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.farm-tutorial-dot {
+  flex: 1;
+  height: 3px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.farm-tutorial-dot-on {
+  background: linear-gradient(90deg, #00d4ff, #00ff88);
+}
+
+.farm-tutorial-skip {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: #64748b;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.farm-tutorial-skip:hover { color: #cbd5e1; }
+
+.farm-tutorial-kicker {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #00d4ff;
+  margin-bottom: 6px;
+}
+
+.farm-tutorial-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.farm-tutorial-body {
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.55;
+}
+
+.farm-tutorial-hint {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.farm-world-building-img, .farm-world-bazaar-img {
+  display: block;
+  width: auto;
+  height: 160px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: saturate(1.1) contrast(1.05) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
+}
+
+.farm-world-command .farm-world-building-img {
+  height: 200px;
+}
+
+.farm-world-obelisk .farm-world-building-img {
+  height: 220px;
+}
+
+.farm-world-building-label, .farm-world-bazaar-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 300;
+  font-family: "Futura", sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fbbf24;
+  background: rgba(10, 6, 20, 0.9);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.farm-world-building:hover .farm-world-building-label,
+.farm-world-bazaar:hover .farm-world-bazaar-label {
+  border-color: rgba(251, 191, 36, 0.6);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
+}
+
+.farm-world-command .farm-world-building-label { color: #00d4ff; border-color: rgba(0, 212, 255, 0.2); }
+.farm-world-command:hover .farm-world-building-label { border-color: rgba(0, 212, 255, 0.6); box-shadow: 0 0 12px rgba(0, 212, 255, 0.3); }
+
+.farm-world-obelisk .farm-world-building-label { color: #c084fc; border-color: rgba(192, 132, 252, 0.2); }
+.farm-world-obelisk:hover .farm-world-building-label { border-color: rgba(192, 132, 252, 0.6); box-shadow: 0 0 12px rgba(192, 132, 252, 0.3); }
+
+.farm-tutorial-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+/* ══════════════════════════════════════════════
+   World Buildings
+══════════════════════════════════════════════ */
+
+.farm-world-building, .farm-world-bazaar {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  animation: farm-bazaar-float 3.6s ease-in-out infinite;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+/* Positions */
+.farm-world-bazaar { bottom: 11%; left: 2%; }
+.farm-world-obelisk { top: 2%; left: 2%; }
+.farm-world-command { bottom: 10%; right: 2%; }
+
+/* Base Flag (Anchored to Grid) */
+.farm-base-flag {
+  position: absolute;
+  /* Shift it slightly left and up from the tile center to match the pink circle */
+  transform: translate(-140%, -80%);
+  z-index: 50; /* Above tiles */
+  pointer-events: none;
+  filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.4));
+}
+.farm-base-flag-img {
+  width: 140px;
+  height: auto;
+  transform-origin: bottom right;
+}
+
+.farm-world-building:hover, .farm-world-bazaar:hover {
+  filter: brightness(1.2) drop-shadow(0 0 15px rgba(0, 212, 255, 0.4));
+  transform: translateY(-3px) scale(1.05);
+  animation-play-state: paused;
+}
+
+@keyframes farm-bazaar-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+.farm-world-bazaar-glow {
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(100, 60, 255, 0.22) 0%,
+    rgba(0, 212, 255, 0.14) 40%,
+    transparent 70%
+  );
+  animation: farm-bazaar-glow-pulse 2.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes farm-bazaar-glow-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.92); }
+  50%       { opacity: 1;   transform: scale(1.06); }
+}
+
+.farm-world-bazaar-img {
+  display: block;
+  width: 260px;
+  height: 260px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: brightness(0.92) saturate(1.2) drop-shadow(0 12px 16px rgba(0,0,0,0.6));
+}
+.farm-world-bazaar-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fbbf24;
+  background: rgba(10, 6, 20, 0.82);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 20px;
+  padding: 3px 10px;
+  backdrop-filter: blur(6px);
+  animation: farm-bazaar-label-glow 2s ease-in-out infinite;
+}
+
+@keyframes farm-bazaar-label-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(251, 191, 36, 0.2); }
+  50%       { box-shadow: 0 0 14px rgba(251, 191, 36, 0.5); }
+}
+
+/* ── Responsive: smaller on tablet ── */
+@media (max-width: 1100px) {
+  .farm-world-bazaar-img { width: 180px; height: 180px; }
+  .farm-world-bazaar { bottom: 11%; left: 2%; }
+}
+
+@media (max-width: 900px) {
+  .farm-world-bazaar { bottom: 14%; left: 1%; }
+  .farm-world-bazaar-img { width: 130px; height: 130px; }
+}
+
+/* ══════════════════════════════════════════════
+   Bazaar Full-Screen Modal
+══════════════════════════════════════════════ */
+
+.farm-bazaar-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 10, 20, 0.65);
+}
+
+.farm-bazaar-modal {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(10, 14, 20, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+/* Glowing top accent line */
+.farm-bazaar-modal-awning {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.8), transparent);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+  z-index: 10;
+}
+
+.farm-bazaar-modal-header {
+  flex-shrink: 0;
+  padding: 16px 24px 0;
+  background: transparent;
+  border-bottom: none;
+}
+
+.farm-bazaar-modal-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 12px;
+}
+
+.farm-bazaar-modal-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.farm-bazaar-modal-title {
+  font-family: "Futura", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+}
+
+.farm-bazaar-modal-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0;
+}
+
+.farm-bazaar-modal-close:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Tabs */
+.farm-bazaar-modal-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.farm-bazaar-modal-tab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 99px; /* Pill shape */
+  font-family: "Bourgeois", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.farm-bazaar-modal-tab:hover {
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.farm-bazaar-modal-tab-on {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+}
+
+.farm-bazaar-modal-tab-trade.farm-bazaar-modal-tab-on {
+  color: #00d4ff;
+  background: rgba(0, 212, 255, 0.15);
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+}
+
+.farm-bazaar-modal-tab-store.farm-bazaar-modal-tab-on {
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.15);
+  border-color: rgba(192, 132, 252, 0.4);
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.2);
+}
+
+/* Scrollable content */
+.farm-bazaar-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 24px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: #7d6e5f transparent;
+}
+
+.farm-bazaar-modal-body::-webkit-scrollbar { width: 4px; }
+.farm-bazaar-modal-body::-webkit-scrollbar-thumb,
+.farm-lb-list::-webkit-scrollbar-thumb,
+.farm-quest-list::-webkit-scrollbar-thumb,
+.farm-trade-list::-webkit-scrollbar-thumb {
+  background: #7d6e5f;
+  border-radius: 99px;
+}
+
+/* Remove inner top padding on nested bazaar panels inside modal */
+.farm-bazaar-modal-body .farm-bazaar { border-radius: 10px; }
+
+/* ══════════════════════════════════════════════
+   Sidebar Market Tab — Bazaar CTA Card
+══════════════════════════════════════════════ */
+
+.farm-bazaar-worldcta {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(20, 10, 40, 0.92), rgba(8, 4, 18, 0.96));
+  border: 1px solid rgba(251, 191, 36, 0.22);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.farm-bazaar-worldcta-awning {
+  height: 3px;
+  background: linear-gradient(90deg, #7000ff 0%, #00d4ff 50%, #00ff88 100%);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  opacity: 1;
+}
+
+.farm-bazaar-worldcta-inner {
+  padding: 14px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.farm-bazaar-worldcta-kicker {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.farm-bazaar-worldcta-title {
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.farm-bazaar-worldcta-sub {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.farm-bazaar-worldcta-btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #020617;
+  background: linear-gradient(135deg, #00d4ff, #00ff88);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 255, 136, 0.25);
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+}
+
+.farm-bazaar-worldcta-btn:hover {
+  box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.farm-bazaar-worldcta-btn:active {
+  transform: translateY(0);
+}
+

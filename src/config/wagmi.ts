@@ -38,6 +38,10 @@ export const baseChainId = targetChainId;
 export const walletMetadata = {
   name: PROJECT.name,
   description: `Stake Pickaxe NFTs. Mine $VENA on ${PROJECT.network}.`,
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  url:
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    (process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : "https://venaprotocol.com"),
   icons: ["/favicon.ico"],
 };

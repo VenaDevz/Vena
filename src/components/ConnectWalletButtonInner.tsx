@@ -5,6 +5,7 @@ import { useAccount, useSwitchChain } from "wagmi";
 import { motion } from "framer-motion";
 import { Activity, AlertTriangle } from "lucide-react";
 import { baseChainId } from "@/config/wagmi";
+import { switchRobinhoodChain } from "@/lib/chains/add-robinhood-to-wallet";
 import { PROJECT } from "@/lib/project";
 
 function truncateAddress(address: string) {
@@ -28,7 +29,11 @@ export default function ConnectWalletButtonInner({
 
   const handleClick = async () => {
     if (isWrongNetwork) {
-      switchChain({ chainId: baseChainId });
+      try {
+        switchChain({ chainId: baseChainId });
+      } catch {
+        await switchRobinhoodChain(baseChainId);
+      }
       return;
     }
 

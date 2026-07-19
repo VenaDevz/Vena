@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { RARITY_TIERS, TIER_MAX_SUPPLY, tierUpgradeVena, SILVER_MINT_ETH } from "@/lib/tokenomics";
 import { formatVena } from "@/lib/mint-pricing";
+import { effectiveMiningPower } from "@/lib/mining";
+import { stackMiningPower } from "@/lib/forge";
 import { getPickaxeImage, type Rarity } from "@/lib/types";
 import SectionShell from "./SectionShell";
 import ForgeUpgradeBlock from "./ForgeUpgradeBlock";
@@ -19,10 +21,10 @@ export default function ForgeSection() {
       id="forge"
       eyebrow="Rarity"
       title="Upgrade your Pickaxe."
-      subtitle="Everyone mints Silver with 0.01 ETH. To climb a tier, burn the required lower Pickaxes (4 Silver → Gold) and pay $VENA — that $VENA feeds the staking pool."
+      subtitle="Everyone mints Silver with 0.01 ETH. Upgrading burns lower Pickaxes and pays $VENA into the pool — forged tiers earn more stake power than holding the same-cost Silver stack."
     >
-      <div className="mb-10 p-5 sm:p-6 rounded-2xl border border-[rgba(0,212,255,0.12)] bg-[rgba(10,15,22,0.7)]">
-        <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">
+      <div className="mb-10 p-5 sm:p-6 rounded-2xl border border-[rgba(0,212,255,0.12)] bg-[rgba(10,15,22,0.7)] space-y-4">
+        <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
           Upgrade ladder — burn + pay to climb
         </p>
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm font-mono">
@@ -38,10 +40,25 @@ export default function ForgeSection() {
             </span>
           ))}
         </div>
+        <p className="text-xs text-slate-400 leading-relaxed max-w-3xl mx-auto text-center">
+          Raw hashrate can match an equivalent Silver stack (e.g. 4× Silver = 40 H/s vs Gold = 40 H/s).
+          Staking rewards use <span className="text-[#00d4ff]">stake power</span> — hashrate × forge bonus —
+          so one Gold beats four Silvers on-chain.
+        </p>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {RARITY_TIERS.map((tier) => {
+          const stakePower = effectiveMiningPower(tier.hashrate, tier.id);
+          const silverStackPower =
+            tier.id !== "Silver"
+              ? stackMiningPower("Silver", tier.silverEquivalent)
+              : null;
+          const powerAdvantagePct =
+            silverStackPower && silverStackPower > 0
+              ? Math.round((stakePower / silverStackPower - 1) * 100)
+              : null;
+
           return (
             <div
               key={tier.id}
@@ -94,9 +111,21 @@ export default function ForgeSection() {
                     <dd className="text-[#a78bfa]">{tier.powerMultiplier}x</dd>
                   </div>
                   <div className="flex justify-between text-slate-500">
+                    <dt>Stake power</dt>
+                    <dd className="text-[#00d4ff]">{stakePower}</dd>
+                  </div>
+                  <div className="flex justify-between text-slate-500">
                     <dt>Base hashrate</dt>
                     <dd className="text-[#00ff88]">{tier.hashrate} H/s</dd>
                   </div>
+                  {silverStackPower !== null && powerAdvantagePct !== null && (
+                    <div className="flex justify-between text-slate-500">
+                      <dt>vs {tier.silverEquivalent}× Silver</dt>
+                      <dd className="text-[#00ff88]">
+                        {silverStackPower} → +{powerAdvantagePct}%
+                      </dd>
+                    </div>
+                  )}
                   <div className="flex justify-between text-slate-500">
                     <dt>Max supply</dt>
                     <dd className="text-slate-400">
