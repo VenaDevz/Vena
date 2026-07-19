@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Zap, Gem, Store, Trophy, ShoppingBag, Shield } from "lucide-react";
-import { formatCrystal } from "../config/farm-config";
+import { formatCrystal, FARM_GRID_TIERS } from "../config/farm-config";
 import FarmGrid from "./FarmGrid";
 import type { SavedFarmState } from "../lib/farm-storage";
 
@@ -147,7 +147,7 @@ export default function FarmWorld({
         </div>
         <div className="farm-hud-chip farm-hud-chip-sm">
           <p className="farm-hud-chip-label">Plots</p>
-          <p className="farm-hud-stat farm-hud-chip-value">{builtCount}/{state.cells.length}</p>
+          <p className="farm-hud-stat farm-hud-chip-value">{builtCount}/{FARM_GRID_TIERS.find((t) => t.tier === (state.gridTier ?? 1))?.plots ?? state.cells.length}</p>
         </div>
         {vpickCount > 0 && (
           <div className="farm-hud-chip farm-hud-chip-boost">
