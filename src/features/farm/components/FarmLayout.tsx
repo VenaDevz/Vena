@@ -119,7 +119,6 @@ export default function FarmLayout() {
     builtPlots,
     claimDecryptorReward,
     decryptorFreeSpinAt,
-    setDecryptorFreeSpinAt,
   } = game;
 
   useEffect(() => {
@@ -487,18 +486,15 @@ export default function FarmLayout() {
           crystal={state.crystal}
           hasFreeSpin={hasFreeSpin}
           onReward={(reward: any) => {
-            // hasFreeSpin tracking is now duplicated securely on backend, but we keep local state for UI
             if (hasFreeSpin && !reward.isPaid) {
               setHasFreeSpin(false);
-              setDecryptorFreeSpinAt(Date.now() + 24 * 60 * 60 * 1000);
             }
             
+            // This unified method now safely updates both the resource and the 24h timer in one atomic state update
+            claimDecryptorReward(reward);
+            
             if (reward.type === "vena") {
-              // The secure backend API already handled the payout during the spin generation!
-              // We just show the success receipt to the user.
               setPayoutTx(reward.txHash || "secured");
-            } else {
-              claimDecryptorReward(reward);
             }
           }}
         />

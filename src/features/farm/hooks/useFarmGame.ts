@@ -1064,7 +1064,7 @@ export function useFarmGame() {
 
   const isPaying = txPending || txConfirming;
 
-  const claimDecryptorReward = useCallback((reward: { type: string; amount: number; name: string }) => {
+  const claimDecryptorReward = useCallback((reward: { type: string; amount: number; name: string; isPaid?: boolean }) => {
     if (!state) return;
     const newState = { ...state };
     if (reward.type === "crystal") {
@@ -1078,12 +1078,12 @@ export function useFarmGame() {
     } else if (reward.type === "core") {
       newState.powerCores = (newState.powerCores || 0) + reward.amount;
     }
+    
+    if (reward.isPaid === false) {
+      newState.decryptorFreeSpinAt = Date.now() + 24 * 60 * 60 * 1000;
+    }
+    
     persist(newState);
-  }, [state, persist]);
-
-  const setDecryptorFreeSpinAt = useCallback((timestamp: number) => {
-    if (!state) return;
-    persist({ ...state, decryptorFreeSpinAt: timestamp });
   }, [state, persist]);
 
   return {
@@ -1156,6 +1156,5 @@ export function useFarmGame() {
     builtPlots,
     claimDecryptorReward,
     decryptorFreeSpinAt: state?.decryptorFreeSpinAt ?? 0,
-    setDecryptorFreeSpinAt,
   };
 }
