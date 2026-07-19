@@ -1049,6 +1049,23 @@ export function useFarmGame() {
 
   const isPaying = txPending || txConfirming;
 
+  const claimDecryptorReward = useCallback((reward: { type: string; amount: number; name: string }) => {
+    if (!state) return;
+    const newState = { ...state };
+    if (reward.type === "crystal") {
+      newState.crystal += reward.amount;
+    } else if (reward.type === "ore") {
+      newState.resources.ore += reward.amount;
+    } else if (reward.type === "iron") {
+      newState.resources.iron += reward.amount;
+    } else if (reward.type === "gold") {
+      newState.resources.gold += reward.amount;
+    } else if (reward.type === "core") {
+      newState.powerCores = (newState.powerCores || 0) + reward.amount;
+    }
+    persist(newState);
+  }, [state, persist]);
+
   return {
     state,
     rate,
@@ -1117,5 +1134,6 @@ export function useFarmGame() {
     tradesFilled,
     gridTier,
     builtPlots,
+    claimDecryptorReward,
   };
 }

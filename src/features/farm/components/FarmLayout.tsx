@@ -34,6 +34,9 @@ export default function FarmLayout() {
   const [showCommandCenter, setShowCommandCenter] = useState(false);
   const [showObelisk, setShowObelisk] = useState(false);
   const [showDecryptor, setShowDecryptor] = useState(false);
+  const [isPayoutPending, setIsPayoutPending] = useState(false);
+  const [payoutTx, setPayoutTx] = useState<string | null>(null);
+  const [payoutError, setPayoutError] = useState<string | null>(null);
   const [hasFreeSpin, setHasFreeSpin] = useState(true);
   const [nextFreeSpinAt, setNextFreeSpinAt] = useState<number | null>(null);
   const [countdownText, setCountdownText] = useState("24:00:00");
@@ -133,6 +136,7 @@ export default function FarmLayout() {
     tradesFilled,
     gridTier,
     builtPlots,
+    claimDecryptorReward,
   } = game;
 
   const cosmetics = state?.cosmetics ?? [];
@@ -478,14 +482,78 @@ export default function FarmLayout() {
           onClose={() => setShowDecryptor(false)}
           crystal={state.crystal}
           hasFreeSpin={hasFreeSpin}
-          onReward={(reward) => {
+          onReward={async (reward) => {
             if (hasFreeSpin) {
               setHasFreeSpin(false);
               setNextFreeSpinAt(Date.now() + 24 * 60 * 60 * 1000);
             }
-            console.log("Decrypted:", reward);
+            if (reward.type === "vena") {
+              setIsPayoutPending(true);
+              setPayoutError(null);
+              setPayoutTx(null);
+              try {
+                const res = await fetch("/api/farm/decryptor-reward", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ address, amount: reward.amount })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                setPayoutTx(data.txHash);
+              } catch (err: any) {
+                console.error("Payout failed", err);
+                setPayoutError(err.message || "Failed to process VENA payout");
+              } finally {
+                setIsPayoutPending(false);
+              }
+            } else {
+              claimDecryptorReward(reward);
+            }
           }}
         />
+      )}
+
+      {/* Payout Status Overlay */}
+      {(isPayoutPending || payoutTx || payoutError) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#0f172a] border border-slate-700 p-6 rounded-2xl max-w-md w-full flex flex-col items-center text-center shadow-2xl">
+            {isPayoutPending && (
+              <>
+                <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">Processing Payout...</h3>
+                <p className="text-slate-400 text-sm">Securely transferring $VENA to your Robinhood Wallet. Please wait.</p>
+              </>
+            )}
+            {payoutTx && (
+              <>
+                <div className="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-4">
+                  <Share2 className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Payout Successful!</h3>
+                <p className="text-slate-400 text-sm mb-4">Your VENA tokens have been sent.</p>
+                <div className="bg-slate-800/50 p-3 rounded-lg w-full mb-6 break-all">
+                  <span className="text-xs text-slate-500 block mb-1">Transaction Hash</span>
+                  <span className="text-sm font-mono text-green-400">{payoutTx}</span>
+                </div>
+                <button onClick={() => setPayoutTx(null)} className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg transition-colors">
+                  Close
+                </button>
+              </>
+            )}
+            {payoutError && (
+              <>
+                <div className="w-16 h-16 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mb-4">
+                  <X className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Payout Failed</h3>
+                <p className="text-red-400 text-sm mb-6">{payoutError}</p>
+                <button onClick={() => setPayoutError(null)} className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg transition-colors">
+                  Close
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
