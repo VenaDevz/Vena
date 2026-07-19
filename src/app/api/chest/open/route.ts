@@ -46,13 +46,19 @@ export async function POST(req: Request) {
 
     // 2. Connect to Blockchain
     const provider = new ethers.JsonRpcProvider(RPC_URL);
-    const receipt = await provider.getTransactionReceipt(txHash);
+    let receipt = null;
+    for (let i = 0; i < 5; i++) {
+      receipt = await provider.getTransactionReceipt(txHash);
+      if (receipt) break;
+      await new Promise((res) => setTimeout(res, 2000));
+    }
 
     if (!receipt) {
-      return NextResponse.json({ error: "Transaction not found or pending" }, { status: 400 });
+      return NextResponse.json({ error: "Transaction not found or pending. Please try again in a few seconds." }, { status: 400 });
     }
 
     if (receipt.status !== 1) {
+      console.error("Tx failed on chain:", txHash);
       return NextResponse.json({ error: "Transaction failed on chain" }, { status: 400 });
     }
 
@@ -91,6 +97,8 @@ export async function POST(req: Request) {
     }
 
     if (!validBurn || burnedChestId === null) {
+      console.error("No valid burn found in tx:", txHash);
+      console.error("Logs received:", receipt.logs.map(l => ({ addr: l.address, topics: l.topics })));
       return NextResponse.json({ error: "No valid Chest burn found in this transaction" }, { status: 400 });
     }
 
