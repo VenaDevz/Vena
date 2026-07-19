@@ -37,8 +37,7 @@ export default function FarmLayout() {
   const [isPayoutPending, setIsPayoutPending] = useState(false);
   const [payoutTx, setPayoutTx] = useState<string | null>(null);
   const [payoutError, setPayoutError] = useState<string | null>(null);
-  const [hasFreeSpin, setHasFreeSpin] = useState(true);
-  const [nextFreeSpinAt, setNextFreeSpinAt] = useState<number | null>(null);
+  const [hasFreeSpin, setHasFreeSpin] = useState(false);
   const [countdownText, setCountdownText] = useState("24:00:00");
   const [speechText, setSpeechText] = useState("");
   const [speechVisible, setSpeechVisible] = useState(false);
@@ -59,24 +58,6 @@ export default function FarmLayout() {
     setSpeechVisible(true);
     setTimeout(() => setSpeechVisible(false), 2500);
   };
-
-  useEffect(() => {
-    if (hasFreeSpin || !nextFreeSpinAt) return;
-    const interval = setInterval(() => {
-      const diff = nextFreeSpinAt - Date.now();
-      if (diff <= 0) {
-        setHasFreeSpin(true);
-        setNextFreeSpinAt(null);
-        clearInterval(interval);
-      } else {
-        const h = Math.floor(diff / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        setCountdownText(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [hasFreeSpin, nextFreeSpinAt]);
 
   const {
     state,
@@ -137,7 +118,30 @@ export default function FarmLayout() {
     gridTier,
     builtPlots,
     claimDecryptorReward,
+    decryptorFreeSpinAt,
+    setDecryptorFreeSpinAt,
   } = game;
+
+  useEffect(() => {
+    if (!state) return;
+    // Initial check without waiting for setInterval
+    const initialDiff = decryptorFreeSpinAt - Date.now();
+    if (initialDiff <= 0) setHasFreeSpin(true);
+
+    const interval = setInterval(() => {
+      const diff = decryptorFreeSpinAt - Date.now();
+      if (diff <= 0) {
+        setHasFreeSpin(true);
+      } else {
+        setHasFreeSpin(false);
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        setCountdownText(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [decryptorFreeSpinAt, state]);
 
   const cosmetics = state?.cosmetics ?? [];
   const neonBorder = cosmetics.includes("neon_border");
@@ -486,7 +490,7 @@ export default function FarmLayout() {
             // hasFreeSpin tracking is now duplicated securely on backend, but we keep local state for UI
             if (hasFreeSpin && !reward.isPaid) {
               setHasFreeSpin(false);
-              setNextFreeSpinAt(Date.now() + 24 * 60 * 60 * 1000);
+              setDecryptorFreeSpinAt(Date.now() + 24 * 60 * 60 * 1000);
             }
             
             if (reward.type === "vena") {

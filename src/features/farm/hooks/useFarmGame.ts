@@ -1081,6 +1081,11 @@ export function useFarmGame() {
     persist(newState);
   }, [state, persist]);
 
+  const setDecryptorFreeSpinAt = useCallback((timestamp: number) => {
+    if (!state) return;
+    persist({ ...state, decryptorFreeSpinAt: timestamp });
+  }, [state, persist]);
+
   return {
     state,
     rate,
@@ -1150,5 +1155,7 @@ export function useFarmGame() {
     gridTier,
     builtPlots,
     claimDecryptorReward,
+    decryptorFreeSpinAt: state?.decryptorFreeSpinAt ?? 0,
+    setDecryptorFreeSpinAt,
   };
 }

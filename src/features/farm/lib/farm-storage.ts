@@ -43,6 +43,8 @@ export type SavedFarmState = {
   tutorialStep?: number;
   /** Last UTC day the daily cache was claimed (YYYY-MM-DD). */
   dailyCacheDay?: string;
+  /** Timestamp when the next free spin is available (ms since epoch). */
+  decryptorFreeSpinAt?: number;
   /** Lifetime Crystal produced (for leaderboard). */
   stats?: {
     totalCrystalProduced: number;
