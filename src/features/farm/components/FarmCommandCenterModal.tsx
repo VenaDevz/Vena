@@ -3,7 +3,12 @@
 import { X } from "lucide-react";
 import FarmDailyCachePanel from "./FarmDailyCachePanel";
 import FarmQuestPanel from "./FarmQuestPanel";
-import type { FarmQuest } from "../config/farm-quests";
+import type { QuestInstance } from "../config/farm-quests";
+
+type QuestState = {
+  dayKey: string;
+  instances: QuestInstance[];
+} | null;
 
 type Props = {
   onClose: () => void;
@@ -14,7 +19,7 @@ type Props = {
   vpickTier: "emerald" | "amethyst" | null;
   onClaimCache: () => void;
   // Quests
-  quests: FarmQuest[];
+  quests: QuestState;
   streakCount: number;
   strMult: number;
   onClaimQuest: (id: string) => void;
