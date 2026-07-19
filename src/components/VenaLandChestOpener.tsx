@@ -83,6 +83,8 @@ export default function VenaLandChestOpener() {
   const [account, setAccount] = useState<string>("");
   const [standardCount, setStandardCount] = useState(0);
   const [premiumCount, setPremiumCount] = useState(0);
+  const [recoverTxHash, setRecoverTxHash] = useState("");
+  const [showRecover, setShowRecover] = useState(false);
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const [selectedChest, setSelectedChest] = useState<0 | 1>(0);
   const [revealedLand, setRevealedLand] = useState<{ name: string; tx: string; size: number } | null>(null);
@@ -168,6 +170,36 @@ export default function VenaLandChestOpener() {
       setTimeout(() => setPhase("idle"), 3000);
     }
   };
+
+  const openChestWithHash = async (txHash: string) => {
+    if (!account || !txHash) return;
+    setPhase("charging");
+    setErrorMsg("");
+    try {
+      setPhase("opening");
+      await new Promise(r => setTimeout(r, 1000));
+      setPhase("flash");
+      const res = await fetch("/api/chest/open", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txHash, walletAddress: account }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Mint failed");
+
+      const landMap: Record<number, string> = { 2: "2x2 VenaLand Base", 3: "3x3 VenaLand Base", 4: "4x4 VenaLand Base", 5: "5x5 VenaLand Base" };
+      await new Promise(r => setTimeout(r, 800));
+      setRevealedLand({ name: landMap[data.landSizeId], tx: data.mintTxHash, size: data.landSizeId });
+      setPhase("revealing");
+      setShowRecover(false);
+      fetchBalances(account);
+    } catch (err: any) {
+      console.error(err);
+      setPhase("error");
+      setErrorMsg(err.message || "Recovery failed.");
+      setTimeout(() => setPhase("idle"), 5000);
+    }
+  };
+
   const isAnimating = phase !== "idle" && phase !== "error";
 
   /* ─── Particles (purple sparkles during charging/opening) ─── */
@@ -200,7 +232,8 @@ export default function VenaLandChestOpener() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Standard Card */}
             <div className="bg-black/40 p-8 rounded-3xl border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.15)] flex flex-col items-center hover:border-blue-500/60 transition-all hover:-translate-y-2 group">
               <div className="w-48 h-48 relative mb-6" style={{ animation: "float-idle 3s ease-in-out infinite" }}>
@@ -228,6 +261,27 @@ export default function VenaLandChestOpener() {
               </button>
             </div>
           </div>
+          
+          <div className="mt-8 flex flex-col items-center">
+            <button onClick={() => setShowRecover(!showRecover)} className="text-sm text-gray-400 hover:text-white underline transition-colors">
+              Did your chest burn but you got an error? Recover here.
+            </button>
+            {showRecover && (
+              <div className="mt-4 flex items-center gap-2 w-full max-w-md">
+                <input 
+                  type="text" 
+                  value={recoverTxHash} 
+                  onChange={(e) => setRecoverTxHash(e.target.value)}
+                  placeholder="Paste Transaction Hash (0x...)" 
+                  className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500"
+                />
+                <button onClick={() => openChestWithHash(recoverTxHash)} className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-bold transition-all">
+                  Recover
+                </button>
+              </div>
+            )}
+          </div>
+          </>
         )}
 
         {account && (
