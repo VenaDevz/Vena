@@ -5,7 +5,7 @@ import "../farm.css";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAccount } from "wagmi";
-import { Share2, X, Bot, Flame, Timer, Hexagon, ArrowRight, Zap, Store, Target, Trophy, LayoutGrid, Package } from "lucide-react";
+import { Share2, X, Bot, Flame, Timer, Hexagon, ArrowRight, Zap, Store, Target, Trophy, LayoutGrid, Package, Info } from "lucide-react";
 import { FARM_DEMO_MODE, FARM_DEMO_START_CRYSTAL, FARM_GRID_TIERS, formatCrystal } from "../config/farm-config";
 import { useFarmGame } from "../hooks/useFarmGame";
 import FarmHeader from "./FarmHeader";
@@ -300,6 +300,14 @@ export default function FarmLayout() {
 
             {/* Bottom-left actions */}
             <div className="farm-overlay-actions">
+              <button
+                type="button"
+                onClick={() => setShowGuide(true)}
+                className="farm-btn-ghost inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-wider text-[#00d4ff] border-[#00d4ff]/30"
+              >
+                <Info size={14} />
+                Guide
+              </button>
               <button
                 type="button"
                 onClick={shareOnX}
