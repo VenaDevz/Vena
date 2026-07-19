@@ -106,11 +106,11 @@ export default function FarmGrid({
       </button>
 
       {/* ── Active plots ── */}
-      {state.cells.map((cell, i) => {
+      {positions.map((pos, i) => {
+        const cell = state.cells[i] ?? { buildingId: null };
         const built = cell.buildingId;
         const def = built ? FARM_BUILDING_MAP[built] : null;
         const isPending = pendingCell === i;
-        const pos = positions[i] ?? positions[0];
         const resMeta = def ? RESOURCE_META[def.produces] : null;
         const level = cell.level ?? 1;
         const vTier = levelVisualTier(level);
