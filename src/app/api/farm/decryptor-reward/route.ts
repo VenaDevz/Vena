@@ -10,7 +10,7 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "dummy";
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 const VENA_CONTRACT_ADDRESS = "0xFbD1Bf9d354CD8197Ab54f80778C03cc468ADAaf";
-const FARM_TREASURY = process.env.NEXT_PUBLIC_TREASURY || "0x0000000000000000000000000000000000000000";
+const FARM_TREASURY = process.env.TREASURY || process.env.NEXT_PUBLIC_TREASURY || "0x52c965483B19FBeF104B5490Ec65aD4c6ae76AD3";
 const RPC_URL = process.env.RH_MAINNET_RPC || "https://rpc.mainnet.chain.robinhood.com";
 
 const erc20Abi = [

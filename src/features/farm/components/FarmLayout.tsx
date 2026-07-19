@@ -122,12 +122,7 @@ export default function FarmLayout() {
   } = game;
 
   useEffect(() => {
-    if (!state) return;
-    // Initial check without waiting for setInterval
-    const initialDiff = decryptorFreeSpinAt - Date.now();
-    if (initialDiff <= 0) setHasFreeSpin(true);
-
-    const interval = setInterval(() => {
+    const updateCountdown = () => {
       const diff = decryptorFreeSpinAt - Date.now();
       if (diff <= 0) {
         setHasFreeSpin(true);
@@ -138,9 +133,12 @@ export default function FarmLayout() {
         const s = Math.floor((diff % 60000) / 1000);
         setCountdownText(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
       }
-    }, 1000);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
-  }, [decryptorFreeSpinAt, state]);
+  }, [decryptorFreeSpinAt]);
 
   const cosmetics = state?.cosmetics ?? [];
   const neonBorder = cosmetics.includes("neon_border");
