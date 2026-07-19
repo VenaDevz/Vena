@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Target } from "lucide-react";
+import { X, Target, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useWriteContract } from "wagmi";
+import { parseUnits } from "viem";
+import { FARM_TREASURY } from "../config/farm-config";
 
 type Props = {
   onClose: () => void;
@@ -30,13 +33,48 @@ const generateTrack = () => {
   return track;
 };
 
+const VENA_CONTRACT_ADDRESS = "0xFbD1Bf9d354CD8197Ab54f80778C03cc468ADAaf";
+const venaTokenAbi = [
+  {
+    name: "transfer",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "amount", type: "uint256" }
+    ],
+    outputs: [{ type: "bool" }],
+  }
+] as const;
+
 export default function FarmDecryptorModal({ onClose, onReward, hasFreeSpin, crystal }: Props) {
   const [isSpinning, setIsSpinning] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
   const [result, setResult] = useState<typeof LOOT_TABLE[0] | null>(null);
   const [track, setTrack] = useState(() => generateTrack());
   
-  const handleSpin = (isPaid: boolean) => {
-    if (isSpinning) return;
+  const { writeContractAsync } = useWriteContract();
+
+  const handleSpin = async (isPaid: boolean) => {
+    if (isSpinning || isPaying) return;
+    
+    if (isPaid) {
+      try {
+        setIsPaying(true);
+        // Charge 5,000 VENA to the treasury
+        await writeContractAsync({
+          address: VENA_CONTRACT_ADDRESS,
+          abi: venaTokenAbi,
+          functionName: "transfer",
+          args: [FARM_TREASURY, parseUnits("5000", 18)],
+        });
+      } catch (err) {
+        console.error("Payment failed or rejected", err);
+        setIsPaying(false);
+        return; // Stop spin if they didn't pay
+      }
+      setIsPaying(false);
+    }
     
     // First, instantly reset the track back to start
     setResult(null);
@@ -165,17 +203,17 @@ export default function FarmDecryptorModal({ onClose, onReward, hasFreeSpin, cry
           <div className="flex gap-3 mt-4">
             <button
               onClick={() => handleSpin(false)}
-              disabled={isSpinning || !hasFreeSpin}
+              disabled={isSpinning || isPaying || !hasFreeSpin}
               className={`flex-1 py-3 px-4 rounded-xl font-black text-sm tracking-widest transition-all border ${hasFreeSpin ? 'bg-[#00ff88]/20 border-[#00ff88]/50 text-[#00ff88] shadow-[0_0_15px_rgba(0,255,136,0.3)] hover:bg-[#00ff88]/30 hover:scale-105' : 'bg-white/5 border-white/10 text-slate-400 cursor-not-allowed'}`}
             >
               {hasFreeSpin ? "FREE SPIN" : "NEXT IN 12H"}
             </button>
             <button
               onClick={() => handleSpin(true)}
-              disabled={isSpinning}
-              className="flex-1 py-3 px-4 rounded-xl font-black text-sm tracking-widest transition-all border bg-[#00d4ff]/20 border-[#00d4ff]/50 text-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.3)] hover:bg-[#00d4ff]/30 hover:scale-105"
+              disabled={isSpinning || isPaying}
+              className={`flex-1 py-3 px-4 rounded-xl font-black text-sm tracking-widest transition-all border flex items-center justify-center gap-2 ${isPaying || isSpinning ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed' : 'bg-[#00d4ff]/20 border-[#00d4ff]/50 text-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.3)] hover:bg-[#00d4ff]/30 hover:scale-105'}`}
             >
-              SPIN (5,000 $VENA)
+              {isPaying ? <><Loader2 size={16} className="animate-spin" /> PAYING...</> : "SPIN (5,000 $VENA)"}
             </button>
           </div>
           

@@ -25,15 +25,21 @@ type FarmGridProps = {
 
 /** Build isometric positions for an n×n grid, centered on the board (% values). */
 function buildIsoPositions(tier: 1 | 2 | 3 | 4) {
-  /* Fixed tile size across all tiers — only dx/dy change for positioning.
-     tileW = 22% and size = 40px stay constant so tiles & buildings never rescale. */
-  const cfg: Record<number, { n: number; dx: number; dy: number; ox: number; oy: number; tileW: number; size: number }> = {
-    1: { n: 2, dx: 9, dy: 7, ox: 50, oy: 35, tileW: 22, size: 40 },
-    2: { n: 3, dx: 9, dy: 7, ox: 50, oy: 25, tileW: 22, size: 40 },
-    3: { n: 4, dx: 9, dy: 7, ox: 50, oy: 17, tileW: 22, size: 40 },
-    4: { n: 5, dx: 9, dy: 7, ox: 50, oy: 14, tileW: 22, size: 40 },
+  // To ensure the grid spans nicely and scales down for larger land sizes
+  const cfg: Record<number, { n: number; tileW: number; ox: number; oy: number; size: number }> = {
+    1: { n: 2, tileW: 28, ox: 50, oy: 35, size: 44 }, // 2x2
+    2: { n: 3, tileW: 22, ox: 50, oy: 25, size: 40 }, // 3x3
+    3: { n: 4, tileW: 17, ox: 50, oy: 18, size: 34 }, // 4x4
+    4: { n: 5, tileW: 14, ox: 50, oy: 13, size: 28 }, // 5x5
   };
-  const { n, dx, dy, ox, oy, tileW, size } = cfg[tier] ?? cfg[1];
+  const { n, tileW, ox, oy, size } = cfg[tier] ?? cfg[1];
+
+  // Mathematically perfect seamless layout:
+  // dx = half the width of the tile
+  const dx = tileW / 2;
+  // dy = derived from true aspect ratio of the 220x147 tile (147/220 = 0.66818)
+  const dy = tileW * (147 / 220) / 2;
+
   const positions: { left: number; top: number; z: number }[] = [];
   for (let row = 0; row < n; row++) {
     for (let col = 0; col < n; col++) {
@@ -44,8 +50,12 @@ function buildIsoPositions(tier: 1 | 2 | 3 | 4) {
       });
     }
   }
-  const workerCfg: WorkerCfg = { dim: n, dx, dy, ox, oy, size };
-  return { positions, tileW, workerCfg };
+
+  return {
+    positions,
+    tileW,
+    workerCfg: { dim: n, dx, dy, ox, oy, size }
+  };
 }
 
 export default function FarmGrid({
