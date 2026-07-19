@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import FarmLayout from "@/features/farm/components/FarmLayout";
+import MobileRotateOverlay from "@/components/MobileRotateOverlay";
 import { PROJECT } from "@/lib/project";
 
 export const metadata: Metadata = {
@@ -8,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function FarmPage() {
-  return <FarmLayout />;
+  return (
+    <>
+      <MobileRotateOverlay />
+      <FarmLayout />
+    </>
+  );
 }

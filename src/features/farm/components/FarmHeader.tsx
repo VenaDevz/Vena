@@ -81,9 +81,9 @@ export default function FarmHeader({
 
   return (
     <header className="farm-header sticky top-0 z-50">
-      <div className="mx-auto flex h-[72px] w-full items-center justify-between gap-3 px-4 sm:px-6 relative">
+      <div className="mx-auto flex h-14 sm:h-[72px] w-full items-center justify-between gap-2 sm:gap-3 px-2 sm:px-6 relative">
         {/* Left Side: Logo & Protocol */}
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Link
             href="/"
             className="shrink-0 text-[10px] uppercase tracking-widest text-slate-500 hover:text-[#00f0ff]"
