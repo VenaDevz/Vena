@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { ethers } from "ethers";
 import { createClient } from "@supabase/supabase-js";
 
+export const dynamic = "force-dynamic";
+
 // --- Configuration ---
 const RPC_URL = process.env.RH_MAINNET_RPC || "https://rpc.mainnet.chain.robinhood.com";
 const PRIVATE_KEY = process.env.PRIVATE_KEY!;
-const SUPABASE_URL = process.env.SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://dummy.supabase.co";
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "dummy";
 
 const CHEST_CONTRACT_ADDRESS = "0xb12c93b2e308ae4d6c1713c97b60f9a0389f3b94"; // Chest contract
 const BASE_CONTRACT_ADDRESS = "0xe91078b979e9910cadce340e2e4ffe0450d830a9"; // VenaLandBase contract deployed
