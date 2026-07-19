@@ -1,4 +1,4 @@
-import { X, Info, Pickaxe, Flame, Database } from "lucide-react";
+import { X, Info, Pickaxe, Flame, Database, Zap, Target, Trophy, Clock, Box } from "lucide-react";
 import Image from "next/image";
 
 type Props = {
@@ -120,7 +120,40 @@ export default function FarmGuideModal({ onClose }: Props) {
               </li>
               <li className="flex gap-2">
                 <span className="text-[#00d4ff]">•</span>
-                <p>Click the <strong className="text-white">Expand Base</strong> ring around your base to unlock more plots (requires holding $VENA).</p>
+                <p>Click the <strong className="text-white">Expand Base</strong> ring around your base to unlock more plots (requires holding $VENA in your wallet).</p>
+              </li>
+            </ul>
+          </div>
+
+          <div className="mb-8">
+            <h3 className="text-yellow-400 font-bold mb-2 uppercase tracking-widest text-sm flex items-center gap-2">
+              <Trophy size={16} /> Daily Operations & Boosts
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800/50">
+                <h4 className="text-white font-bold text-sm flex items-center gap-2 mb-2"><Target size={14} className="text-yellow-400" /> Quests & Streaks</h4>
+                <p className="text-xs text-slate-400 leading-relaxed mb-2">Complete daily quests to earn Crystal rewards. Log in consecutively to build a <strong className="text-white">Login Streak</strong> for a global production multiplier!</p>
+                <p className="text-[11px] text-red-400">Warning: Missing a day resets your streak to zero.</p>
+              </div>
+              <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800/50">
+                <h4 className="text-white font-bold text-sm flex items-center gap-2 mb-2"><Zap size={14} className="text-orange-400" /> Commander Rally</h4>
+                <p className="text-xs text-slate-400 leading-relaxed mb-2">Click the Commander avatar to activate a <strong className="text-white">+50% production boost</strong> for a limited time. Use it strategically!</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <h3 className="text-[#c084fc] font-bold mb-2 uppercase tracking-widest text-sm flex items-center gap-2">
+              <Box size={16} /> Orbital Chests & VPICK
+            </h3>
+            <ul className="text-slate-300 text-sm space-y-3">
+              <li className="flex gap-2">
+                <span className="text-[#c084fc]">•</span>
+                <p><strong className="text-white">Orbital Chests:</strong> Open the chest on the map once every 24 hours for <strong className="text-[#00ff88]">FREE</strong>. You can win Crystals, Ores, $VENA tokens, or ultra-rare <strong className="text-red-400">Power Cores</strong> (which give permanent production boosts).</p>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-[#c084fc]">•</span>
+                <p><strong className="text-white">VPICK NFTs:</strong> Holding a VPICK NFT in your wallet automatically multiplies all your base production rates. Higher rarity VPICKs give massive multipliers.</p>
               </li>
             </ul>
           </div>
