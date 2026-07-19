@@ -10,7 +10,7 @@ type Props = {
   gridTier: number;
   builtPlots: number;
   streakCount: number;
-  address: `0x${string}`;
+  address?: `0x${string}`;
   // Season & Exchange
   crystal: number;
   exchange: any;

@@ -473,7 +473,7 @@ export default function FarmLayout() {
         />
       )}
 
-      {showDecryptor && (
+      {showDecryptor && state && (
         <FarmDecryptorModal
           onClose={() => setShowDecryptor(false)}
           crystal={state.crystal}

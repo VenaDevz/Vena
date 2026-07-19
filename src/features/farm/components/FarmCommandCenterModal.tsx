@@ -4,6 +4,8 @@ import { X } from "lucide-react";
 import FarmDailyCachePanel from "./FarmDailyCachePanel";
 import FarmQuestPanel from "./FarmQuestPanel";
 import type { QuestInstance } from "../config/farm-quests";
+import type { CacheReward } from "../config/farm-daily-cache";
+import type { VpickTier } from "../config/farm-config";
 
 type QuestState = {
   dayKey: string;
@@ -14,9 +16,9 @@ type Props = {
   onClose: () => void;
   // Daily Cache
   dailyCacheAvailable: boolean;
-  dailyCachePreview: { crystal: number; ore: number; iron: number; gold: number } | null;
+  dailyCachePreview: CacheReward | null;
   cacheCountdownMs: number;
-  vpickTier: "emerald" | "amethyst" | null;
+  vpickTier: VpickTier;
   onClaimCache: () => void;
   // Quests
   quests: QuestState;

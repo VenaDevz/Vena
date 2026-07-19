@@ -452,7 +452,7 @@ export function vpickProductionMultiplier(tier: VpickTier): number {
 /** Crystal-roll bonus on daily cache (production uses vpickProductionMultiplier). */
 export function vpickCacheCrystalMultiplier(tier: VpickTier): number {
   if (tier === "emerald") return FARM_VPICK_BONUS.emerald;
-  if (tier === "any") return FARM_VPICK_BONUS.any;
+  if (tier !== "none") return FARM_VPICK_BONUS.any;
   return 1;
 }
 
