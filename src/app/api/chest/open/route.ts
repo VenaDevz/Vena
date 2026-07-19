@@ -121,6 +121,10 @@ export async function POST(req: Request) {
     }
 
     // 5. Mint the Land via Smart Contract
+    if (!PRIVATE_KEY) {
+      console.error("CRITICAL ERROR: PRIVATE_KEY is not set in environment variables!");
+      return NextResponse.json({ error: "Server Configuration Error: PRIVATE_KEY is missing on Vercel." }, { status: 500 });
+    }
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
     const baseContract = new ethers.Contract(BASE_CONTRACT_ADDRESS, baseAbi, wallet);
 
