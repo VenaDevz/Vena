@@ -488,6 +488,10 @@ export default function FarmLayout() {
         />
       )}
 
+      {showGuide && (
+        <FarmGuideModal onClose={() => setShowGuide(false)} />
+      )}
+
       {showDecryptor && state && (
         <FarmDecryptorModal
           onClose={() => setShowDecryptor(false)}
