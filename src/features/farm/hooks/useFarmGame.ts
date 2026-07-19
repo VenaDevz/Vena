@@ -255,6 +255,7 @@ export function useFarmGame() {
 
   const hasAnyLand = landBalances ? landBalances.some((b: bigint) => b > 0n) : false;
 
+
   // VenaLand is strictly gated by owning a VenaLand Base NFT for the first phase.
   const pickaxeRequired = false;
   const hasPickaxe = vpickCount > 0;
@@ -310,6 +311,20 @@ export function useFarmGame() {
     },
     [effectiveAddress]
   );
+
+  // Sync the local gridTier with the highest tier VenaLand Base NFT they own
+  useEffect(() => {
+    if (!landBalances || !state) return;
+    let actualTier: 1 | 2 | 3 | 4 = 1;
+    if (landBalances[3] > 0n) actualTier = 4;
+    else if (landBalances[2] > 0n) actualTier = 3;
+    else if (landBalances[1] > 0n) actualTier = 2;
+    else if (landBalances[0] > 0n) actualTier = 1;
+
+    if (state.gridTier !== actualTier) {
+      persist({ ...state, gridTier: actualTier });
+    }
+  }, [landBalances, state?.gridTier, persist]);
 
   // Load / migrate on wallet connect
   useEffect(() => {
