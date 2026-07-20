@@ -28,14 +28,19 @@ const LOOT_TABLE = [
   { id: 7, chance: 1, type: "core", amount: 1, name: "Power Core", image: "/farm/items/power_core.png", color: "text-red-400", bg: "bg-red-500/20" },
 ];
 
-function generateReward() {
-  const roll = Math.random() * 100;
+function generateReward(isPaid: boolean) {
+  // Free spins cannot win VENA. Distribute probabilities among remaining items.
+  const table = isPaid ? LOOT_TABLE : LOOT_TABLE.filter(l => l.type !== "vena");
+  
+  const totalChance = table.reduce((sum, item) => sum + item.chance, 0);
+  const roll = Math.random() * totalChance;
+  
   let cum = 0;
-  for (const loot of LOOT_TABLE) {
+  for (const loot of table) {
     cum += loot.chance;
     if (roll <= cum) return loot;
   }
-  return LOOT_TABLE[0];
+  return table[0];
 }
 
 export async function POST(req: Request) {
@@ -78,6 +83,7 @@ export async function POST(req: Request) {
             const parsed = iface.parseLog(log as any);
             if (
               parsed?.name === "Transfer" &&
+              parsed.args[0].toLowerCase() === address.toLowerCase() &&
               parsed.args[1].toLowerCase() === FARM_TREASURY.toLowerCase() &&
               parsed.args[2] >= expectedAmount
             ) {
@@ -116,7 +122,7 @@ export async function POST(req: Request) {
     }
 
     // RNG Roll
-    const reward = generateReward();
+    const reward = generateReward(isPaid);
     let txHash = undefined;
 
     // Execute VENA Payout if won
