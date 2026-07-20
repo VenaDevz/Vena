@@ -406,19 +406,28 @@ export function useFarmGame() {
       
       let raw: SavedFarmState;
       if (rawCloud && rawLocal) {
-        const cloudStats = rawCloud.stats?.totalCrystalProduced ?? 0;
-        const localStats = rawLocal.stats?.totalCrystalProduced ?? 0;
         const cloudTick = rawCloud.lastTickAt ?? 0;
         const localTick = rawLocal.lastTickAt ?? 0;
 
+        const isEmptyState = (s: any) =>
+          !s.cells?.some((c: any) => c?.buildingId) &&
+          (s.crystal ?? 0) === 0 &&
+          (s.resources?.ore ?? 0) === 0 &&
+          (s.resources?.iron ?? 0) === 0 &&
+          (s.resources?.gold ?? 0) === 0 &&
+          (s.stats?.totalCrystalProduced ?? 0) === 0;
+
+        const cloudEmpty = isEmptyState(rawCloud);
+        const localEmpty = isEmptyState(rawLocal);
+
         // 1. Pick the base state (fungible items like resources, crystal, cells)
         let baseState = null;
-        if (cloudStats > localStats + 100) {
-          baseState = rawCloud;
-        } else if (localStats > cloudStats + 100) {
+        if (localEmpty && !cloudEmpty) {
+          baseState = rawCloud; // Prevent accidental overwrite by a fresh/buggy local state
+        } else if (cloudEmpty && !localEmpty) {
           baseState = rawLocal;
         } else {
-          // If they are roughly equal in lifetime progress, tie-break by timestamp
+          // If neither is strictly empty (or both are), tie-break by timestamp.
           baseState = localTick > cloudTick ? rawLocal : rawCloud;
         }
 
@@ -434,7 +443,10 @@ export function useFarmGame() {
 
         // 3. Ensure lifetime stats never go down during a merge
         if (!raw.stats) raw.stats = { totalCrystalProduced: 0 };
-        raw.stats.totalCrystalProduced = Math.max(cloudStats, localStats);
+        raw.stats.totalCrystalProduced = Math.max(
+          rawCloud.stats?.totalCrystalProduced ?? 0, 
+          rawLocal.stats?.totalCrystalProduced ?? 0
+        );
         raw.stats.tradesFilled = Math.max(
            rawCloud.stats?.tradesFilled ?? 0,
            rawLocal.stats?.tradesFilled ?? 0
