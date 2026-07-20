@@ -404,16 +404,53 @@ export function useFarmGame() {
       
       const rawLocal = loadFarmState(effectiveAddress);
       
-      let raw = null;
+      let raw: SavedFarmState;
       if (rawCloud && rawLocal) {
-        // Tie-break by lastTickAt
+        const cloudStats = rawCloud.stats?.totalCrystalProduced ?? 0;
+        const localStats = rawLocal.stats?.totalCrystalProduced ?? 0;
         const cloudTick = rawCloud.lastTickAt ?? 0;
         const localTick = rawLocal.lastTickAt ?? 0;
-        if (localTick > cloudTick) {
-          raw = rawLocal;
+
+        // 1. Pick the base state (fungible items like resources, crystal, cells)
+        let baseState = null;
+        if (cloudStats > localStats + 100) {
+          baseState = rawCloud;
+        } else if (localStats > cloudStats + 100) {
+          baseState = rawLocal;
         } else {
-          raw = rawCloud;
+          // If they are roughly equal in lifetime progress, tie-break by timestamp
+          baseState = localTick > cloudTick ? rawLocal : rawCloud;
         }
+
+        // 2. Merge in "permanent" upgrades that only ever increase, to prevent split-brain wipeouts.
+        raw = {
+          ...baseState,
+          gridTier: Math.max(rawCloud.gridTier ?? 1, rawLocal.gridTier ?? 1),
+          powerCores: Math.max(rawCloud.powerCores ?? 0, rawLocal.powerCores ?? 0),
+          landGranted: rawCloud.landGranted || rawLocal.landGranted,
+          tutorialStep: Math.max(rawCloud.tutorialStep ?? 0, rawLocal.tutorialStep ?? 0),
+          cosmetics: Array.from(new Set([...(rawCloud.cosmetics || []), ...(rawLocal.cosmetics || [])])),
+        };
+
+        // 3. Ensure lifetime stats never go down during a merge
+        if (!raw.stats) raw.stats = { totalCrystalProduced: 0 };
+        raw.stats.totalCrystalProduced = Math.max(cloudStats, localStats);
+        raw.stats.tradesFilled = Math.max(
+           rawCloud.stats?.tradesFilled ?? 0,
+           rawLocal.stats?.tradesFilled ?? 0
+        );
+
+        // 4. If the gridTier was merged up from the other state, ensure cells array is expanded
+        // so it doesn't crash FarmLayout when rendering.
+        const tierDef = FARM_GRID_TIERS.find((t) => t.tier === raw.gridTier);
+        if (tierDef && raw.cells.length < tierDef.plots) {
+           const mergedCells = Array.from(
+             { length: tierDef.plots },
+             (_, i) => raw.cells[i] ?? { buildingId: null }
+           );
+           raw.cells = mergedCells;
+        }
+
       } else {
         raw = rawCloud || rawLocal || emptyFarmState();
       }
