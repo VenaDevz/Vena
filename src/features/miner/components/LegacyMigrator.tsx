@@ -21,6 +21,17 @@ export default function LegacyMigrator() {
 
   const stakedIds = (userInfo?.[1] ?? []) as bigint[];
 
+  const { data: pendingV1RewardsRaw } = useReadContract({
+    address: LEGACY_MINING_ADDRESS,
+    abi: venaMiningAbi,
+    functionName: "pendingRewards",
+    args: address ? [address] : undefined,
+    chainId: targetChainId,
+    query: { enabled: isConnected && !!address },
+  });
+
+  const pendingV1 = Number(pendingV1RewardsRaw ?? 0n) / 1e18;
+
   const { data: txHash, writeContractAsync, isPending, reset } = useWriteContract();
 
   const { isSuccess, isLoading: isMining } = useWaitForTransactionReceipt({
@@ -45,7 +56,16 @@ export default function LegacyMigrator() {
     });
   }, [stakedIds, writeContractAsync]);
 
-  if (!isConnected || stakedIds.length === 0) return null;
+  const handleClaim = useCallback(async () => {
+    if (pendingV1 <= 0) return;
+    await writeContractAsync({
+      address: LEGACY_MINING_ADDRESS,
+      abi: venaMiningAbi,
+      functionName: "claimRewards",
+    });
+  }, [pendingV1, writeContractAsync]);
+
+  if (!isConnected || (stakedIds.length === 0 && pendingV1 <= 0.01)) return null;
 
   return (
     <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 shadow-lg backdrop-blur-md">
@@ -57,14 +77,28 @@ export default function LegacyMigrator() {
             You must unstake them here to use them in the new V2 Mining pool.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleUnstake}
-          disabled={isPending || isMining}
-          className="shrink-0 rounded-lg bg-red-500 px-4 py-2 text-xs font-bold text-white shadow hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isPending || isMining ? "Unstaking..." : "Unstake 1 VPICK"}
-        </button>
+        <div className="flex flex-col gap-2 shrink-0">
+          {stakedIds.length > 0 && (
+            <button
+              type="button"
+              onClick={handleUnstake}
+              disabled={isPending || isMining}
+              className="rounded-lg bg-red-500 px-4 py-2 text-xs font-bold text-white shadow hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPending || isMining ? "Unstaking..." : "Unstake 1 VPICK"}
+            </button>
+          )}
+          {pendingV1 > 0.01 && (
+            <button
+              type="button"
+              onClick={handleClaim}
+              disabled={isPending || isMining}
+              className="rounded-lg bg-[#00ff88]/20 px-4 py-2 text-xs font-bold text-[#00ff88] shadow hover:bg-[#00ff88]/30 disabled:opacity-50 disabled:cursor-not-allowed border border-[#00ff88]/50"
+            >
+              {isPending || isMining ? "Claiming..." : `Claim ${pendingV1.toLocaleString("en-US", { maximumFractionDigits: 2 })} V1 VENA`}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
