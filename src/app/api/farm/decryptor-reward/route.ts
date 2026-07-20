@@ -18,6 +18,11 @@ const erc20Abi = [
   "event Transfer(address indexed from, address indexed to, uint256 value)"
 ];
 
+const BASE_CONTRACT_ADDRESS = "0xe91078b979e9910cadce340e2e4ffe0450d830a9";
+const baseNftAbi = [
+  "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"
+];
+
 const LOOT_TABLE = [
   { id: 1, chance: 35, type: "crystal", amount: 50000, name: "50K Crystal", image: "/farm/items/crystal.png", color: "text-[#00ff88]", bg: "bg-[#00ff88]/20" },
   { id: 2, chance: 20, type: "ore", amount: 25000, name: "25K Ore", image: "/farm/items/ore.png", color: "text-orange-300", bg: "bg-orange-500/20" },
@@ -49,6 +54,25 @@ export async function POST(req: Request) {
 
     if (!address) {
       return NextResponse.json({ success: false, error: "Missing address" }, { status: 400 });
+    }
+
+    // Anti-Sybil: Verify the address owns at least one VenaLand Base NFT (tiers 2, 3, 4, 5)
+    try {
+      const provider = new ethers.JsonRpcProvider(RPC_URL);
+      const baseContract = new ethers.Contract(BASE_CONTRACT_ADDRESS, baseNftAbi, provider);
+      const accounts = [address, address, address, address];
+      const ids = [2, 3, 4, 5];
+      
+      const balances = await baseContract.balanceOfBatch(accounts, ids);
+      const hasAnyLand = balances.some((b: any) => b > 0n);
+      
+      if (!hasAnyLand) {
+        return NextResponse.json({ success: false, error: "Access Denied: Requires an active VenaLand Base NFT to participate." }, { status: 403 });
+      }
+    } catch (err) {
+      console.error("[Decryptor] Failed to verify NFT ownership", err);
+      // In production, you might let it pass if RPC is down, but for strict security we block
+      return NextResponse.json({ success: false, error: "Failed to verify NFT ownership on-chain" }, { status: 500 });
     }
 
     if (isPaid) {
