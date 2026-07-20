@@ -1,7 +1,7 @@
 "use client";
 
 import { PROJECT } from "@/lib/project";
-import { BUYBACK_POLICY, MINT_REVENUE_POLICY } from "@/lib/tokenomics";
+import { MINT_REVENUE_POLICY } from "@/lib/tokenomics";
 import SectionShell from "./SectionShell";
 
 export default function FeeDistribution() {
@@ -9,8 +9,8 @@ export default function FeeDistribution() {
     <SectionShell
       id="fees"
       eyebrow="Revenue"
-      title="Two flywheels."
-      subtitle="Every Pickaxe mint and upgrade buys $VENA into the staking pool. Trade fees trigger random-timed buybacks that are sent to the reward pool. This constantly grows the rewards available to active miners."
+      title="Mining flywheel."
+      subtitle="Every Pickaxe mint and upgrade buys $VENA into the staking pool. This constantly grows the rewards available to active miners."
     >
       <div className="grid lg:grid-cols-2 gap-8 items-start">
         <div
@@ -31,13 +31,6 @@ export default function FeeDistribution() {
               detail="ETH mint + $VENA upgrades → buy $VENA → staking pool"
               color="#00ff88"
             />
-            <FeeBar
-              label="Virtuals trade fees"
-              action="Buyback & feed pool"
-              pct={BUYBACK_POLICY.tradeFeeTakePct}
-              detail="Random-timed buybacks → sent to reward pools"
-              color="#00d4ff"
-            />
           </div>
           <p className="mt-8 text-xs text-slate-500 font-mono leading-relaxed">
             No dedicated staking allocation is pre-minted. The reward pool is
@@ -51,10 +44,6 @@ export default function FeeDistribution() {
             {
               title: "Mint → pool",
               body: "ETH from every Silver mint is swapped into $VENA and added to the staking pool. Upgrades pay $VENA that flows to the same pool.",
-            },
-            {
-              title: "Trade → rewards",
-              body: "Virtuals trade fees come back to the project as $VIRTUAL, are swapped into $VENA at random intervals, and sent to the reward pool — increasing the pool size over time.",
             },
             {
               title: "Staking rewards",

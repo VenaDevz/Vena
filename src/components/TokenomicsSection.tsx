@@ -10,7 +10,7 @@ export default function TokenomicsSection() {
       id="tokenomics"
       eyebrow="Tokenomics"
       title="1B $VENA. 10,000 Pickaxes."
-      subtitle="No staking allocation is pre-minted. The reward pool is fed by buybacks: mint & upgrade revenue buys $VENA into the pool, trade fees buy back to feed the reward pool."
+      subtitle="No staking allocation is pre-minted. The reward pool is fed by buybacks: mint & upgrade revenue buys $VENA directly into the pool."
     >
       <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-10 lg:gap-14 items-start">
         <TokenomicsPieChart />
@@ -55,18 +55,14 @@ export default function TokenomicsSection() {
               0.01 ETH per Silver mint buys $VENA on the market and adds it to the
               staking pool. Upgrades pay $VENA into the same pool.
             </p>
-            <p>
-              <span className="text-[#00d4ff] font-semibold">Trade → rewards</span> —
-              Virtuals trade fees trigger random-timed $VENA buybacks that are
-              fed directly into the reward pools, boosting miner yields.
-            </p>
+
             <p>
               <span className="text-[#a78bfa] font-semibold">Staking</span> — Stake
               Pickaxes to earn from the buyback-fed pool. Payout scales with rarity
               weight, Stratum (stake duration), and total staked power.
             </p>
           </div>
-          <div className="pt-4 border-t border-[rgba(255,255,255,0.06)] grid grid-cols-3 gap-4 text-center">
+          <div className="pt-4 border-t border-[rgba(255,255,255,0.06)] grid grid-cols-2 gap-4 text-center">
             <div>
               <div
                 className="text-2xl font-black text-white"
@@ -87,17 +83,6 @@ export default function TokenomicsSection() {
               </div>
               <div className="text-[10px] font-mono text-slate-500 uppercase mt-1">
                 Mint → pool
-              </div>
-            </div>
-            <div>
-              <div
-                className="text-2xl font-black text-[#00d4ff]"
-                style={{ fontFamily: "var(--font-orbitron)" }}
-              >
-                Rewards
-              </div>
-              <div className="text-[10px] font-mono text-slate-500 uppercase mt-1">
-                Trade fees
               </div>
             </div>
           </div>
