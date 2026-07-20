@@ -121,6 +121,11 @@ export default function ActiveStakesPanel({
                     getPickaxeDailyYield(pickaxe.rarity, pickaxe.hashrate)
                   )}
                   /day preview
+                  {pickaxe.stratumMultiplier !== undefined && pickaxe.stratumMultiplier > 1 && (
+                    <span className="ml-1 text-[11px] font-bold text-[#00f0ff]">
+                       · Stratum {pickaxe.stratumMultiplier.toFixed(2)}x
+                    </span>
+                  )}
                 </p>
               </div>
               <div className="flex shrink-0 flex-col gap-1 sm:flex-row">
@@ -157,8 +162,20 @@ export default function ActiveStakesPanel({
       </ul>
       {stakedIds.size > 0 && onSyncPower && (
         <div className="mt-4 rounded-xl border border-white/5 bg-black/20 p-4 text-center">
-          <h3 className="miner-panel-title text-xs font-bold text-[#00f0ff]">STRATUM MULTIPLIER</h3>
-          <p className="mt-1 text-[11px] text-slate-400 mb-3">
+          <div className="flex flex-col items-center justify-center gap-1">
+            <h3 className="miner-panel-title text-xs font-bold text-[#00f0ff]">STRATUM MULTIPLIER</h3>
+            {(() => {
+              const stakedList = equippedPickaxes.filter(p => p.id >= 0 && stakedIds.has(p.id) && p.stratumMultiplier !== undefined);
+              if (stakedList.length > 0) {
+                const avg = stakedList.reduce((acc, curr) => acc + (curr.stratumMultiplier || 1), 0) / stakedList.length;
+                if (avg >= 1) {
+                  return <div className="text-2xl font-black text-[#00f0ff]">{avg.toFixed(2)}x</div>;
+                }
+              }
+              return null;
+            })()}
+          </div>
+          <p className="mt-2 text-[11px] text-slate-400 mb-3">
             Stake duration raises your reward multiplier. Click below to lock in your latest Stratum power level on-chain!
           </p>
           <button

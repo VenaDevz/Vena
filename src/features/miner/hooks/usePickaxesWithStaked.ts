@@ -8,6 +8,7 @@ import {
   pickaxeNftAbi,
   RH_CONTRACTS,
 } from "@/lib/contracts/robinhood";
+import { venaMiningAbi, VENA_MINING_ADDRESS } from "../config/mining-contract";
 import type { PickaxeNFT } from "@/lib/types";
 import { pickaxeFromTokenId } from "../config/game-config";
 
@@ -23,6 +24,8 @@ export function usePickaxesWithStaked(
     const walletIds = new Set(walletPickaxes.map((p) => p.id));
     return [...stakedIds].filter((id) => id >= 0 && !walletIds.has(id));
   }, [walletPickaxes, stakedIds]);
+
+  const allStakedArray = useMemo(() => [...stakedIds].filter(id => id >= 0), [stakedIds]);
 
   const tierCalls = useMemo(
     () =>
@@ -43,6 +46,26 @@ export function usePickaxesWithStaked(
     },
   });
 
+  const stratumCalls = useMemo(
+    () =>
+      allStakedArray.map((id) => ({
+        address: VENA_MINING_ADDRESS,
+        abi: venaMiningAbi,
+        functionName: "stratumBps" as const,
+        args: [BigInt(id)] as [bigint],
+        chainId: targetChainId,
+      })),
+    [allStakedArray]
+  );
+
+  const { data: stratumResults } = useReadContracts({
+    contracts: stratumCalls,
+    query: {
+      enabled: allStakedArray.length > 0,
+      refetchInterval: 10_000,
+    },
+  });
+
   return useMemo(() => {
     const merged = new Map<number, PickaxeNFT>();
 
@@ -59,7 +82,16 @@ export function usePickaxesWithStaked(
       if (tierNum === undefined) return;
       merged.set(id, { ...pickaxeFromTokenId(id, tierNum), staked: true });
     });
-
-    return [...merged.values()];
-  }, [walletPickaxes, missingStakedIds, tierResults, stakedIds]);
+    return [...merged.values()].map((pickaxe) => {
+      if (!pickaxe.staked) return pickaxe;
+      const idx = allStakedArray.indexOf(pickaxe.id);
+      if (idx !== -1) {
+        const bps = stratumResults?.[idx]?.result as bigint | undefined;
+        if (bps !== undefined) {
+          return { ...pickaxe, stratumMultiplier: Number(bps) / 10000 };
+        }
+      }
+      return pickaxe;
+    });
+  }, [walletPickaxes, missingStakedIds, tierResults, stakedIds, allStakedArray, stratumResults]);
 }

@@ -10,6 +10,7 @@ export interface PickaxeNFT {
   hashrate: number;
   staked: boolean;
   image?: string;
+  stratumMultiplier?: number;
 }
 
 export const RARITY_CONFIG: Record<
