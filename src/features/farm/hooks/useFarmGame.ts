@@ -338,19 +338,40 @@ export function useFarmGame() {
     [effectiveAddress]
   );
 
-  // Sync the local gridTier with the highest tier VenaLand Base NFT they own
+  // Sync the local gridTier with the highest tier VenaLand Base NFT they own,
+  // or recover corrupted gridTier if cells array is already expanded.
   useEffect(() => {
     if (!landBalances || !state) return;
+    
     let actualTier: 1 | 2 | 3 | 4 = 1;
     if (landBalances[3] > 0n) actualTier = 4;
     else if (landBalances[2] > 0n) actualTier = 3;
     else if (landBalances[1] > 0n) actualTier = 2;
     else if (landBalances[0] > 0n) actualTier = 1;
 
-    if (state.gridTier !== actualTier) {
-      persist({ ...state, gridTier: actualTier });
+    const currentTier = state.gridTier ?? 1;
+    const currentPlots = state.cells.length;
+    
+    // Determine what tier the user's cells array actually corresponds to.
+    // If the bug downgraded their tier but left cells intact, this will be > currentTier.
+    let tierFromCells: 1 | 2 | 3 | 4 = 1;
+    if (currentPlots >= 16) tierFromCells = 4;
+    else if (currentPlots >= 9) tierFromCells = 3;
+    else if (currentPlots >= 6) tierFromCells = 2;
+
+    const targetTier = Math.max(actualTier, currentTier, tierFromCells) as 1 | 2 | 3 | 4;
+
+    if (currentTier !== targetTier) {
+      const tierDef = FARM_GRID_TIERS.find((t) => t.tier === targetTier);
+      if (tierDef) {
+        const newCells = Array.from(
+          { length: tierDef.plots },
+          (_, i) => state.cells[i] ?? { buildingId: null }
+        );
+        persist({ ...state, cells: newCells, gridTier: targetTier });
+      }
     }
-  }, [landBalances, state?.gridTier, persist]);
+  }, [landBalances, state?.gridTier, state?.cells.length, persist]);
 
   // Load / migrate on wallet connect
   useEffect(() => {
