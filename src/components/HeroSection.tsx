@@ -80,11 +80,9 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.6 }}
-          className="max-w-xl mx-auto text-center text-slate-400 text-base sm:text-lg mt-6 mb-10 leading-relaxed"
+          className="max-w-2xl mx-auto text-center text-slate-400 text-base sm:text-lg mt-6 mb-10 leading-relaxed"
         >
-          Mint a Silver Pickaxe for {SILVER_MINT_ETH} ETH on {PROJECT.network}. Every
-          mint buys {PROJECT.tokenDisplay} into the staking pool then stake to earn from
-          a pool that grows with real mint &amp; upgrade volume.
+          The new V2 Mining Era is live! Mint a Pickaxe and stake it to build your Stratum Multiplier up to 6.5x. Earn massive $VENA rewards from our buyback-funded pool, but act fast—the new On-Chain Halving mechanism cuts emissions in half at every cycle!
         </motion.p>
 
         <motion.div

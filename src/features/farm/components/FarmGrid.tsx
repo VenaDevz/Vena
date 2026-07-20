@@ -206,8 +206,8 @@ export default function FarmGrid({
                     </span>
                     <span className="farm-tile-label-rate">
                       {def.consumesPerSec 
-                        ? `${def.produces === "prime_crystal" ? shownRate.toFixed(3) : shownRate.toFixed(1)}→` 
-                        : `+${def.produces === "prime_crystal" ? shownRate.toFixed(3) : shownRate.toFixed(1)}`}
+                        ? `${def.produces === "prime_crystal" ? (shownRate || 0).toFixed(3) : (shownRate || 0).toFixed(1)}→` 
+                        : `+${def.produces === "prime_crystal" ? (shownRate || 0).toFixed(3) : (shownRate || 0).toFixed(1)}`}
                     </span>
                   </span>
                 )}

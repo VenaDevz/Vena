@@ -1175,6 +1175,7 @@ export function useFarmGame() {
     rallyCooldownRemaining,
     rallyBoost: FARM_RALLY.boost,
     expandBase,
+    isExpanding: pendingAction?.kind === "expand",
     // Quests & streak
     quests: state?.quests ?? null,
     streakCount,

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import MinerHeader from "./MinerHeader";
 import MinerUnitPanel from "./MinerUnitPanel";
 import ControlPanel from "./ControlPanel";
+import LegacyMigrator from "./LegacyMigrator";
 import {
   GAME_CONFIG,
   SLOT_DEFINITIONS,
@@ -265,6 +266,8 @@ export default function MinerLayout() {
       )}
 
       <main className="relative mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <LegacyMigrator />
+
         <div className="mb-6 lg:mb-8">
           <p className="miner-panel-title text-[10px] uppercase tracking-[0.3em] text-slate-600">
             Cybernetic mining interface · v0.5

@@ -489,10 +489,11 @@ export function formatCrystal(n: number): string {
 
 /** Format Prime Crystal with 4 decimal precision for small values. */
 export function formatPrimeCrystal(n: number): string {
-  if (n >= 1_000) return `${(n / 1_000).toFixed(2)}K`;
-  if (n >= 10)    return n.toFixed(2);
-  if (n >= 1)     return n.toFixed(3);
-  return n.toFixed(4);
+  const val = n || 0;
+  if (val >= 1_000) return `${(val / 1_000).toFixed(2)}K`;
+  if (val >= 10)    return val.toFixed(2);
+  if (val >= 1)     return val.toFixed(3);
+  return val.toFixed(4);
 }
 
 export function formatResource(n: number): string {

@@ -174,14 +174,14 @@ export default function FarmManageModal({
                   <div className="flex items-center gap-2 text-xs">
                     <span className="font-mono text-[#00ff88] flex items-center gap-1.5">
                       <Image src={resMeta.image} alt={resMeta.label} width={14} height={14} className="object-contain" style={{ filter: `drop-shadow(0 0 5px ${resMeta.color})` }} />
-                      {current.produces === "prime_crystal" ? outNow.toFixed(3) : outNow.toFixed(1)}/s
+                      {current.produces === "prime_crystal" ? (outNow || 0).toFixed(3) : (outNow || 0).toFixed(1)}/s
                     </span>
                     {!isMaxed && (
                       <>
                         <ChevronUp size={12} className="text-slate-500" />
                         <span className="font-mono text-yellow-300 flex items-center gap-1.5">
                           <Image src={resMeta.image} alt={resMeta.label} width={14} height={14} className="object-contain opacity-80" />
-                          {current.produces === "prime_crystal" ? outNext.toFixed(3) : outNext.toFixed(1)}/s
+                          {current.produces === "prime_crystal" ? (outNext || 0).toFixed(3) : (outNext || 0).toFixed(1)}/s
                         </span>
                       </>
                     )}

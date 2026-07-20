@@ -416,10 +416,11 @@ export default function FarmLayout() {
                       ) : canExpand ? (
                         <button
                           type="button"
-                          className="farm-btn-primary shrink-0 px-3 py-1.5 text-[11px] font-bold"
+                          className="farm-btn-primary shrink-0 px-3 py-1.5 text-[11px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => { expandBase(tier.tier as 1|2|3|4); setShowExpand(false); }}
+                          disabled={isPaying || isExpanding}
                         >
-                          Expand
+                          {isPaying || isExpanding ? "Mining..." : "Expand"}
                         </button>
                       ) : (
                         <span className="shrink-0 text-[10px] text-slate-600">🔒 Locked</span>

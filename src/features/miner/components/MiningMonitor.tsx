@@ -99,7 +99,25 @@ export default function MiningMonitor({
               Network power
             </p>
             <p className="miner-panel-title text-sm font-semibold tabular-nums text-white">
-              {poolStats.totalPower.toLocaleString()}
+              {poolStats.totalPower.toLocaleString("en-US")}
+            </p>
+          </div>
+          <div className="rounded-lg border border-[#c084fc]/20 bg-[#c084fc]/5 px-3 py-2">
+            <p className="text-[9px] uppercase tracking-wider text-[#c084fc]/70">
+              Halving multiplier
+            </p>
+            <p className="miner-panel-title text-sm font-semibold tabular-nums text-[#c084fc]">
+              {poolStats.halvingMultiplier}x
+            </p>
+          </div>
+          <div className="rounded-lg border border-white/5 bg-black/20 px-3 py-2">
+            <p className="text-[9px] uppercase tracking-wider text-slate-600">
+              Next halving
+            </p>
+            <p className="miner-panel-title text-[11px] mt-1 font-semibold tabular-nums text-slate-300">
+              {poolStats.nextHalvingDate 
+                ? poolStats.nextHalvingDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : "TBA"}
             </p>
           </div>
           <div className="rounded-lg border border-white/5 bg-black/20 px-3 py-2">
