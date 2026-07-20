@@ -212,8 +212,18 @@ export const useMinerStore = create<MinerStore>()(
           validIds.has(id)
         );
         
+        // Always select staked pickaxes
         for (const id of stakedIds) {
           if (!nextSelected.includes(id)) {
+            nextSelected.push(id);
+          }
+        }
+
+        // Auto-select unstaked pickaxes up to maxMiningStake limit
+        // so they don't appear unselected on page reload or wallet switch
+        const maxLimit = GAME_CONFIG.pickaxes.maxMiningStake;
+        for (const id of validIds) {
+          if (!nextSelected.includes(id) && nextSelected.length < maxLimit) {
             nextSelected.push(id);
           }
         }
