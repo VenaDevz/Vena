@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { formatVenaAmount } from "@/lib/mining";
 import { hasMiningContract, isMiningDeployed } from "../config/mining-contract";
 import type { PoolStats } from "../hooks/usePoolStats";
@@ -54,6 +55,26 @@ export default function MiningMonitor({
       ? `${poolStats.userSharePct.toFixed(2)}% pool share`
       : "0% pool share"
     : `${previewPower.toFixed(0)} mining power (preview)`;
+
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  let halvingCountdown = "TBA";
+  if (poolStats?.nextHalvingDate) {
+    const diff = poolStats.nextHalvingDate.getTime() - now;
+    if (diff > 0) {
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / 1000 / 60) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
+      halvingCountdown = `${days}d ${hours}h ${mins}m ${secs}s`;
+    } else {
+      halvingCountdown = "Processing...";
+    }
+  }
 
   return (
     <section className="miner-glass rounded-2xl p-5" aria-label="Mining monitor">
@@ -115,9 +136,7 @@ export default function MiningMonitor({
               Next halving
             </p>
             <p className="miner-panel-title text-[11px] mt-1 font-semibold tabular-nums text-slate-300">
-              {poolStats.nextHalvingDate 
-                ? poolStats.nextHalvingDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-                : "TBA"}
+              {halvingCountdown}
             </p>
           </div>
           <div className="rounded-lg border border-white/5 bg-black/20 px-3 py-2">

@@ -32,7 +32,11 @@ export default function UpgradePanel({
   const isUpgrading = upgradeEndsAt !== null && upgradeEndsAt > now;
   const remainingMs = isUpgrading ? upgradeEndsAt - now : 0;
   const nextCost = getUpgradeCostVena(level);
-  const skipCost = GAME_CONFIG.upgrade.timeSkipCostVena;
+  
+  const totalDuration = GAME_CONFIG.upgrade.durationMs;
+  const skipCost = isUpgrading 
+    ? Math.max(0, Math.ceil((remainingMs / totalDuration) * nextCost))
+    : 0;
 
   useEffect(() => {
     if (!isUpgrading) return;
