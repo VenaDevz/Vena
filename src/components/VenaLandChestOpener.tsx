@@ -1,16 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { ethers } from "ethers";
+import React, { useState, useCallback } from "react";
 import Image from "next/image";
+import { parseAbi } from "viem";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import ConnectWalletButton from "@/components/ConnectWalletButton";
+import { targetChainId } from "@/config/wagmi";
 
 const CHEST_CONTRACT_ADDRESS = "0xb12c93b2e308ae4d6c1713c97b60f9a0389f3b94";
 const DEAD_ADDRESS = "0x000000000000000000000000000000000000dead";
 
-const chestAbi = [
+const chestAbi = parseAbi([
   "function balanceOf(address account, uint256 id) view returns (uint256)",
   "function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data)"
-];
+]);
 
 /* ─── Animation keyframes ─── */
 const animStyles = `
@@ -80,9 +83,30 @@ type AnimPhase =
   | "error";
 
 export default function VenaLandChestOpener() {
-  const [account, setAccount] = useState<string>("");
-  const [standardCount, setStandardCount] = useState(0);
-  const [premiumCount, setPremiumCount] = useState(0);
+  const { address: account, isConnected } = useAccount();
+
+  const { data: stdCountData, refetch: refetchStd } = useReadContract({
+    address: CHEST_CONTRACT_ADDRESS,
+    abi: chestAbi,
+    functionName: "balanceOf",
+    args: account ? [account, 0n] : undefined,
+    chainId: targetChainId,
+    query: { enabled: isConnected && !!account },
+  });
+  const standardCount = Number(stdCountData ?? 0n);
+
+  const { data: premCountData, refetch: refetchPrem } = useReadContract({
+    address: CHEST_CONTRACT_ADDRESS,
+    abi: chestAbi,
+    functionName: "balanceOf",
+    args: account ? [account, 1n] : undefined,
+    chainId: targetChainId,
+    query: { enabled: isConnected && !!account },
+  });
+  const premiumCount = Number(premCountData ?? 0n);
+
+  const { writeContractAsync } = useWriteContract();
+
   const [recoverTxHash, setRecoverTxHash] = useState("");
   const [showRecover, setShowRecover] = useState(false);
   const [phase, setPhase] = useState<AnimPhase>("idle");
@@ -90,29 +114,10 @@ export default function VenaLandChestOpener() {
   const [revealedLand, setRevealedLand] = useState<{ name: string; tx: string; size: number } | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  /* ─── Wallet helpers ─── */
-  useEffect(() => {
-    if (typeof window !== "undefined" && (window as any).ethereum) {
-      (window as any).ethereum.request({ method: "eth_accounts" }).then((accts: string[]) => {
-        if (accts.length > 0) { setAccount(accts[0]); fetchBalances(accts[0]); }
-      });
-    }
-  }, []);
-
-  const connectWallet = async () => {
-    if (!(window as any).ethereum) return alert("Metamask not found!");
-    const accts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
-    setAccount(accts[0]); fetchBalances(accts[0]);
-  };
-
-  const fetchBalances = async (addr: string) => {
-    try {
-      const p = new ethers.JsonRpcProvider("https://rpc.mainnet.chain.robinhood.com");
-      const c = new ethers.Contract(CHEST_CONTRACT_ADDRESS, chestAbi, p);
-      setStandardCount(Number(await c.balanceOf(addr, 0)));
-      setPremiumCount(Number(await c.balanceOf(addr, 1)));
-    } catch (e) { console.error(e); }
-  };
+  const fetchBalances = useCallback(() => {
+    refetchStd();
+    refetchPrem();
+  }, [refetchStd, refetchPrem]);
 
   /* ─── Image map for each phase ─── */
   const getImg = useCallback((chestId: 0 | 1, p: AnimPhase) => {
@@ -134,17 +139,17 @@ export default function VenaLandChestOpener() {
     setErrorMsg("");
 
     try {
-      try {
-        await (window as any).ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x1237" }] });
-      } catch (sw: any) { if (sw.code === 4902) throw new Error("Add Robinhood Network to wallet first."); }
-
-      const provider = new ethers.BrowserProvider((window as any).ethereum);
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(CHEST_CONTRACT_ADDRESS, chestAbi, signer);
-      const tx = await contract.safeTransferFrom(account, DEAD_ADDRESS, chestId, 1, "0x");
+      const txHash = await writeContractAsync({
+        address: CHEST_CONTRACT_ADDRESS,
+        abi: chestAbi,
+        functionName: "safeTransferFrom",
+        args: [account, DEAD_ADDRESS, BigInt(chestId), 1n, "0x"],
+        chainId: targetChainId,
+      });
 
       setPhase("charging");
-      const receipt = await tx.wait();
+      // Wait a bit for the transaction to index in the backend
+      await new Promise(r => setTimeout(r, 4000));
 
       setPhase("opening");
       await new Promise(r => setTimeout(r, 1800));
@@ -152,7 +157,7 @@ export default function VenaLandChestOpener() {
       setPhase("flash");
       const res = await fetch("/api/chest/open", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ txHash: receipt.hash, walletAddress: account }),
+        body: JSON.stringify({ txHash, walletAddress: account }),
       });
       const data = await res.json();
 
@@ -162,11 +167,12 @@ export default function VenaLandChestOpener() {
       await new Promise(r => setTimeout(r, 800));
       setRevealedLand({ name: landMap[data.landSizeId], tx: data.mintTxHash, size: data.landSizeId });
       setPhase("revealing");
-      fetchBalances(account);
+      fetchBalances();
     } catch (err: any) {
       console.error(err);
       setPhase("error");
-      setErrorMsg(err.code === "ACTION_REJECTED" ? "Transaction cancelled." : (err.message || "Error"));
+      const errStr = err.message || "";
+      setErrorMsg(errStr.includes("rejected") || err.code === "ACTION_REJECTED" ? "Transaction cancelled." : (err.message || "Error"));
       setTimeout(() => setPhase("idle"), 3000);
     }
   };
@@ -191,7 +197,7 @@ export default function VenaLandChestOpener() {
       setRevealedLand({ name: landMap[data.landSizeId], tx: data.mintTxHash, size: data.landSizeId });
       setPhase("revealing");
       setShowRecover(false);
-      fetchBalances(account);
+      fetchBalances();
     } catch (err: any) {
       console.error(err);
       setPhase("error");
@@ -226,10 +232,7 @@ export default function VenaLandChestOpener() {
 
         {!account ? (
           <div className="flex justify-center">
-            <button onClick={connectWallet}
-              className="px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-2xl font-bold text-2xl transition-all shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:scale-105">
-              Connect Wallet to Begin
-            </button>
+            <ConnectWalletButton />
           </div>
         ) : (
           <>
