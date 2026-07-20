@@ -156,6 +156,27 @@ export const venaMiningAbi = [
     inputs: [{ name: "tokenId", type: "uint256" }],
     outputs: [{ type: "address" }],
   },
+  {
+    name: "startTime",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "halvingPeriod",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "currentMultiplier",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
 ] as const;
 
 export const LOADOUT_LIVE = process.env.NEXT_PUBLIC_LOADOUT_LIVE === "true";

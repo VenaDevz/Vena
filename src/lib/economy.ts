@@ -6,7 +6,6 @@ import type { Rarity } from "./types";
 import {
   RARITY_TIERS,
   TOKENOMICS,
-  BUYBACK_POLICY,
   MINT_REVENUE_POLICY,
   tierMintOrUpgradeCost,
 } from "./tokenomics";
@@ -18,7 +17,7 @@ import {
   venaPerDayFromPower,
 } from "./mining";
 
-export { BUYBACK_POLICY, MINT_REVENUE_POLICY, tierMintOrUpgradeCost };
+export { MINT_REVENUE_POLICY, tierMintOrUpgradeCost };
 
 export type TierEconomyRow = {
   tier: Rarity;

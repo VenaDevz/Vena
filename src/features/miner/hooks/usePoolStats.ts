@@ -32,6 +32,7 @@ export type PoolStats = {
   /** User share of global emission (0–100). */
   userSharePct: number;
   /** On-chain estimated daily yield for this user at current pool state. */
+  userDailyVena: number;
   /** Timestamp of the next halving, or null if not started. */
   nextHalvingDate: Date | null;
   /** Current multiplier applied (1e18 = 1x, 5e17 = 0.5x). */

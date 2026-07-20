@@ -59,11 +59,6 @@ export default function ProtocolMetrics() {
       value: "Buyback-fed",
       hint: "Grows with mint & upgrade volume",
     },
-    {
-      label: "Trade Fee",
-      value: `${TOKENOMICS.tradeFeeBps / 100}%`,
-      hint: "Buyback & burn",
-    },
   ];
 
   return (

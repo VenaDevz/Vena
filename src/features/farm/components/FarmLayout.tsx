@@ -81,6 +81,7 @@ export default function FarmLayout() {
     buyMarketItem,
     buildError,
     isPaying,
+    isExpanding,
     pendingCell,
     isDemoMode,
     rallyCommander,
