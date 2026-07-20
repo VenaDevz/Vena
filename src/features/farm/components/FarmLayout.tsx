@@ -151,7 +151,7 @@ export default function FarmLayout() {
 
   const shareOnX = () => {
     if (!state) return;
-    const built = state.cells.filter((c) => c.buildingId).length;
+    const built = state.cells.filter((c) => c?.buildingId).length;
     const plots =
       FARM_GRID_TIERS.find((t) => t.tier === (state.gridTier ?? 1))?.plots ?? state.cells.length;
     const text = `My VENA Command Base ⚡ ${built}/${plots} plots · ${formatCrystal(state.crystal)} CRYSTAL · +${rate.toFixed(1)}/s\n\nBuild yours → ${typeof window !== "undefined" ? window.location.origin : ""}/farm`;

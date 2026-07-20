@@ -75,7 +75,7 @@ export default function FarmGrid({
   const workerCount = workerCfg.dim + 1;
   const n = workerCfg.dim;
   const buildingCells = state.cells
-    .map((c, i) => (c.buildingId ? { col: i % n, row: Math.floor(i / n) } : null))
+    .map((c, i) => (c?.buildingId ? { col: i % n, row: Math.floor(i / n) } : null))
     .filter((v): v is { col: number; row: number } => v !== null);
 
   return (

@@ -468,20 +468,27 @@ export function useFarmGame() {
         raw = rawCloud || rawLocal || emptyFarmState();
       }
 
+      // Sanitize any null cells that might have been saved in DB or localStorage
+      if (raw.cells) {
+        raw.cells = raw.cells.map(c => c || { buildingId: null });
+      } else {
+        raw.cells = Array.from({ length: 4 }, () => ({ buildingId: null }));
+      }
+
       // Refresh streak + daily quests before touching anything else
       let withStreak = refreshStreakAndQuests(raw);
     withStreak = { ...withStreak, exchange: normalizeExchange(withStreak.exchange) };
 
     if (
       (withStreak.tutorialStep ?? 0) < TUTORIAL_COMPLETE &&
-      withStreak.cells.some((c) => c.buildingId)
+      withStreak.cells.some((c) => c?.buildingId)
     ) {
       withStreak = { ...withStreak, tutorialStep: TUTORIAL_COMPLETE };
     }
 
     // First-login welcome grant. Every VENA-holding commander gets starter
     // Crystal; VPICK holders get the larger bundled head-start.
-    const isFresh = withStreak.cells.every((c) => !c.buildingId) && withStreak.crystal === 0;
+    const isFresh = withStreak.cells.every((c) => !c?.buildingId) && withStreak.crystal === 0;
     if (!withStreak.landGranted && isFresh && !FARM_DEMO_MODE) {
       withStreak = {
         ...withStreak,
@@ -493,7 +500,7 @@ export function useFarmGame() {
     }
 
     const withDemo =
-      FARM_DEMO_MODE && withStreak.crystal === 0 && withStreak.cells.every((c) => !c.buildingId)
+      FARM_DEMO_MODE && withStreak.crystal === 0 && withStreak.cells.every((c) => !c?.buildingId)
         ? { ...withStreak, crystal: FARM_DEMO_START_CRYSTAL }
         : withStreak;
 
@@ -1278,7 +1285,7 @@ export function useFarmGame() {
   const totalCrystalProduced = state?.stats?.totalCrystalProduced ?? 0;
   const tradesFilled = state?.stats?.tradesFilled ?? 0;
   const gridTier = state?.gridTier ?? 1;
-  const builtPlots = state?.cells.filter((c) => c.buildingId).length ?? 0;
+  const builtPlots = state?.cells.filter((c) => c?.buildingId).length ?? 0;
 
   const isPaying = txPending || txConfirming;
 

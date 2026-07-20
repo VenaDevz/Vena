@@ -41,7 +41,7 @@ export default function FarmWorld({
   onOpenCommandCenter,
   onOpenObelisk,
 }: FarmWorldProps) {
-  const builtCount = state.cells.filter((c) => c.buildingId).length;
+  const builtCount = state.cells.filter((c) => c?.buildingId).length;
 
   return (
     <div className="farm-world">
