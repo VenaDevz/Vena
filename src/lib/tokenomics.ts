@@ -6,7 +6,7 @@
  *
  * Two flywheels, both market-driven (no pre-minted staking pool):
  *   1. Mint / upgrade revenue  → buy $VENA on market → add to STAKING POOL.
- *   2. Virtuals trade fees      → random-timed buybacks → BURN $VENA.
+ *   2. Virtuals trade fees      → random-timed buybacks → Reward Pool.
  */
 
 import type { Rarity } from "./types";
@@ -14,10 +14,10 @@ import type { Rarity } from "./types";
 /** Silver mint price — fixed ETH on Robinhood Chain. */
 export const SILVER_MINT_ETH = "0.01";
 
-/** Virtuals trade-fee take → random-timed buyback → BURN. */
+/** Virtuals trade-fee take → random-timed buyback → Reward Pool. */
 export const BUYBACK_POLICY = {
   tradeFeeTakePct: 100,
-  action: "burn" as const,
+  action: "reward" as const,
 } as const;
 
 /** NFT mint & upgrade revenue → buy $VENA → STAKING POOL. */

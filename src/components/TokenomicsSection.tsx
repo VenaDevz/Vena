@@ -10,7 +10,7 @@ export default function TokenomicsSection() {
       id="tokenomics"
       eyebrow="Tokenomics"
       title="1B $VENA. 10,000 Pickaxes."
-      subtitle="No staking allocation is pre-minted. The reward pool is fed by buybacks: mint & upgrade revenue buys $VENA into the pool, trade fees buy back and burn."
+      subtitle="No staking allocation is pre-minted. The reward pool is fed by buybacks: mint & upgrade revenue buys $VENA into the pool, trade fees buy back to feed the reward pool."
     >
       <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-10 lg:gap-14 items-start">
         <TokenomicsPieChart />
@@ -56,9 +56,9 @@ export default function TokenomicsSection() {
               staking pool. Upgrades pay $VENA into the same pool.
             </p>
             <p>
-              <span className="text-[#00d4ff] font-semibold">Trade → burn</span> —
+              <span className="text-[#00d4ff] font-semibold">Trade → rewards</span> —
               Virtuals trade fees trigger random-timed $VENA buybacks that are
-              permanently burned, tightening supply.
+              fed directly into the reward pools, boosting miner yields.
             </p>
             <p>
               <span className="text-[#a78bfa] font-semibold">Staking</span> — Stake
@@ -94,7 +94,7 @@ export default function TokenomicsSection() {
                 className="text-2xl font-black text-[#00d4ff]"
                 style={{ fontFamily: "var(--font-orbitron)" }}
               >
-                Burn
+                Rewards
               </div>
               <div className="text-[10px] font-mono text-slate-500 uppercase mt-1">
                 Trade fees

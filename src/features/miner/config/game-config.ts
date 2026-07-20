@@ -65,9 +65,9 @@ export const GAME_CONFIG = {
 
   upgrade: {
     /** Set true when level-upgrade pricing is finalized. */
-    pricingEnabled: false,
-    baseCostVena: 100,
-    costMultiplier: 1.5,
+    pricingEnabled: true,
+    baseCostVena: 100_000,
+    costMultiplier: 1.4,
     durationMs: 4 * 60 * 60 * 1000,
     timeSkipCostVena: 50,
   },

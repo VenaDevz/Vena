@@ -10,7 +10,7 @@ export default function FeeDistribution() {
       id="fees"
       eyebrow="Revenue"
       title="Two flywheels."
-      subtitle="Every Pickaxe mint and upgrade buys $VENA into the staking pool. Trade fees trigger random-timed buybacks that are burned. One grows rewards, the other tightens supply."
+      subtitle="Every Pickaxe mint and upgrade buys $VENA into the staking pool. Trade fees trigger random-timed buybacks that are sent to the reward pool. This constantly grows the rewards available to active miners."
     >
       <div className="grid lg:grid-cols-2 gap-8 items-start">
         <div
@@ -33,9 +33,9 @@ export default function FeeDistribution() {
             />
             <FeeBar
               label="Virtuals trade fees"
-              action="Buyback & burn"
+              action="Buyback & feed pool"
               pct={BUYBACK_POLICY.tradeFeeTakePct}
-              detail="Random-timed buybacks → permanently burned"
+              detail="Random-timed buybacks → sent to reward pools"
               color="#00d4ff"
             />
           </div>
@@ -53,8 +53,8 @@ export default function FeeDistribution() {
               body: "ETH from every Silver mint is swapped into $VENA and added to the staking pool. Upgrades pay $VENA that flows to the same pool.",
             },
             {
-              title: "Trade → burn",
-              body: "Virtuals trade fees come back to the project as $VIRTUAL, are swapped into $VENA at random intervals, and burned — reducing supply over time.",
+              title: "Trade → rewards",
+              body: "Virtuals trade fees come back to the project as $VIRTUAL, are swapped into $VENA at random intervals, and sent to the reward pool — increasing the pool size over time.",
             },
             {
               title: "Staking rewards",

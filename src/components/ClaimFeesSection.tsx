@@ -18,7 +18,7 @@ export default function ClaimFeesSection() {
         <p className="text-center text-slate-400 text-sm mb-8 max-w-md mx-auto">
           Stake your Pickaxes to earn {PROJECT.tokenDisplay} from the buyback-fed
           staking pool. Every mint and upgrade buys {PROJECT.tokenSymbol} into the
-          pool; trade fees buy back and burn — real volume, not a fixed emission.
+          pool; trade fees buy back to feed the reward pool — real volume, not a fixed emission.
         </p>
 
         <div
