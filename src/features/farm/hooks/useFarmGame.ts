@@ -363,12 +363,14 @@ export function useFarmGame() {
     let active = true;
     
     const init = async () => {
-      let raw = null;
+      let rawCloud = null;
       if (!hasLoadedFromCloud) {
         try {
           const res = await fetch(`/api/farm/load?address=${effectiveAddress}`);
           const data = await res.json();
-          raw = data.state;
+          if (data.state) {
+             rawCloud = typeof data.state === "string" ? JSON.parse(data.state) : data.state;
+          }
           if (active) setHasLoadedFromCloud(true);
         } catch (err) {
           console.error("Failed to load state from backend:", err);
@@ -377,8 +379,20 @@ export function useFarmGame() {
 
       if (!active) return;
       
-      if (!raw) {
-        raw = loadFarmState(effectiveAddress) ?? emptyFarmState();
+      const rawLocal = loadFarmState(effectiveAddress);
+      
+      let raw = null;
+      if (rawCloud && rawLocal) {
+        // Tie-break by lastTickAt
+        const cloudTick = rawCloud.lastTickAt ?? 0;
+        const localTick = rawLocal.lastTickAt ?? 0;
+        if (localTick > cloudTick) {
+          raw = rawLocal;
+        } else {
+          raw = rawCloud;
+        }
+      } else {
+        raw = rawCloud || rawLocal || emptyFarmState();
       }
 
       // Refresh streak + daily quests before touching anything else
