@@ -136,8 +136,8 @@ export default function FarmGuideModal({ onClose }: Props) {
                 <p className="text-[11px] text-red-400">Warning: Missing a day resets your streak to zero.</p>
               </div>
               <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800/50">
-                <h4 className="text-white font-bold text-sm flex items-center gap-2 mb-2"><Zap size={14} className="text-orange-400" /> Commander Rally</h4>
-                <p className="text-xs text-slate-400 leading-relaxed mb-2">Click the Commander avatar to activate a <strong className="text-white">+50% production boost</strong> for a limited time. Use it strategically!</p>
+                <h4 className="text-white font-bold text-sm flex items-center gap-2 mb-2"><Zap size={14} className="text-orange-400" /> Rally Crew</h4>
+                <p className="text-xs text-slate-400 leading-relaxed mb-2">Click the <strong className="text-white">RALLY CREW</strong> button to activate a <strong className="text-[#00ff88]">+50% production boost</strong> across your entire base for a limited time. Use it strategically to maximize your Crystal output!</p>
               </div>
             </div>
           </div>
@@ -158,9 +158,29 @@ export default function FarmGuideModal({ onClose }: Props) {
             </ul>
           </div>
 
+          <div className="mb-8">
+            <h3 className="text-red-400 font-bold mb-2 uppercase tracking-widest text-sm flex items-center gap-2">
+              <Flame size={16} /> Power Cores & The Forge
+            </h3>
+            <ul className="text-slate-300 text-sm space-y-3 bg-red-950/20 p-4 rounded-xl border border-red-500/20">
+              <li className="flex gap-2">
+                <span className="text-red-400">•</span>
+                <p>When you refine Gold, your Crystal Forges produce <strong className="text-[#c084fc]">Prime Crystals</strong>.</p>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-red-400">•</span>
+                <p>Go to the <strong className="text-white">Forge tab</strong> (bottom menu) to burn your Prime Crystals and forge <strong className="text-red-400">Power Cores</strong>.</p>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-red-400">•</span>
+                <p>Each Power Core grants a <strong className="text-[#00ff88]">permanent +5% global multiplier</strong> to ALL your base's production! The more cores you forge, the more expensive the next one becomes.</p>
+              </li>
+            </ul>
+          </div>
+
           <div>
             <h3 className="text-purple-400 font-bold mb-2 uppercase tracking-widest text-sm flex items-center gap-2">
-              <Flame size={16} /> Cloud Saves
+              <Database size={16} /> Cloud Saves
             </h3>
             <p className="text-slate-300 text-sm leading-relaxed bg-purple-500/10 p-4 rounded-xl border border-purple-500/20">
               Your base layout, resources, and progress are <strong className="text-white">automatically synced to the cloud</strong> via your wallet address. 

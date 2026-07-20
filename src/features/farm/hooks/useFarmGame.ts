@@ -309,9 +309,11 @@ export function useFarmGame() {
 
   const persist = useCallback(
     (next: SavedFarmState) => {
-      setState(next);
+      // Always bump lastTickAt to ensure any local action makes this state "newer" than the cloud
+      const nextState = { ...next, lastTickAt: Date.now() };
+      setState(nextState);
       if (effectiveAddress) {
-        saveFarmState(effectiveAddress, next); // Sync locally immediately
+        saveFarmState(effectiveAddress, nextState); // Sync locally immediately
         
         // Debounce network save (every 5 seconds max)
         const syncToCloud = () => {
