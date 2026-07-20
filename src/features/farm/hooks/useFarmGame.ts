@@ -358,9 +358,9 @@ export function useFarmGame() {
     // Determine what tier the user's cells array actually corresponds to.
     // If the bug downgraded their tier but left cells intact, this will be > currentTier.
     let tierFromCells: 1 | 2 | 3 | 4 = 1;
-    if (currentPlots >= 16) tierFromCells = 4;
-    else if (currentPlots >= 9) tierFromCells = 3;
-    else if (currentPlots >= 6) tierFromCells = 2;
+    if (currentPlots >= 25) tierFromCells = 4;
+    else if (currentPlots >= 16) tierFromCells = 3;
+    else if (currentPlots >= 9) tierFromCells = 2;
 
     const targetTier = Math.max(actualTier, currentTier, tierFromCells) as 1 | 2 | 3 | 4;
 
