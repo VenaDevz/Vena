@@ -56,7 +56,7 @@ type MinerStoreActions = {
     availableBalance: number,
     targetSlotIndex: number | undefined
   ) => boolean;
-  pruneUnavailablePickaxes: (validPickaxeIds: number[]) => void;
+  pruneUnavailablePickaxes: (validPickaxeIds: number[], stakedPickaxeIds?: number[]) => void;
   togglePickaxeSelection: (pickaxeId: number) => boolean;
   setDisplayPickaxe: (id: number) => void;
   startUpgrade: (availableBalance: number) => boolean;
@@ -203,12 +203,20 @@ export const useMinerStore = create<MinerStore>()(
         return true;
       },
 
-      pruneUnavailablePickaxes: (validPickaxeIds) => {
+      pruneUnavailablePickaxes: (validPickaxeIds, stakedPickaxeIds = []) => {
         const validIds = new Set(validPickaxeIds.filter((id) => id >= 0));
+        const stakedIds = new Set(stakedPickaxeIds.filter((id) => id >= 0));
         const state = get();
-        const nextSelected = state.selectedPickaxeIds.filter((id) =>
+        
+        let nextSelected = state.selectedPickaxeIds.filter((id) =>
           validIds.has(id)
         );
+        
+        for (const id of stakedIds) {
+          if (!nextSelected.includes(id)) {
+            nextSelected.push(id);
+          }
+        }
         const nextSlots = { ...state.pickaxeIdBySlot };
         let slotsChanged = false;
 

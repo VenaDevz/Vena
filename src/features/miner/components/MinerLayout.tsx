@@ -133,13 +133,14 @@ export default function MinerLayout() {
 
   useEffect(() => {
     if (!isConnected || pickaxesLoading || !isContractReady) return;
-    pruneUnavailablePickaxes(validPickaxeIds);
+    pruneUnavailablePickaxes(validPickaxeIds, Array.from(chain.stakedIds));
   }, [
     isConnected,
     pickaxesLoading,
     isContractReady,
     pruneUnavailablePickaxes,
     validPickaxeIds,
+    chain.stakedIds,
   ]);
 
   useMiningLoop(
