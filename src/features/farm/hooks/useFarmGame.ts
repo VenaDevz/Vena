@@ -124,6 +124,7 @@ type PendingAction =
   | { kind: "replace"; cellIndex: number; buildingId: FarmBuildingId }
   | { kind: "expand"; targetTier: 1 | 2 | 3 | 4 }
   | { kind: "upgrade"; cellIndex: number }
+  | { kind: "finish_upgrade"; cellIndex: number }
   | { kind: "market"; itemId: string };
 
 // ── Quest helpers ──────────────────────────────────────────────────────────
@@ -589,6 +590,21 @@ export function useFarmGame() {
           { ...prev, crystal, primeCrystal, resources: stockpile, lastTickAt: Date.now(), quests },
           gained.crystal
         );
+
+        // Process any completed upgrades
+        let hasCompletedUpgrade = false;
+        const processedCells = next.cells.map((c) => {
+          if (c.buildingId && c.upgradeCompletesAt && Date.now() >= c.upgradeCompletesAt) {
+            hasCompletedUpgrade = true;
+            return { buildingId: c.buildingId, level: (c.level ?? 1) + 1 }; // clear upgradeCompletesAt
+          }
+          return c;
+        });
+
+        if (hasCompletedUpgrade) {
+          next.cells = processedCells;
+        }
+
         saveFarmState(effectiveAddress, next);
         return next;
       });
@@ -656,7 +672,17 @@ export function useFarmGame() {
             nextResources[k] = Math.max(0, (nextResources[k] ?? 0) - cost.resource.amount);
           }
           const nextCells = [...state.cells];
-          nextCells[pendingAction.cellIndex] = { buildingId: cell.buildingId, level: level + 1 };
+          const durationSec = cost.waitSec;
+          if (durationSec > 0) {
+            nextCells[pendingAction.cellIndex] = { 
+              buildingId: cell.buildingId, 
+              level,
+              upgradeCompletesAt: Date.now() + durationSec * 1000 
+            };
+          } else {
+            nextCells[pendingAction.cellIndex] = { buildingId: cell.buildingId, level: level + 1 };
+          }
+
           const upgd: SavedFarmState = {
             ...state,
             cells: nextCells,
@@ -668,6 +694,16 @@ export function useFarmGame() {
             : upgd;
           persist(withUQ);
         }
+      }
+    } else if (pendingAction.kind === "finish_upgrade") {
+      const cell = state.cells[pendingAction.cellIndex];
+      if (cell?.buildingId && cell.upgradeCompletesAt) {
+        const nextCells = [...state.cells];
+        nextCells[pendingAction.cellIndex] = { 
+          buildingId: cell.buildingId, 
+          level: (cell.level ?? 1) + 1 
+        };
+        persist({ ...state, cells: nextCells });
       }
     } else if (pendingAction.kind === "market") {
       persist(applyMarketPurchase(state, pendingAction.itemId));
@@ -884,7 +920,17 @@ export function useFarmGame() {
       }
 
       const nextCells = [...state.cells];
-      nextCells[cellIndex] = { buildingId: cell.buildingId, level: level + 1 };
+      const durationSec = cost.waitSec;
+      if (durationSec > 0) {
+        nextCells[cellIndex] = { 
+          buildingId: cell.buildingId, 
+          level, 
+          upgradeCompletesAt: Date.now() + durationSec * 1000 
+        };
+      } else {
+        nextCells[cellIndex] = { buildingId: cell.buildingId, level: level + 1 };
+      }
+      
       const upgraded: SavedFarmState = {
         ...state,
         cells: nextCells,
@@ -903,6 +949,38 @@ export function useFarmGame() {
       persist(withUpgradeQuest);
     },
     [state, balanceVena, payVena, persist]
+  );
+
+  const finishUpgrade = useCallback(
+    (cellIndex: number) => {
+      if (!state || FARM_DEMO_MODE) return;
+      const cell = state.cells[cellIndex];
+      if (!cell?.buildingId || !cell.upgradeCompletesAt) return;
+      
+      const def = FARM_BUILDING_MAP[cell.buildingId];
+      const nextLevel = (cell.level ?? 1) + 1;
+      const cost = upgradeCost(def, cell.level ?? 1);
+      if (!cost) return;
+
+      const remainingMs = cell.upgradeCompletesAt - Date.now();
+      if (remainingMs <= 0) return; // Already finished or finishing
+
+      const totalDurationSec = cost.waitSec;
+      if (totalDurationSec <= 0) return;
+
+      // Prorate VENA cost based on time remaining
+      const fraction = remainingMs / (totalDurationSec * 1000);
+      const proratedVena = Math.max(1, Math.floor(cost.vena * fraction));
+
+      if (balanceVena < FARM_MIN_VENA_HOLD + proratedVena) {
+        setBuildError(
+          `Need ${proratedVena.toLocaleString("en-US")} VENA to finish now (+${FARM_MIN_VENA_HOLD.toLocaleString("en-US")} hold).`
+        );
+        return;
+      }
+      payVena(proratedVena, { kind: "finish_upgrade", cellIndex });
+    },
+    [state, balanceVena, payVena]
   );
 
   const buyMarketItem = useCallback(
@@ -1246,6 +1324,7 @@ export function useFarmGame() {
     demolishCell,
     replaceCell,
     upgradeCell,
+    finishUpgrade,
     buyMarketItem,
     buildError,
     isPaying,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { X, Trash2, RefreshCw, ChevronUp } from "lucide-react";
 import {
@@ -26,9 +26,11 @@ type FarmManageModalProps = {
   resources: ResourceStockpile;
   balanceVena: number;
   isPaying: boolean;
+  upgradeCompletesAt?: number;
   onClose: () => void;
   onDemolish: () => void;
   onUpgrade: () => void;
+  onFinishUpgrade: () => void;
   onReplace: (buildingId: FarmBuildingId) => void;
 };
 
@@ -42,14 +44,23 @@ export default function FarmManageModal({
   resources,
   balanceVena,
   isPaying,
+  upgradeCompletesAt,
   onClose,
   onDemolish,
   onUpgrade,
+  onFinishUpgrade,
   onReplace,
 }: FarmManageModalProps) {
   const [mode, setMode] = useState<Mode>("info");
   const [selected, setSelected] = useState<FarmBuildingId>(currentBuildingId);
   const [confirming, setConfirming] = useState(false);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    if (!upgradeCompletesAt) return;
+    const int = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(int);
+  }, [upgradeCompletesAt]);
 
   const current = FARM_BUILDING_MAP[currentBuildingId];
   const selectedDef = FARM_BUILDING_MAP[selected];
@@ -79,6 +90,28 @@ export default function FarmManageModal({
     crystal >= cost.crystal &&
     (!cost.resource || cost.resource.type === "crystal" || resStock >= cost.resource.amount) &&
     (milestoneVena === 0 || balanceVena >= milestoneVena);
+
+  const remainingMs = upgradeCompletesAt ? upgradeCompletesAt - now : 0;
+  const isUpgrading = remainingMs > 0;
+  
+  // Calculate prorated VENA for finish now
+  let proratedVena = 0;
+  if (isUpgrading && cost) {
+    const totalDurationSec = cost.waitSec;
+    if (totalDurationSec > 0) {
+      const fraction = remainingMs / (totalDurationSec * 1000);
+      proratedVena = Math.max(1, Math.floor(cost.vena * fraction));
+    }
+  }
+
+  const formatTime = (ms: number) => {
+    const totalSec = Math.ceil(ms / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
 
   const handleDemolish = () => {
     if (!confirming) { setConfirming(true); return; }
@@ -205,14 +238,35 @@ export default function FarmManageModal({
             </div>
 
             {/* Upgrade button */}
+            {/* Upgrade button / Timer */}
             {isMaxed ? (
               <div className="mb-3 rounded-xl border border-yellow-500/40 bg-yellow-900/15 p-3 text-center text-sm font-bold text-yellow-300">
                 ★ Max level reached
               </div>
+            ) : isUpgrading ? (
+              <div className="mb-3 flex flex-col gap-2">
+                <div className="flex items-center justify-between rounded-xl border border-[#00d4ff]/30 bg-[#00d4ff]/10 p-3">
+                  <span className="text-xs font-bold uppercase text-[#00d4ff]">Upgrading...</span>
+                  <span className="font-mono text-sm font-black text-white">{formatTime(remainingMs)}</span>
+                </div>
+                {!FARM_DEMO_MODE && proratedVena > 0 && (
+                  <button
+                    type="button"
+                    disabled={isPaying || balanceVena < proratedVena}
+                    onClick={onFinishUpgrade}
+                    className="farm-btn-primary flex items-center justify-center gap-2 py-3 text-sm font-bold uppercase tracking-wider disabled:opacity-40"
+                  >
+                    {isPaying ? "Confirming..." : "Finish Now"}
+                    <span className="text-xs opacity-90 text-yellow-300" style={{ fontFamily: '"Futura", sans-serif', fontWeight: 300 }}>
+                      · {proratedVena.toLocaleString("en-US")} VENA
+                    </span>
+                  </button>
+                )}
+              </div>
             ) : cost ? (
               <button
                 type="button"
-                disabled={!canAffordUpgrade || isPaying}
+                disabled={!canAffordUpgrade || isPaying || isUpgrading}
                 onClick={handleUpgrade}
                 className="farm-btn-primary mb-3 w-full py-3 text-sm font-bold uppercase tracking-wider disabled:opacity-40"
               >
@@ -230,7 +284,7 @@ export default function FarmManageModal({
               </button>
             ) : null}
 
-            {cost?.milestone && !isMaxed && (
+            {cost?.milestone && !isMaxed && !isUpgrading && (
               <p className="mb-3 -mt-1 text-center text-[10px] text-yellow-400/80">
                 ★ Milestone upgrade — visual tier boost
               </p>

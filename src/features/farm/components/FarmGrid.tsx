@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Clock } from "lucide-react";
 import {
   FARM_BUILDING_MAP,
   FARM_TILE_IMAGE,
@@ -128,6 +129,7 @@ export default function FarmGrid({
             ? levelRate(def.ratePerSec, level)
             : levelRate(def.ratePerSec > 0 ? def.ratePerSec : def.crystalPerSec, level)
           : 0;
+        const isUpgrading = !!(cell.upgradeCompletesAt && cell.upgradeCompletesAt > Date.now());
 
         return (
           <button
@@ -189,7 +191,15 @@ export default function FarmGrid({
                 />
                 {/* Level badge */}
                 <span className={`farm-tile-level farm-tile-level-t${vTier}`}>Lv.{level}</span>
-                {resMeta && (
+                {isUpgrading ? (
+                  <span
+                    className="farm-tile-label flex items-center justify-center gap-1 bg-[#00d4ff]/20 px-2 py-0.5"
+                    style={{ color: "#00d4ff", borderColor: "#00d4ff" }}
+                  >
+                    <Clock size={10} className="animate-pulse" />
+                    <span className="farm-tile-label-rate text-[9px] font-black tracking-widest uppercase">UPGRADING</span>
+                  </span>
+                ) : resMeta && (
                   <span
                     className="farm-tile-label"
                     style={{ color: resMeta.color, borderColor: `${resMeta.color}55` }}

@@ -7,7 +7,11 @@ export type ResourceStockpile = {
   gold: number;
 };
 
-export type FarmCellState = { buildingId: FarmBuildingId | null; level?: number };
+export type FarmCellState = { 
+  buildingId: FarmBuildingId | null; 
+  level?: number;
+  upgradeCompletesAt?: number; 
+};
 
 export type SavedFarmState = {
   cells: FarmCellState[];

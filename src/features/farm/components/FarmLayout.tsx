@@ -78,6 +78,7 @@ export default function FarmLayout() {
     demolishCell,
     replaceCell,
     upgradeCell,
+    finishUpgrade,
     buyMarketItem,
     buildError,
     isPaying,
@@ -345,6 +346,7 @@ export default function FarmLayout() {
           cellIndex={manageCell}
           currentBuildingId={state.cells[manageCell].buildingId!}
           currentLevel={state.cells[manageCell].level ?? 1}
+          upgradeCompletesAt={state.cells[manageCell].upgradeCompletesAt}
           crystal={state.crystal}
           resources={state.resources}
           balanceVena={balanceVena}
@@ -355,6 +357,7 @@ export default function FarmLayout() {
             setManageCell(null);
           }}
           onUpgrade={() => upgradeCell(manageCell)}
+          onFinishUpgrade={() => finishUpgrade(manageCell)}
           onReplace={(id) => {
             replaceCell(manageCell, id);
             setManageCell(null);
