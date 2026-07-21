@@ -150,7 +150,12 @@ export default function FarmPioneerChest({ onSuccess }: FarmPioneerChestProps) {
             <Image src="/miner/composites/robot-base.png" alt="VenaLand Base" fill className="object-contain" />
           </div>
           <h3 className="text-2xl font-black text-[#00ff88] mb-2 font-orbitron">ACCESS GRANTED</h3>
-          <p className="text-sm text-slate-300 mb-8">You successfully acquired a VenaLand Base NFT.</p>
+          <p className="text-sm text-slate-300 mb-2">You successfully acquired a <span className="font-bold text-[#00f0ff]">2x2 Command Base (Tier 1)</span>.</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30">
+            <span className="text-[#00f0ff] text-[10px] uppercase font-bold tracking-widest">
+              NFT DEPLOYED TO WALLET
+            </span>
+          </div>
           <button
             onClick={onSuccess}
             className="w-full py-4 rounded-xl font-black text-sm tracking-widest text-[#0a0a0f] transition-all hover:scale-[1.02] bg-[#00ff88] shadow-[0_0_20px_rgba(0,255,136,0.4)]"
