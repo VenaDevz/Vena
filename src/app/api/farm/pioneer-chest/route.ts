@@ -13,7 +13,7 @@ const supabase = createClient(
 
 // We need an ERC1155 ABI to transfer the NFT
 const baseNftAbi = [
-  "function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data)"
+  "function mintBase(address to, uint256 sizeId, uint256 amount) external"
 ];
 
 const ERC20_TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
@@ -91,8 +91,8 @@ export async function POST(req: NextRequest) {
         const BASE_CONTRACT_ADDRESS = "0xe91078b979e9910cadce340e2e4ffe0450d830a9";
         const nftContract = new ethers.Contract(BASE_CONTRACT_ADDRESS, baseNftAbi, wallet);
         
-        // Transfer VenaLand Base (ID: 2) to the user
-        const tx = await nftContract.safeTransferFrom(wallet.address, address, 2, 1, "0x");
+        // Mint VenaLand Base (ID: 2) to the user directly
+        const tx = await nftContract.mintBase(address, 2, 1);
         await tx.wait();
         
         console.log("Minted VenaLand base to", address, "Tx:", tx.hash);
