@@ -110,7 +110,7 @@ export default function FarmGate({
             <div className="text-center animate-in fade-in zoom-in duration-1000 flex flex-col items-center">
               <div className="w-24 h-24 mb-6 relative">
                 <div className="absolute inset-0 bg-[#00ff88] blur-xl opacity-20 rounded-full animate-pulse" />
-                <Image src="/farmer/hologram-hq.png" alt="Base" fill className="object-contain drop-shadow-[0_0_20px_rgba(0,255,136,0.8)]" />
+                <Image src="/miner/composites/robot-base.png" alt="Base" fill className="object-contain drop-shadow-[0_0_20px_rgba(0,255,136,0.8)]" />
               </div>
               <p className="text-2xl font-black text-[#00ff88] font-orbitron mb-2 tracking-widest">ACCESS GRANTED</p>
               <p className="text-sm text-slate-400">Secure connection established.</p>

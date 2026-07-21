@@ -147,7 +147,7 @@ export default function FarmPioneerChest({ onSuccess }: FarmPioneerChestProps) {
       {phase === "done" && (
         <div className="text-center animate-in fade-in zoom-in duration-500">
           <div className="relative w-48 h-48 mx-auto mb-6 drop-shadow-[0_0_30px_rgba(0,255,136,0.5)]">
-            <Image src="/farmer/hologram-hq.png" alt="VenaLand Base" fill className="object-contain" />
+            <Image src="/miner/composites/robot-base.png" alt="VenaLand Base" fill className="object-contain" />
           </div>
           <h3 className="text-2xl font-black text-[#00ff88] mb-2 font-orbitron">ACCESS GRANTED</h3>
           <p className="text-sm text-slate-300 mb-8">You successfully acquired a VenaLand Base NFT.</p>
