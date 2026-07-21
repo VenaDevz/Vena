@@ -1,6 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { parseUnits } from "viem";
+import { targetChainId } from "@/config/wagmi";
+import { RH_CONTRACTS, erc20Abi } from "@/lib/contracts/robinhood";
+import { FARM_TREASURY } from "@/features/farm/config/farm-config";
 import MinerHeader from "./MinerHeader";
 import MinerUnitPanel from "./MinerUnitPanel";
 import ControlPanel from "./ControlPanel";
@@ -68,12 +73,41 @@ export default function MinerLayout() {
 
   const [toast, setToast] = useState<string | null>(null);
 
+  const { writeContract, data: txHash, isPending: txPending, reset: resetTx, error: txError } = useWriteContract();
+  const { isLoading: txConfirming, isSuccess: txSuccess, isError: txFailed } = useWaitForTransactionReceipt({ hash: txHash });
+
+  const [pendingUpgradeAction, setPendingUpgradeAction] = useState<"start" | "skip" | null>(null);
+  const isPaying = txPending || txConfirming;
+
   const availableBalance = Math.max(0, walletBalance - localSpentVena);
 
   const notify = useCallback((message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(null), 3500);
   }, []);
+
+  useEffect(() => {
+    if (txFailed || txError) {
+      notify("Transaction failed or was rejected");
+      setPendingUpgradeAction(null);
+      resetTx();
+    }
+  }, [txFailed, txError, notify, resetTx]);
+
+  useEffect(() => {
+    if (txSuccess && pendingUpgradeAction) {
+      if (pendingUpgradeAction === "start") {
+        // Pass a large availableBalance because we already paid on-chain!
+        const ok = startUpgrade(Infinity);
+        if (ok) notify("Upgrade started on-chain!");
+      } else if (pendingUpgradeAction === "skip") {
+        const ok = skipUpgrade(Infinity);
+        if (ok) notify("Timer skipped via on-chain payment!");
+      }
+      setPendingUpgradeAction(null);
+      resetTx();
+    }
+  }, [txSuccess, pendingUpgradeAction, startUpgrade, skipUpgrade, notify, resetTx]);
 
   const accessoryBySlot = useMemo(
     () => resolveAccessoryBySlot(accessoryIdBySlot),
@@ -211,13 +245,35 @@ export default function MinerLayout() {
     [chain, notify]
   );
 
-  const handleStartUpgrade = useCallback((): boolean => {
-    return startUpgrade(availableBalance);
-  }, [startUpgrade, availableBalance]);
+  const handleStartUpgrade = useCallback((cost: number) => {
+    if (!RH_CONTRACTS.venaToken) {
+      notify("VENA token not configured on this network");
+      return;
+    }
+    setPendingUpgradeAction("start");
+    writeContract({
+      address: RH_CONTRACTS.venaToken,
+      abi: erc20Abi,
+      functionName: "transfer",
+      args: [FARM_TREASURY, parseUnits(String(cost), 18)],
+      chainId: targetChainId,
+    });
+  }, [writeContract, notify]);
 
-  const handleSkipUpgrade = useCallback((): boolean => {
-    return skipUpgrade(availableBalance);
-  }, [skipUpgrade, availableBalance]);
+  const handleSkipUpgrade = useCallback((cost: number) => {
+    if (!RH_CONTRACTS.venaToken) {
+      notify("VENA token not configured on this network");
+      return;
+    }
+    setPendingUpgradeAction("skip");
+    writeContract({
+      address: RH_CONTRACTS.venaToken,
+      abi: erc20Abi,
+      functionName: "transfer",
+      args: [FARM_TREASURY, parseUnits(String(cost), 18)],
+      chainId: targetChainId,
+    });
+  }, [writeContract, notify]);
 
   const handleUpgradeComplete = useCallback(() => {
     completeUpgrade();
@@ -322,6 +378,7 @@ export default function MinerLayout() {
             onStartUpgrade={handleStartUpgrade}
             onSkipUpgrade={handleSkipUpgrade}
             onUpgradeComplete={handleUpgradeComplete}
+            isPaying={isPaying}
             onBuyAccessory={handleBuyAccessory}
             onTogglePickaxe={handleTogglePickaxe}
             onStakePickaxe={(pickaxe) => {

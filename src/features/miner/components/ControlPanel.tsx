@@ -30,9 +30,10 @@ type ControlPanelProps = {
   isClaimPending: boolean;
   ownedAccessoryIds: Set<string>;
   onClaimOnChain: () => void;
-  onStartUpgrade: () => boolean;
-  onSkipUpgrade: () => boolean;
+  onStartUpgrade: (cost: number) => void;
+  onSkipUpgrade: (cost: number) => void;
   onUpgradeComplete: () => void;
+  isPaying: boolean;
   onBuyAccessory: (item: StoreItem) => boolean;
   onTogglePickaxe: (pickaxe: PickaxeNFT) => void;
   onStakePickaxe: (pickaxe: PickaxeNFT) => void;
@@ -86,6 +87,7 @@ export default function ControlPanel(props: ControlPanelProps) {
         onSkipUpgrade={props.onSkipUpgrade}
         onUpgradeComplete={props.onUpgradeComplete}
         onNotify={props.onNotify}
+        isPaying={props.isPaying}
       />
       <StorePanel
         balanceVena={props.availableBalance}

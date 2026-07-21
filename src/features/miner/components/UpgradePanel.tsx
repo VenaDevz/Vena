@@ -11,10 +11,11 @@ import { useMinerStore } from "../store/miner-store";
 
 type UpgradePanelProps = {
   balanceVena: number;
-  onStartUpgrade: () => boolean;
-  onSkipUpgrade: () => boolean;
+  onStartUpgrade: (cost: number) => void;
+  onSkipUpgrade: (cost: number) => void;
   onUpgradeComplete: () => void;
   onNotify: (message: string) => void;
+  isPaying: boolean;
 };
 
 export default function UpgradePanel({
@@ -23,6 +24,7 @@ export default function UpgradePanel({
   onSkipUpgrade,
   onUpgradeComplete,
   onNotify,
+  isPaying,
 }: UpgradePanelProps) {
   const level = useMinerStore((s) => s.level);
   const upgradeEndsAt = useMinerStore((s) => s.upgradeEndsAt);
@@ -60,10 +62,8 @@ export default function UpgradePanel({
       onNotify("Insufficient balance");
       return;
     }
-    const ok = onStartUpgrade();
-    if (ok) {
-      onNotify(`Upgrade started — ${formatVena(nextCost)} VENA spent`);
-    }
+    if (isPaying) return;
+    onStartUpgrade(nextCost);
   };
 
   const handleSkip = () => {
@@ -73,10 +73,8 @@ export default function UpgradePanel({
       onNotify("Insufficient balance");
       return;
     }
-    const ok = onSkipUpgrade();
-    if (ok) {
-      onNotify(`Timer skipped — ${formatVena(skipCost)} VENA spent`);
-    }
+    if (isPaying) return;
+    onSkipUpgrade(skipCost);
   };
 
   return (
@@ -132,19 +130,19 @@ export default function UpgradePanel({
         <button
           type="button"
           onClick={handleStart}
-          disabled={!pricingEnabled || isUpgrading}
+          disabled={!pricingEnabled || isUpgrading || isPaying}
           className="miner-panel-title flex-1 rounded-xl border border-[#00f0ff]/40 bg-[#00f0ff]/10 py-3 text-sm font-semibold text-[#00f0ff] transition-colors hover:bg-[#00f0ff]/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {pricingEnabled ? "Upgrade level" : "Coming soon"}
+          {pricingEnabled ? (isPaying ? "Processing Tx..." : "Upgrade level") : "Coming soon"}
         </button>
         {pricingEnabled && (
           <button
             type="button"
             onClick={handleSkip}
-            disabled={!isUpgrading}
-            className="miner-panel-title flex-1 rounded-xl border border-[#7000ff]/40 bg-[#7000ff]/10 py-3 text-sm font-semibold text-[#7000ff] transition-colors hover:bg-[#7000ff]/20 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={!isUpgrading || isPaying}
+            className="miner-panel-title flex-1 rounded-xl border border-white/20 bg-white/5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Finish now ({formatVena(skipCost)} VENA)
+            {isPaying ? "Processing..." : `Finish now (${formatVena(skipCost)} VENA)`}
           </button>
         )}
       </div>
