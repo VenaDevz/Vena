@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { FARM_TREASURY } from "@/features/farm/config/farm-config";
 import { RH_CONTRACTS } from "@/lib/contracts/robinhood";
 
-const RPC_URL = "https://rpc.robinhoodchain.com"; // Assuming fallback, will use provider
+const RPC_URL = process.env.NEXT_PUBLIC_RH_RPC || "https://rpc.mainnet.chain.robinhood.com";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
