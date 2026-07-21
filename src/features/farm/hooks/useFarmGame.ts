@@ -264,7 +264,7 @@ export function useFarmGame() {
   const pickaxeRequired = false;
   const hasPickaxe = vpickCount > 0;
   const hasAccess =
-    FARM_DEMO_MODE || (isConnected && hasAnyLand);
+    FARM_DEMO_MODE || (isConnected && hasAnyLand) || true; // TEMPORARY BYPASS: allow entry without NFT because Treasury is empty
 
   const [nowTs, setNowTs] = useState(() => Date.now());
   useEffect(() => {
