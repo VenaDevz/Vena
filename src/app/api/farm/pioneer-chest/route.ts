@@ -83,19 +83,19 @@ export async function POST(req: NextRequest) {
     });
 
     // 4. Send VenaLand Base NFT (Tier 1/2) to the user
-    // Assuming Treasury holds the NFTs and we have its private key
+    // The Treasury holds the NFTs and we have its private key
     const privateKey = process.env.MINTER_PRIVATE_KEY;
     if (privateKey) {
       try {
         const wallet = new ethers.Wallet(privateKey, provider);
-        const nftContract = new ethers.Contract(RH_CONTRACTS.loadout, baseNftAbi, wallet); // Assuming loadout or pickaxeNft is the base land?
-        // Wait, VenaLand Base is a separate contract. Let's assume it's `pickaxeNft` or we just log success for now.
-        // If we don't have the exact VenaLand Base contract address, we will just simulate success.
+        const BASE_CONTRACT_ADDRESS = "0xe91078b979e9910cadce340e2e4ffe0450d830a9";
+        const nftContract = new ethers.Contract(BASE_CONTRACT_ADDRESS, baseNftAbi, wallet);
         
-        // Example execution (commented out until contract address is confirmed):
-        // const tx = await nftContract.safeTransferFrom(wallet.address, address, 1, 1, "0x");
-        // await tx.wait();
-        console.log("Mock minted VenaLand base to", address);
+        // Transfer VenaLand Base (ID: 2) to the user
+        const tx = await nftContract.safeTransferFrom(wallet.address, address, 2, 1, "0x");
+        await tx.wait();
+        
+        console.log("Minted VenaLand base to", address, "Tx:", tx.hash);
       } catch (err) {
         console.error("Mint error:", err);
         // Do not fail the request if mint fails, they already paid. In production we'd queue this.
