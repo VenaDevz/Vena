@@ -410,13 +410,17 @@ export default function FarmLayout() {
                       {isCurrent ? (
                         <span className="shrink-0 rounded-full bg-[#00ff88]/15 border border-[#00ff88]/40 px-2 py-0.5 text-[10px] font-bold text-[#00ff88]">Active</span>
                       ) : isUnlocked ? (
-                        <button
-                          type="button"
-                          className="farm-btn-primary shrink-0 px-3 py-1.5 text-[11px] font-bold"
-                          onClick={() => { expandBase(tier.tier as 1|2|3|4); setShowExpand(false); }}
-                        >
-                          Switch
-                        </button>
+                        isDemoMode ? (
+                          <button
+                            type="button"
+                            className="farm-btn-primary shrink-0 px-3 py-1.5 text-[11px] font-bold"
+                            onClick={() => { expandBase(tier.tier as 1|2|3|4); setShowExpand(false); }}
+                          >
+                            Switch
+                          </button>
+                        ) : (
+                          <span className="shrink-0 text-[10px] font-bold text-slate-500">Unlocked</span>
+                        )
                       ) : canExpand ? (
                         <button
                           type="button"

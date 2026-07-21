@@ -1055,8 +1055,13 @@ export function useFarmGame() {
 
       const goingUp = targetTier > currentTier;
 
-      // Free switch: demo mode, or downgrading to an already-unlocked tier.
-      if (FARM_DEMO_MODE || !goingUp) {
+      // DISALLOW downgrading to protect user data from data-loss.
+      if (!goingUp && !FARM_DEMO_MODE) {
+        return; // Prevent downgrading entirely in live mode
+      }
+
+      // Free switch: demo mode only now.
+      if (FARM_DEMO_MODE && !goingUp) {
         const newCells = Array.from(
           { length: tierDef.plots },
           (_, i) => state.cells[i] ?? { buildingId: null }
