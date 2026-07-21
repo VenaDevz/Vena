@@ -3,8 +3,9 @@
 import { useAccount, useReadContract } from "wagmi";
 import { formatUnits } from "viem";
 import { targetChainId } from "@/config/wagmi";
+import { RH_CONTRACTS } from "@/lib/contracts/robinhood";
 
-const VENA_TOKEN = (process.env.NEXT_PUBLIC_VENA_TOKEN ?? "") as `0x${string}`;
+const VENA_TOKEN = RH_CONTRACTS.venaToken;
 
 const erc20Abi = [
   {

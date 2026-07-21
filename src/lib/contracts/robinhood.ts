@@ -7,6 +7,7 @@ export const RH_MAINNET_CONTRACTS = {
   venaToken: "0xFbD1Bf9d354CD8197Ab54f80778C03cc468ADAaf",
   staking: "0x1dDA64bd76165400Ad929D4d94E0D8285288D37B",
   loadout: "0x29865b0A6a9fA520b9d5DE47434c76936D032bcb",
+  usdgToken: "0x5fc5360d0400a0fd4f2af552add042d716f1d168", // USDG token
 } as const;
 
 const RH_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 4663);
@@ -41,6 +42,10 @@ export const RH_CONTRACTS = {
   loadout: resolveRhAddress(
     process.env.NEXT_PUBLIC_LOADOUT,
     RH_MAINNET_CONTRACTS.loadout
+  ),
+  usdgToken: resolveRhAddress(
+    process.env.NEXT_PUBLIC_USDG_TOKEN,
+    RH_MAINNET_CONTRACTS.usdgToken
   ),
 } as const;
 

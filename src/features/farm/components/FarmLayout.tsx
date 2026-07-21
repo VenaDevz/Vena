@@ -186,7 +186,7 @@ export default function FarmLayout() {
       />
 
       {gated ? (
-        <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10 sm:px-6">
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-8 flex items-center justify-center min-h-[calc(100vh-80px)]">
           <FarmGate
             isConnected={isConnected}
             hasAccess={hasAccess}
